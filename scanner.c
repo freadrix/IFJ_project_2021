@@ -17,6 +17,7 @@ int get_token(token_struct *token)
 
     int state = STATE_START;
     char c;
+    char string_number[2] = { 0 };
 
     string_struct *str;
 
@@ -220,7 +221,143 @@ int get_token(token_struct *token)
                 }
                 break;
             case (STATE_STRING_START):
-                // TODO
+                if (c < 32) {
+                    string_free(str);
+                    return ERR_LEXER;
+                }
+                else
+                if (c == '\\') {
+                    state = STATE_STRING_ESCAPE;
+                }
+                else
+                if (c == '"') {
+                    token->type = TOKEN_STRING;
+                    string_free(str);
+                    return OK;
+                }
+                break;
+            case (STATE_STRING_ESCAPE):
+                if (c == '\\') {
+                    c = '\\';
+                    add_char_to_string(str, c);
+                    state = STATE_STRING_START;
+                }
+                else
+                if (c == '"') {
+                    c == '\"';
+                    add_char_to_string(str, c);
+                    state = STATE_STRING_START;
+                }
+                else
+                if (c == 'n') {
+                    c == '\n';
+                    add_char_to_string(str, c);
+                    state = STATE_STRING_START;
+                }
+                else
+                if (c == 't') {
+                    c == '\t';
+                    add_char_to_string(str, c);
+                    state = STATE_STRING_START;
+                }
+                else
+                if (c == '0') {
+                    string_number[0] = c;
+                    state = STATE_STRING_ESCAPE_ZERO;
+                }
+                else
+                if (c == '1') {
+                    string_number[0] = c;
+                    state = STATE_STRING_ESCAPE_ONE;
+                }
+                else
+                if (c == '2') {
+                    string_number[0] = c;
+                    state = STATE_STRING_ESCAPE_TWO;
+                }
+                else {
+                    string_free(str);
+                    return ERR_LEXER;
+                }
+                break;
+            case (STATE_STRING_ESCAPE_ZERO):
+                if (c == '0') {
+                    string_number[1] = c;
+                    state = STATE_STRING_ESCAPE_ZERO_ZERO;
+                }
+                else
+                if (isdigit(c)) {
+                    string_number[1] = c;
+                    state = STATE_STRING_ESCAPE_OTHER;
+                }
+                else {
+                    string_free(str);
+                    return ERR_LEXER;
+                }
+                break;
+            case (STATE_STRING_ESCAPE_ONE):
+                if (isdigit(c)) {
+                    string_number[1] = c;
+                    state = STATE_STRING_ESCAPE_OTHER;
+                }
+                else {
+                    string_free(str);
+                    return ERR_LEXER;
+                }
+                break;
+            case (STATE_STRING_ESCAPE_TWO):
+                if (0 <= atoi(&c) <= 4) { // 0..4
+                    string_number[1] = c;
+                    state = STATE_STRING_ESCAPE_OTHER;
+                }
+                else
+                if (c == '5') {
+                    string_number[1] = c;
+                    state = STATE_STRING_ESCAPE_TWO_FIVE;
+                }
+                else {
+                    string_free(str);
+                    return ERR_LEXER;
+                }
+                break;
+            case (STATE_STRING_ESCAPE_ZERO_ZERO):
+                if (isdigit(c)) {
+                    string_number[2] = c;
+                    int value = atoi(string_number);
+                    c = value;
+                    add_char_to_string(str, c);
+                    state = STATE_STRING_START;
+                }
+                else {
+                    string_free(str);
+                    return ERR_LEXER;
+                }
+                break;
+            case (STATE_STRING_ESCAPE_TWO_FIVE):
+                if (0 <= atoi(&c) <= 5) { // 0..5
+                    string_number[2] = c;
+                    int value = atoi(string_number);
+                    c = value;
+                    add_char_to_string(str, c);
+                    state = STATE_STRING_START;
+                }
+                else {
+                    string_free(str);
+                    return ERR_LEXER;
+                }
+                break;
+            case (STATE_STRING_ESCAPE_OTHER):
+                if (isdigit(c)) {
+                    string_number[2] = c;
+                    int value = atoi(string_number);
+                    c = value;
+                    add_char_to_string(str, c);
+                    state = STATE_STRING_START;
+                }
+                else {
+                    string_free(str);
+                    return ERR_LEXER;
+                }
                 break;
             case (STATE_NUMBER):
                 if (isdigit(c)) {
@@ -312,7 +449,7 @@ int get_token(token_struct *token)
                 }
                 break;
             case (STATE_MINUS):
-                // TODO
+                // TODOOOOOOOOOOOOOOOO
                 break;
             case (STATE_MORE_THAN):
                 c = getchar();
