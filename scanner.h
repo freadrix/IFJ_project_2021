@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 #include "error.h"
-// #include "stack.h"
+#include "str.h"
 
 /* STATES */
 #define STATE_START 10 // Start
@@ -56,6 +56,10 @@ typedef enum
     TOKEN_ID,
     TOKEN_KEYWORD,
 
+    TOKEN_INT,
+    TOKEN_DOUBLE,
+    TOKEN_STRING,
+
     TOKEN_EQUAL,
     TOKEN_NOT_EQUAL,
     TOKEN_PLUS,
@@ -83,28 +87,28 @@ typedef enum
 
 typedef enum
 {
-	KEYWORD_DO,
-	KEYWORD_ELSE,
-	KEYWORD_END,
-	KEYWORD_FUNCTION,
-	KEYWORD_GLOBAL,
-	KEYWORD_IF,
-	KEYWORD_LOCAL,
-	KEYWORD_NIL,
-	KEYWORD_REQUIRE,
-	KEYWORD_RETURN,
-	KEYWORD_THEN,
-	KEYWORD_WHILE,
-	KEYWORD_INTEGER,
-	KEYWORD_NUMBER,
-	KEYWORD_STRING,
+    KEYWORD_DO,
+    KEYWORD_ELSE,
+    KEYWORD_END,
+    KEYWORD_FUNCTION,
+    KEYWORD_GLOBAL,
+    KEYWORD_IF,
+    KEYWORD_LOCAL,
+    KEYWORD_NIL,
+    KEYWORD_REQUIRE,
+    KEYWORD_RETURN,
+    KEYWORD_THEN,
+    KEYWORD_WHILE,
+    KEYWORD_INTEGER,
+    KEYWORD_NUMBER,
+    KEYWORD_STRING,
 } keyword_type;
 
 typedef union
 {
     int int_value;
     double double_value;
-    char  *string;
+    string_struct *string;
     keyword_type keyword;
 } token_attribute;
 
@@ -113,5 +117,7 @@ typedef struct
     token_type type;
     token_attribute attribute;
 } token_struct;
+
+int get_token(token_struct *token);
 
 #endif
