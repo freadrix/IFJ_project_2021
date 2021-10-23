@@ -140,6 +140,12 @@ int get_token(token_struct *token)
                     return ERR_LEXER;
                 }
                 break;
+            case (STATE_EOL):
+                if (isspace(c)) { break; }
+                ungetc(c, source_code);
+                token->type = TOKEN_EOL;
+                string_free(str);
+                return OK;
             case (STATE_ID_OR_KEYWORD):
                 if (c == '_' || isalpha(c)) {
                     c = tolower(c); // A-Z -> a-z
@@ -238,26 +244,26 @@ int get_token(token_struct *token)
                 break;
             case (STATE_STRING_ESCAPE):
                 if (c == '\\') {
-                    c = '\\';
-                    add_char_to_string(str, c);
+                    // c = '\\';
+                    add_char_to_string(str, '\\');
                     state = STATE_STRING_START;
                 }
                 else
                 if (c == '"') {
-                    c == '\"';
-                    add_char_to_string(str, c);
+                    // c == '\"';
+                    add_char_to_string(str, '\"');
                     state = STATE_STRING_START;
                 }
                 else
                 if (c == 'n') {
-                    c == '\n';
-                    add_char_to_string(str, c);
+                    // c == '\n';
+                    add_char_to_string(str, '\n');
                     state = STATE_STRING_START;
                 }
                 else
                 if (c == 't') {
-                    c == '\t';
-                    add_char_to_string(str, c);
+                    // c == '\t';
+                    add_char_to_string(str, '\t');
                     state = STATE_STRING_START;
                 }
                 else
@@ -449,7 +455,69 @@ int get_token(token_struct *token)
                 }
                 break;
             case (STATE_MINUS):
-                // TODOOOOOOOOOOOOOOOO
+                c = getchar();
+                if (c == '-') {
+                    state = STATE_COMMENT_START;
+                }
+                else {
+                    ungetc(c, source_code);
+                    token->type = TOKEN_MINUS;
+                    string_free(str);
+                    return OK;
+                }
+                break;
+            case (STATE_COMMENT_START):
+                if (c == '\n' || c == EOF) {
+                    ungetc(c, source_code);
+                    state = STATE_START;
+                }
+                else
+                if (c == '[') {
+                    add_char_to_string(str, c);
+                    state = STATE_COMMENT_BLOCK_START;
+                }
+                else {
+                    add_char_to_string(str, c);
+                }
+                break;
+            case (STATE_COMMENT_BLOCK_START):
+                if (c == '\n' || c == EOF) {
+                    ungetc(c, source_code);
+                    state = STATE_START;
+                }
+                else
+                if (c == '[') {
+                    add_char_to_string(str, c);
+                    state = STATE_COMMENT_BLOCK;
+                }
+                else {
+                    add_char_to_string(str, c);
+                    state = STATE_COMMENT_START;
+                }
+                break;
+            case (STATE_COMMENT_BLOCK):
+                if (c == '\n' || c == EOF) {
+                    ungetc(c, source_code);
+                    state = STATE_START;
+                }
+                else
+                if (c == ']') {
+                    add_char_to_string(str, c);
+                    state = STATE_COMMENT_BLOCK_END;
+                }
+                else {
+                    add_char_to_string(str, c);
+                }
+                break;
+            case (STATE_COMMENT_BLOCK_END):
+                if (c == '\n' || c == EOF || c == ']') {
+                    ungetc(c, source_code);
+                    state = STATE_START;
+                }
+                else {
+                    add_char_to_string(str, c);
+                    state = STATE_COMMENT_BLOCK;
+                }
                 break;
             case (STATE_MORE_THAN):
                 c = getchar();
@@ -460,7 +528,8 @@ int get_token(token_struct *token)
                     ungetc(c, source_code);
                     token->type = TOKEN_LESS;
                 }
-                break;
+                string_free(str);
+                return OK;
             case (STATE_LESS_THAN):
                 c = getchar();
                 if (c == '=') {
@@ -470,7 +539,8 @@ int get_token(token_struct *token)
                     ungetc(c, source_code);
                     token->type = TOKEN_GREATER;
                 }
-                break;
+                string_free(str);
+                return OK;
             case (STATE_EQUAL):
                 c = getchar();
                 if (c == '=') {
@@ -480,16 +550,20 @@ int get_token(token_struct *token)
                     ungetc(c, source_code);
                     token->type = TOKEN_EQUAL;
                 }
-                break;
+                string_free(str);
+                return OK;
             case (STATE_TILDE):
                 c = getchar();
                 if (c == '=') {
                     token->type = TOKEN_NOT_EQUAL;
                 }
-                else { // TODO error: non-existent character ~
+                else {
                     ungetc(c, source_code);
+                    string_free(str);
+                    return ERR_LEXER;
                 }
-                break;
+                string_free(str);
+                return OK;
             case (STATE_SLASH):
                 c = getchar();
                 if (c == '/') {
@@ -499,8 +573,8 @@ int get_token(token_struct *token)
                     ungetc(c, source_code);
                     token->type = TOKEN_DIV;
                 }
-                break;
+                string_free(str);
+                return OK;;
         }
     }
-    return 0;
 }
