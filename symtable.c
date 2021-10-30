@@ -8,18 +8,15 @@
 #include <string.h>
 
 #include "symtable.h"
-/*
-int main() {
-    //TODO tests
-}
-*/
+
+
 static unsigned get_hash(const char *str) {
     //generator of hash
     unsigned h = 0;
     const unsigned char *us;
     us = (unsigned const char *) str;
     while((*us) != '\0') {
-        h = 65599 * h + *us;
+        h = 65599 * h + (*us);
         us++;
     }
     return (h % MAX_HT_SIZE);
@@ -100,7 +97,7 @@ item_t *insert_hashtab(table_t *tab, char *key) {
         table_item_t *item = (*tab)[get_hash(key)], *previous_item = NULL;
         //check if item already existing in the table
         while (item != NULL) {
-            if (!(strcmp(item-key, key))) {
+            if (!(strcmp(item->key, key))) {
                 return NULL;
             }
             previous_item = item;
@@ -115,7 +112,6 @@ item_t *insert_hashtab(table_t *tab, char *key) {
                 if (inserted->value.parametrs != NULL) {
                     if (string_init(inserted->value.parametrs)) {
                         strcpy(inserted->key, key);
-                        inserted->value.type = NULL;
                         inserted->value.defined = false;
                         inserted->value.gl_var = false;
                         if (previous_item != NULL) {

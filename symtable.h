@@ -10,7 +10,7 @@
 
 #include "scanner.h"
 #include "str.h"
-
+//max size of the table
 #define MAX_HT_SIZE 20003  //TODO //How many? For optimization. Must be prime number
 
 
