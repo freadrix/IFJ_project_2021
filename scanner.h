@@ -48,8 +48,8 @@
 #define STATE_EOF 37 // End of file
 /* STATES END */
 
-typedef enum
-{
+typedef enum {
+
     TOKEN_EOL,
     TOKEN_EOF,
 
@@ -85,8 +85,8 @@ typedef enum
     TOKEN_BRACKET_CURLY_L,
 } token_type;
 
-typedef enum
-{
+typedef enum {
+
     KEYWORD_DO,
     KEYWORD_ELSE,
     KEYWORD_END,
@@ -104,16 +104,16 @@ typedef enum
     KEYWORD_STRING,
 } keyword_type;
 
-typedef union
-{
+typedef union {
+
     int int_value;
     double double_value;
     string_struct *string;
     keyword_type keyword;
 } token_attribute;
 
-typedef struct
-{
+typedef struct {
+    
     token_type type;
     token_attribute attribute;
 } token_struct;
