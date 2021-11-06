@@ -1,3 +1,10 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ21.
+ * 
+ * @brief Lexical analysis header
+ * @author Ivan Tsiareshkin (xtsiar00)
+ */
+
 #ifndef _SCANNER_H_
 #define _SCANNER_H_
 

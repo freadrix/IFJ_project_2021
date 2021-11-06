@@ -1,3 +1,10 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ21.
+ * 
+ * @brief String operations
+ * @author Ivan Tsiareshkin (xtsiar00)
+ */
+
 #include "str.h"
 
 

@@ -1,4 +1,6 @@
 /**
+ * Implementace překladače imperativního jazyka IFJ21.
+ * 
  * @brief Hash table operations header
  * @author Aleksandr Verevkin (xverev00)
  */
@@ -33,7 +35,7 @@ typedef struct {
     value_type type;            // type of item value
     bool defined;               // existing of function
     bool gl_var;
-    string_struct *parametrs;   // parametrs of function (i,d,s)
+    string_struct *parameters;   // parameters of function (i,d,s)
 } item_t;
 
 
@@ -62,7 +64,7 @@ void init_hashtab(table_t *tab);
 void delete_all_hashtab(table_t *tab);
 
 /**
- * @brief Hash table initialization
+ * @brief Search item with given key
  * @param tab Pointer on table
  * @param key Key of needed item
  * @return Pointer on founded item in case of success, else NULL
@@ -70,15 +72,15 @@ void delete_all_hashtab(table_t *tab);
 item_t *search_hashtab(table_t *tab, char *key);
 
 /**
- * @brief Hash table initialization
+ * @brief Add new parameter(ids) to the function
  * @param tab Pointer on table
- * @param type Value type of the new parametr
+ * @param type Value type of the new parameter
  * @return true in case of success, else false
  */
-bool new_parametr_hashtab(item_t *item, value_type type);
+bool new_parameter_hashtab(item_t *item, value_type type);
 
 /**
- * @brief Hash table initialization
+ * @brief Insert new element in the hash table
  * @param tab Pointer on table
  * @param key Key of inserted item
  * @return Pointer on created item in case of success, else NULL
@@ -86,7 +88,7 @@ bool new_parametr_hashtab(item_t *item, value_type type);
 item_t *insert_hashtab(table_t *tab, char *key);
 
 /**
- * @brief Hash table initialization
+ * @brief Delete element from the hash table
  * @param tab Pointer on table
  * @param key Key of deleted item
  * @return true in case of success, else false

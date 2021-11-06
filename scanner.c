@@ -1,3 +1,10 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ21.
+ * 
+ * @brief Lexical analysis
+ * @author Ivan Tsiareshkin (xtsiar00)
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

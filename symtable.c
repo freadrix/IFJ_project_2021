@@ -1,4 +1,6 @@
 /**
+ * Implementace překladače imperativního jazyka IFJ21.
+ * 
  * @brief Hash table operations
  * @author Aleksandr Verevkin (xverev00)
  */
@@ -40,9 +42,9 @@ void delete_all_hashtab(table_t *tab) {
             table_item_t *iter_item = (*tab)[i];
             while (iter_item != NULL) {
                 table_item_t *temp_iter_item = iter_item->next;
-                if ((iter_item->value.parametrs != NULL)) {
-                    string_free(iter_item->value.parametrs);
-                    free(iter_item->value.parametrs);
+                if ((iter_item->value.parameters != NULL)) {
+                    string_free(iter_item->value.parameters);
+                    free(iter_item->value.parameters);
                 }
                 free(iter_item->key);
                 free(iter_item);
@@ -67,21 +69,21 @@ item_t *search_hashtab(table_t *tab, char *key) {
     return NULL;
 }
 
-bool new_parametr_hashtab(item_t *item, value_type type) {
-    //insert new parametr(int(i), double(d), str(s)) for function
+bool new_parameter_hashtab(item_t *item, value_type type) {
+    //insert new parameter(int(i), double(d), str(s)) for function
     if (item != NULL) {
         if (type == TYPE_INTEGER) {
-            if (!(add_char_to_string(item->parametrs, 'i'))) {
+            if (!(add_char_to_string(item->parameters, 'i'))) {
                 return false;
             }
         }
         else if (type == TYPE_DOUBLE) {
-            if (!(add_char_to_string(item->parametrs, 'd'))) {
+            if (!(add_char_to_string(item->parameters, 'd'))) {
                 return false;
             }
         }
         else if (type == TYPE_STRING) {
-            if (!(add_char_to_string(item->parametrs, 's'))) {
+            if (!(add_char_to_string(item->parameters, 's'))) {
                 return false;
             }
         }
@@ -92,7 +94,7 @@ bool new_parametr_hashtab(item_t *item, value_type type) {
 }
 
 item_t *insert_hashtab(table_t *tab, char *key) {
-    //insert new element on the hash table
+    //insert new element in the hash table
     if (tab != NULL && key != NULL) {
         table_item_t *item = (*tab)[get_hash(key)], *previous_item = NULL;
         //check if item already existing in the table
@@ -108,9 +110,9 @@ item_t *insert_hashtab(table_t *tab, char *key) {
         if (inserted != NULL) {
             inserted->key = malloc((strlen(key) + 1) * sizeof(char));
             if (inserted->key != NULL) {
-                inserted->value.parametrs = malloc(sizeof(string_struct));
-                if (inserted->value.parametrs != NULL) {
-                    if (string_init(inserted->value.parametrs)) {
+                inserted->value.parameters = malloc(sizeof(string_struct));
+                if (inserted->value.parameters != NULL) {
+                    if (string_init(inserted->value.parameters)) {
                         strcpy(inserted->key, key);
                         inserted->value.defined = false;
                         inserted->value.gl_var = false;
@@ -121,7 +123,7 @@ item_t *insert_hashtab(table_t *tab, char *key) {
                         }
                         return &inserted->value;
                     } else {
-                        free(inserted->value.parametrs);
+                        free(inserted->value.parameters);
                         free(inserted->key);
                         free(inserted);
                     }
@@ -143,9 +145,9 @@ bool delete_single_hashtab(table_t *tab, char *key) {
         table_item_t *item = (*tab)[get_hash(key)], *previous_item = NULL;
         while (item != NULL) {
             if (!(strcmp(item->key, key))) {
-                if (item->value.parametrs != NULL) {
-                    string_free(item->value.parametrs);
-                    free(item->value.parametrs);
+                if (item->value.parameters != NULL) {
+                    string_free(item->value.parameters);
+                    free(item->value.parameters);
                 }
                 if (previous_item != NULL) {
                     previous_item->next = item->next;
