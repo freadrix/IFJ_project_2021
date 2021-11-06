@@ -8,7 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <exp_stack.h>
+#include "exp_stack.h"
+
 
 void init_stack(stack_t *stack) {
     //initialization of stack
@@ -47,7 +48,7 @@ bool push_stack(stack_t *stack, char elem) {
     if (!(item)) {
         return false;
     } else {
-        item->nxt = stack_top;
+        item->nxt = stack->top;
         item->elem = elem;
         stack->top = item;
         return true;
