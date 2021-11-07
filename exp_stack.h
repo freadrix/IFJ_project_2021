@@ -11,13 +11,14 @@
 #include <stdbool.h>
 
 #include "symtable.h"
+#include "grammar.h"
 
 /**
  * @struct Stack item structure
  */
 typedef struct item_stack_struct {
 
-    char elem;
+    elem_enum type;
     struct item_stack_struct *nxt;
 } item_stack_t;
 

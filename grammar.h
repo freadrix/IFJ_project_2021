@@ -25,12 +25,15 @@ typedef enum {
     DIV,        // /
     IDIV,       // //
 
-    ID,         // identifier
     LBR,        // (
     RBR,        // )
+    ID,         // identifier
     INT,
     DOUBLE,
     STRING,
+    
+    EXP,        // expression
+    SIGN,       // $
 } elem_enum;
 
 /**
@@ -50,7 +53,7 @@ typedef enum {
     E_DIV_E,        // E / E
     E_IDIV_E,       // E // E
 
-    ID,             // id
+    ID_RULE,        // id
     BR_E_BR,        // (E)
     NO_RULE
 } rules_enum;
