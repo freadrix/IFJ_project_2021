@@ -21,6 +21,8 @@
  */
 typedef enum {
 
+    TYPE_NULL,
+    TYPE_BOOL,
     TYPE_INTEGER = TOKEN_INT,
     TYPE_DOUBLE = TOKEN_DOUBLE,
     TYPE_STRING = TOKEN_STRING,

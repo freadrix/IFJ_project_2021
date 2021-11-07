@@ -18,7 +18,8 @@
  */
 typedef struct item_stack_struct {
 
-    elem_enum type;
+    value_type type;
+    elem_enum elem;
     struct item_stack_struct *nxt;
 } item_stack_t;
 
@@ -62,7 +63,7 @@ bool pop_stack(stack_t *stack);
  * @param elem New character
  * @return true in case of success, else false
  */
-bool push_stack(stack_t *stack, char elem);
+bool push_stack(stack_t *stack, elem_enum type);
 
 /**
  * @brief Clear entire stack from the items

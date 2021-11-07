@@ -114,6 +114,8 @@ item_t *insert_hashtab(table_t *tab, char *key) {
                 if (inserted->value.parameters != NULL) {
                     if (string_init(inserted->value.parameters)) {
                         strcpy(inserted->key, key);
+                        inserted->value.key = inserted->key;
+                        inserted->value.type = TYPE_NULL;
                         inserted->value.defined = false;
                         inserted->value.gl_var = false;
                         if (previous_item != NULL) {

@@ -2,7 +2,7 @@
  * Implementace překladače imperativního jazyka IFJ21.
  * 
  * @brief Grammar
- * @author TODO
+ * @author Aleksandr Verevkin (xverev00)
  */
 
 #include <stdio.h>
@@ -128,7 +128,7 @@ static prec_enum get_precedence(elem_enum elem) {
     }
 }
 
-static rules_enum get_rule(bool id, item_stack_t *left, item_stack_t *middle, item_stack_t *right) {
+static rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_t *right, bool id) {
 
     if (id) {
         if ((left->type == ID) || (left->type == INT) || (left->type == DOUBLE) || (left->type == STRING)) {
@@ -170,3 +170,90 @@ static rules_enum get_rule(bool id, item_stack_t *left, item_stack_t *middle, it
         }
     }
 }
+
+static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, rules_enum rule, value_type *type) {
+
+    if ((rule == E_PLUS_E) || (rule == E_MINUS_E) || (rule == E_MUL_E)) {
+        if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) || (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
+            return ERR_INCOMPATIBILITY;
+        } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+            return ERR_UNDEF;
+        } else if ((left->type == TYPE_INTEGER) && (right->type == TYPE_INTEGER)) {
+            *type = TYPE_INTEGER;
+            return OK;
+        } else {
+            //TODO convertation INT->DOUBLE
+            *type = TYPE_DOUBLE;
+            return OK;
+        }
+    } else if (rule == E_DIV_E) {
+        if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) || (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
+            return ERR_INCOMPATIBILITY;
+        } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+            return ERR_UNDEF;
+        } else {
+            //TODO convertation INT->DOUBLE
+            *type = TYPE_DOUBLE;
+            return OK;
+        }
+    } else if (rule == E_IDIV_E) {
+        if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) || (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
+            return ERR_INCOMPATIBILITY;
+        } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+            return ERR_UNDEF;
+        } else {
+            //TODO convertation DOUBLE->INT
+            *type = TYPE_INTEGER;
+            return OK;
+        }
+    } else if ((rule == E_LT_E) || (rule == E_GT_E) || (rule == E_LEQ_E) || (rule == E_GEQ_E)) {
+        if ((right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
+            return ERR_INCOMPATIBILITY;
+        } else if ((left->type == TYPE_STRING) && ((right->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE))) {
+            return ERR_INCOMPATIBILITY;
+        } else if (((left->type == TYPE_INTEGER) || (left->type == TYPE_DOUBLE)) && (right->type == TYPE_STRING)) {
+            return ERR_INCOMPATIBILITY;
+        } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+            return ERR_UNDEF;
+        } else {
+            //TODO convertation INT->DOUBLE
+            *type = TYPE_BOOL;
+            return OK;
+        }
+    } else if ((rule == E_NE_E) || (rule == E_EQ_E)) {
+        //TODO comparation with NIL
+        if ((right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
+            return ERR_INCOMPATIBILITY;
+        } else if ((left->type == TYPE_STRING) && ((right->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE))) {
+            return ERR_INCOMPATIBILITY;
+        } else if (((left->type == TYPE_INTEGER) || (left->type == TYPE_DOUBLE)) && (right->type == TYPE_STRING)) {
+            return ERR_INCOMPATIBILITY;
+        } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+            return ERR_UNDEF;
+        } else {
+            //TODO convertation INT->DOUBLE
+            *type = TYPE_BOOL;
+            return OK;
+        }
+    } else if (rule == ID_RULE) {
+        if (left->type == TYPE_NULL) {
+            return ERR_UNDEF;
+        } else if (left->type == TYPE_BOOL) {
+            return ERR_INCOMPATIBILITY;
+        } else {
+            *type = left->type;
+            return OK;
+        }
+    } else if (rule == BR_E_BR) {
+        if (middle->type == TYPE_NULL) {
+            return ERR_UNDEF;
+        } else {
+            *type = middle->type;
+            return OK;
+        }
+    } else {
+        return OK;
+    }
+}
+
+//TODO exprassion handling
