@@ -1,6 +1,6 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
- * 
+ *
  * @brief Lexical analysis
  * @author Ivan Tsiareshkin (xtsiar00)
  */
@@ -16,8 +16,7 @@
 
 FILE *source_code;
 
-int get_token(token_struct *token)
-{
+int get_token(token_struct *token) {
     if (source_code == NULL) {
         return ERR_INTERNAL;
     }
@@ -44,18 +43,22 @@ int get_token(token_struct *token)
                 if (isspace(c)) {
                     state = STATE_START;
                 }
-                else if (c == '\n') {
+                else
+                if (c == '\n') {
                     state = STATE_EOL;
                 }
-				else if (isalpha(c) || c == '_') {
+				else
+                if (isalpha(c) || c == '_') {
                     c = tolower(c); // A-Z -> a-z
                     add_char_to_string(str, c);
                     state = STATE_ID_OR_KEYWORD;
                 }
-                else if (c == '"') {
+                else
+                if (c == '"') {
                     state = STATE_STRING_START;
                 }
-                else if (isdigit(c)) {
+                else
+                if (isdigit(c)) {
                     if (c == '0') {
                         c = getchar();
                         if (c == '.') { // 0. => double
@@ -74,70 +77,90 @@ int get_token(token_struct *token)
                     }
                     break;
                 }
-                else if (c == '-') {
+                else
+                if (c == '-') {
                     state = STATE_MINUS;
                 }
-                else if (c == '<' ) {
+                else
+                if (c == '<' ) {
                     state = STATE_LESS_THAN;
                 }
-                else if (c == '>') {
+                else
+                if (c == '>') {
                     state = STATE_MORE_THAN;
                 }
-                else if (c == '=') {
+                else
+                if (c == '=') {
                     state = STATE_EQUAL;
                 }
-                else if (c == '~') {
+                else
+                if (c == '~') {
                     state = STATE_TILDE;
                 }
-                else if (c == '/') {
+                else
+                if (c == '/') {
                     state = STATE_SLASH;
                 }
-                else if (c == '.') {
-                    token->type = TOKEN_DOT;
-                    string_free(str);
-                    return OK;
+                else
+                if (c == '.') {
+                    state = STATE_DOT;
                 }
-                else if (c == ':') {
+                else
+                if (c == ':') {
                     token->type = TOKEN_DDOT;
                     string_free(str);
                     return OK;
                 }
-                else if (c == ',') {
+                else
+                if (c == ',') {
                     token->type = TOKEN_COMMA;
                     string_free(str);
                     return OK;
                 }
-                else if (c == ']') {
+                else
+                if (c == ']') {
                     token->type = TOKEN_BRACKET_SQUARE_R;
                     string_free(str);
                     return OK;
                 }
-                else if (c == '[') {
+                else
+                if (c == '[') {
                     token->type = TOKEN_BRACKET_SQUARE_L;
                     string_free(str);
                     return OK;
                 }
-                else if (c == ')') {
+                else
+                if (c == ')') {
                     token->type = TOKEN_BRACKET_ROUND_R;
                     string_free(str);
                     return OK;
                 }
-                else if (c == '(') {
+                else
+                if (c == '(') {
                     token->type = TOKEN_BRACKET_ROUND_L;
                     string_free(str);
                     return OK;
                 }
-                else if (c == '}') {
-                    token->type = TOKEN_BRACKET_CURLY_R;
+                else
+                if (c == '#') {
+                    token->type = TOKEN_UNARY_LENGTH;
                     string_free(str);
                     return OK;
                 }
-                else if (c == '{') {
-                    token->type = TOKEN_BRACKET_CURLY_L;
-                    string_free(str);
-                    return OK;
-                }
-                else if (c == EOF) {
+                // else
+                // if (c == '}') {
+                //     token->type = TOKEN_BRACKET_CURLY_R;
+                //     string_free(str);
+                //     return OK;
+                // }
+                // else
+                // if (c == '{') {
+                //     token->type = TOKEN_BRACKET_CURLY_L;
+                //     string_free(str);
+                //     return OK;
+                // }
+                else
+                if (c == EOF) {
                     token->type = TOKEN_EOF;
                     string_free(str);
                     return OK;
@@ -581,7 +604,19 @@ int get_token(token_struct *token)
                     token->type = TOKEN_DIV;
                 }
                 string_free(str);
-                return OK;;
+                return OK;
+            case (STATE_DOT):
+                c = getchar();
+                if (c == '.') {
+                    token->type = TOKEN_CONCAT;
+                }
+                else {
+                    ungetc(c, source_code);
+                    string_free(str);
+                    return ERR_LEXER;
+                }
+                string_free(str);
+                return OK;
         }
     }
 }
