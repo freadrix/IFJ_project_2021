@@ -1,3 +1,10 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ21.
+ * 
+ * @brief String operations header
+ * @author Ivan Tsiareshkin (xtsiar00)
+ */
+
 #ifndef _STR_H_
 #define _STR_H_
 
@@ -9,8 +16,8 @@
 #define STR_ERR 0
 #define STR_OK 1
 
-typedef struct
-{
+typedef struct {
+    
 	char *string;
     size_t length;
     size_t alloc_length;
