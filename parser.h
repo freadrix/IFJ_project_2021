@@ -13,4 +13,10 @@
 #include "scanner.h"
 
 
+typedef struct {
+
+    token_struct tok;
+    //TODO
+} code_struct;
+
 #endif
