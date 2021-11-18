@@ -11,11 +11,14 @@
 #include <stdbool.h>
 
 #include "scanner.h"
+#include "symtable.h"
 
 
 typedef struct {
 
     token_struct tok;
+    table_t local;
+    table_t global;
     //TODO
 } code_struct;
 

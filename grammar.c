@@ -256,4 +256,4 @@ static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *r
     }
 }
 
-//TODO exprassion handling
+//TODO expression handling
