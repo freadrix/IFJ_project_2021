@@ -16,7 +16,6 @@
  * @struct Stack item structure
  */
 typedef struct item_stack_struct {
-
     char elem;
     struct item_stack_struct *nxt;
 } item_stack_t;
@@ -25,7 +24,6 @@ typedef struct item_stack_struct {
  * @struct Stack structure
  */
 typedef struct stack_struct {
-    
     item_stack_t *top;
 } stack_t;
 

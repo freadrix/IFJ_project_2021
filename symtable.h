@@ -20,7 +20,6 @@
  * @enum Type of data
  */
 typedef enum {
-
     TYPE_INTEGER = TOKEN_INT,
     TYPE_DOUBLE = TOKEN_DOUBLE,
     TYPE_STRING = TOKEN_STRING,
@@ -30,7 +29,6 @@ typedef enum {
  * @struct Item structure
  */
 typedef struct {
-
     char *key;                  // item identifier
     value_type type;            // type of item value
     bool defined;               // existing of function
@@ -43,7 +41,6 @@ typedef struct {
  * @struct Single item in the hash table
  */
 typedef struct table_item {
-
   char *key;                    // key identifier
   item_t value;                 // item value
   struct table_item *next;      // pointer on the next element
@@ -73,7 +70,7 @@ item_t *search_hashtab(table_t *tab, char *key);
 
 /**
  * @brief Add new parameter(ids) to the function
- * @param tab Pointer on table
+ * @param item Pointer on item
  * @param type Value type of the new parameter
  * @return true in case of success, else false
  */
