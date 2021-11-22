@@ -15,7 +15,6 @@
 int main() {
 
     FILE *fp = stdin;
-
     // TODO output
     // TODO errors handling (analysis?)
 

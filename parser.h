@@ -12,14 +12,20 @@
 
 #include "scanner.h"
 #include "symtable.h"
+#include "exp_stack.h"
 
 
 typedef struct {
 
     token_struct tok;
-    table_t local;
+//    table_t local; //  think that wont need
     table_t global;
+    stack_t
     //TODO
 } code_struct;
+
+
+// functions declaration
+void init_code_struct(code_struct *data);
 
 #endif

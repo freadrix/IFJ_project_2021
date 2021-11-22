@@ -5,8 +5,8 @@
  * @author Ivan Tsiareshkin (xtsiar00)
  */
 
-#ifndef _ERROR_H
-#define _ERROR_H
+#ifndef _ERROR_H_
+#define _ERROR_H_
 
 #define OK 0
 

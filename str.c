@@ -36,7 +36,7 @@ int add_char_to_string(string_struct *str, char c) {
 		}
 		str->alloc_length = new_lengh;
 	}
-	str->string[++str->length] = c;
+	str->string[++(str->length)] = c;
 	str->string[str->length] = '\0';
 
 	return STR_OK;

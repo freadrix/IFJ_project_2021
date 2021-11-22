@@ -10,6 +10,28 @@
 
 #include "parser.h"
 #include "error.h"
+#include "scanner.h"
+
+/* Global variables*/
+int SCANNER_RESPONSE;   // for return value from get_token()
+int PARAMETERS_NUMBER;
+/*-----------------*/
+
+/**
+ * @brief
+ * @param data code struct data
+ * @return some number TODO
+ * */
+int token_check(code_struct *data) {
+    SCANNER_RESPONSE = get_token(data->tok);
+    if (data->tok.attribute == KEYWORD_REQUIRE) {
+        init_code_struct(data);
+    }
+}
+
+void init_code_struct(code_struct *data) {
+
+}
 
 
 int get_token_check(code_struct *data) {
