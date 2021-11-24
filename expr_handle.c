@@ -14,10 +14,6 @@
 
 stack_t stack;
 
-int main() {
-
-    return 0;
-}
 
 typedef enum {
 

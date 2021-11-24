@@ -12,6 +12,8 @@
 
 #include "symtable.h"
 #include "expr_handle.h"
+#include "scanner.h"
+#include "str.h"
 
 
 

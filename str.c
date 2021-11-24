@@ -36,7 +36,23 @@ int add_char_to_string(string_struct *str, char c) {
 		}
 		str->alloc_length = new_lengh;
 	}
-	str->string[++(str->length)] = c;
+	str->string[str->length++] = c;
+	str->string[str->length] = '\0';
+
+	return STR_OK;
+}
+
+int add_string_to_string(string_struct *str, const char *str_to_add) {
+    unsigned int added_str_length = (unsigned int) strlen(str_to_add);
+    if ((str->length + 1 + added_str_length) >= str->alloc_length) {
+		size_t new_length = str->length + 1 + added_str_length;
+		if (!(str->string = (char*)realloc(str->string, new_length))) {
+			return STR_ERR;
+		}
+		str->alloc_length = new_length;
+	}
+	str->length += added_str_length;
+    strcat(str->string, str_to_add);
 	str->string[str->length] = '\0';
 
 	return STR_OK;
