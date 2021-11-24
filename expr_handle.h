@@ -1,12 +1,12 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
  * 
- * @brief Grammar header
+ * @brief Expression handling header
  * @author Aleksandr Verevkin (xverev00)
  */
 
-#ifndef _GRAMMAR_H_
-#define _GRAMMAR_H_
+#ifndef _EXPR_HANDLE_H_
+#define _EXPR_HANDLE_H_
 
 /**
  * @enum Available symbols

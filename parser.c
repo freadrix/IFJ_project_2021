@@ -23,7 +23,7 @@ int PARAMETERS_NUMBER;
  * @return some number TODO
  * */
 int token_check(code_struct *data) {
-    SCANNER_RESPONSE = get_token(data->tok);
+    SCANNER_RESPONSE = get_token(&data->tok);
     if (data->tok.attribute == KEYWORD_REQUIRE) {
         init_code_struct(data);
     }

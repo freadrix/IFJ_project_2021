@@ -1,18 +1,23 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
  * 
- * @brief Grammar
+ * @brief Expression handling
  * @author Aleksandr Verevkin (xverev00)
  */
 
 #include <stdio.h>
 
-#include "grammar.h"
+#include "expr_handle.h"
 #include "exp_stack.h"
 #include "scanner.h"
 #include "error.h"
 
 stack_t stack;
+
+int main() {
+
+    return 0;
+}
 
 typedef enum {
 
@@ -131,39 +136,39 @@ static prec_enum get_precedence(elem_enum elem) {
 static rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_t *right, bool id) {
 
     if (id) {
-        if ((left->type == ID) || (left->type == INT) || (left->type == DOUBLE) || (left->type == STRING)) {
+        if ((left->elem == ID) || (left->elem == INT) || (left->elem == DOUBLE) || (left->elem == STRING)) {
             return ID_RULE;
         } else {
             return NO_RULE;
         }
     } else {
-        if ((left->type == EXP) && (right->type == EXP)) {
-            if (middle->type == PLUS) {
+        if ((left->elem == EXP) && (right->elem == EXP)) {
+            if (middle->elem == PLUS) {
                 return E_PLUS_E;
-            } else if (middle->type == MINUS) {
+            } else if (middle->elem == MINUS) {
                 return E_MINUS_E;
-            } else if (middle->type == MUL) {
+            } else if (middle->elem == MUL) {
                 return E_MUL_E;
-            } else if (middle->type == DIV) {
+            } else if (middle->elem == DIV) {
                 return E_DIV_E;
-            } else if (middle->type == IDIV) {
+            } else if (middle->elem == IDIV) {
                 return E_IDIV_E;
-            } else if (middle->type == LT) {
+            } else if (middle->elem == LT) {
                 return E_LT_E;
-            } else if (middle->type == GT) {
+            } else if (middle->elem == GT) {
                 return E_GT_E;
-            } else if (middle->type == GEQ) {
+            } else if (middle->elem == GEQ) {
                 return E_GEQ_E;
-            } else if (middle->type == LEQ) {
+            } else if (middle->elem == LEQ) {
                 return E_LEQ_E;
-            } else if (middle->type == EQ) {
+            } else if (middle->elem == EQ) {
                 return E_EQ_E;
-            } else if (middle->type == NE) {
+            } else if (middle->elem == NE) {
                 return E_NE_E;
             } else {
                 return NO_RULE;
             }
-        } else if ((left->type == LBR) && (left->type == EXP) && (left->type == RBR)) {
+        } else if ((left->elem == LBR) && (left->elem == EXP) && (left->elem == RBR)) {
             return BR_E_BR;
         } else {
             return NO_RULE;
