@@ -2,7 +2,7 @@
  * Implementace překladače imperativního jazyka IFJ21.
  * 
  * @brief Syntactic and semantic check
- * @author TODO
+ * @author Matej Alexej Helc
  */
 
 #ifndef _PARSER_H_
@@ -26,6 +26,12 @@ typedef struct {
 
 
 // functions declaration
-void init_code_struct(code_struct *data);
+int get_token_check() ;
+int p_params();
+int p_rets();
+int p_body();
+int p_defvar();
+int p_assign();
+int p_state_l();
 
 #endif
