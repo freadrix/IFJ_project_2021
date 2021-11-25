@@ -12,58 +12,81 @@
 
 #include "scanner.h"
 #include "str.h"
+
 //max size of the table
-#define MAX_HT_SIZE 20003  //TODO //How many? For optimization. Must be prime number
+#define MAX_HT_SIZE 2000  //TODO //How many? For optimization. Must be prime number
+#define MAX_RETURN_TYPES 10 // max values which func return
+#define MAX_PARAMETERS 10   // max parameters which func can have
 
 
 /**
  * @enum Type of data
  */
 typedef enum {
-
     TYPE_NULL,
     TYPE_BOOL,
     TYPE_INTEGER = TOKEN_INT,
     TYPE_DOUBLE = TOKEN_DOUBLE,
     TYPE_STRING = TOKEN_STRING,
-} value_type;
+    TYPE_UNDEFINED
+}tab_item_data_type;
 
 /**
- * @struct Item structure
- */
-typedef struct {
+ * @enum Type of id
+ * */
+typedef enum {
+    VARIABLE,
+    FUNCTION,
+    UNDEFINED,
+}tab_item_id_type;
 
-    char *key;                  // item identifier
-    value_type type;            // type of item value
-    bool defined;               // existing of function
-    bool gl_var;
-    string_struct *parameters;   // parameters of function (i,d,s)
-} item_t;
+/**
+ * @union value of table element
+ * */
+typedef union t_value {
+    int int_value;
+    double double_value;
+    char *string_value;
+}tab_item_value;
 
+/**
+ * @struct data of table element
+ * */
+typedef struct table_item_data {
+    char *identifier;
+    tab_item_id_type type_id;
+    tab_item_data_type type_data;
+    tab_item_data_type type_return_values[MAX_RETURN_TYPES];
+    tab_item_data_type type_parameter_values[MAX_PARAMETERS];
+    bool defined;
+    tab_item_value value;
+}tab_item_data_t;
 
 /**
  * @struct Single item in the hash table
  */
 typedef struct table_item {
+    char *key;
+    tab_item_data_t data;
+    struct table_item *next_item;
+}tab_item_t;
 
-  char *key;                    // key identifier
-  item_t value;                 // item value
-  struct table_item *next;      // pointer on the next element
-} table_item_t;
-
+/**
+ * @typedef type of table, which is array of items
+ * */
 typedef table_item_t *table_t[MAX_HT_SIZE];
 
 /**
  * @brief Hash table initialization
  * @param tab Pointer on table
  */
-void init_hashtab(table_t *tab);
+void init_hashtable(table_t *tab);
 
 /**
  * @brief Clear all symbols from hash table and free allocated memory
  * @param tab Pointer on table
  */
-void delete_all_hashtab(table_t *tab);
+void delete_all_hashtable(table_t *tab);
 
 /**
  * @brief Search item with given key
@@ -71,7 +94,7 @@ void delete_all_hashtab(table_t *tab);
  * @param key Key of needed item
  * @return Pointer on founded item in case of success, else NULL
  */
-item_t *search_hashtab(table_t *tab, char *key);
+tab_item_t *search_hashtable(table_t *tab, char *key);
 
 /**
  * @brief Add new parameter(ids) to the function
@@ -79,7 +102,7 @@ item_t *search_hashtab(table_t *tab, char *key);
  * @param type Value type of the new parameter
  * @return true in case of success, else false
  */
-bool new_parameter_hashtab(item_t *item, value_type type);
+bool new_parameter_hashtable(table_item_t *item, value_type type);
 
 /**
  * @brief Insert new element in the hash table
@@ -87,7 +110,7 @@ bool new_parameter_hashtab(item_t *item, value_type type);
  * @param key Key of inserted item
  * @return Pointer on created item in case of success, else NULL
  */
-item_t *insert_hashtab(table_t *tab, char *key);
+void insert_element_hashtable(table_t *tab, char *key);
 
 /**
  * @brief Delete element from the hash table
@@ -95,6 +118,6 @@ item_t *insert_hashtab(table_t *tab, char *key);
  * @param key Key of deleted item
  * @return true in case of success, else false
  */
-bool delete_single_hashtab(table_t *tab, char *key);
+bool delete_single_hashtable(table_t *tab, char *key);
 
 #endif
