@@ -1,6 +1,6 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
- * 
+ *
  * @brief Main, start file
  * @author TODO
  */
@@ -25,10 +25,11 @@
 
 
 int main() {
-    //char c;
-    // while ((c=getchar()) != EOF) {
+    // simple check of scanner
     token_struct *token = malloc(sizeof(token_struct*));
-    get_token(token);
-    //}
+    while (token->type != EOF) {
+        get_token(token);
+    }
+    free(token);
     return 0;
 }
