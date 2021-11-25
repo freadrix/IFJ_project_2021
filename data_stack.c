@@ -26,10 +26,10 @@ bool push_data_item(data_stack_t *stack) {
     item_data_stack_t *item = malloc(sizeof(item_data_stack_t));
     if (!(item)) return false;
     item->previous = stack->top;
-    stack->top->next = item;
+    if (!data_stack_is_empty(stack)) stack->top->next = item;
     item->next = NULL;
     stack->top = item;
-    item->table = init_hashtab(item->table);
+    init_hashtab(item->table);
     return true;
 }
 

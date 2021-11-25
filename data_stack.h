@@ -16,10 +16,10 @@
 /**
  * @struct data stack item
  * */
-typedef struct {
+typedef struct item_of_stack{
     table_t *table;
-    item_data_stack_t *next;
-    item_data_stack_t *previous;
+    struct item_of_stack *next;
+    struct item_of_stack *previous;
 }item_data_stack_t;
 
 /**
