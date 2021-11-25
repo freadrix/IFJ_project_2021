@@ -1,6 +1,6 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
- * 
+ *
  * @brief String operations header
  * @author Ivan Tsiareshkin (xtsiar00)
  */
@@ -11,16 +11,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define STRING_LEN_INC 8
+#define STRING_CONST_LENGHT 8
 
 #define STR_ERR 0
 #define STR_OK 1
 
 typedef struct {
-    
+
 	char *string;
-    size_t length;
-    size_t alloc_length;
+	int length;
+	int alloc_length;
 } string_struct;
 
 int string_init(string_struct *str);
@@ -28,6 +28,8 @@ int string_init(string_struct *str);
 void string_free(string_struct *str);
 
 void string_clear(string_struct *str);
+
+int re_lenght(string_struct *str);
 
 int add_char_to_string(string_struct *str, char c);
 
