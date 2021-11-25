@@ -14,7 +14,7 @@
 #include "str.h"
 
 //max size of the table
-#define MAX_HT_SIZE 2000  //TODO //How many? For optimization. Must be prime number
+#define MAX_HT_SIZE 6133  //TODO //How many? For optimization. Must be prime number
 #define MAX_RETURN_TYPES 10 // max values which func return
 #define MAX_PARAMETERS 10   // max parameters which func can have
 
@@ -74,7 +74,7 @@ typedef struct table_item {
 /**
  * @typedef type of table, which is array of items
  * */
-typedef table_item_t *table_t[MAX_HT_SIZE];
+typedef tab_item_t *table_t[MAX_HT_SIZE];
 
 /**
  * @brief Hash table initialization
@@ -97,20 +97,12 @@ void delete_all_hashtable(table_t *tab);
 tab_item_t *search_hashtable(table_t *tab, char *key);
 
 /**
- * @brief Add new parameter(ids) to the function
- * @param tab Pointer on table
- * @param type Value type of the new parameter
- * @return true in case of success, else false
- */
-bool new_parameter_hashtable(table_item_t *item, value_type type);
-
-/**
  * @brief Insert new element in the hash table
  * @param tab Pointer on table
  * @param key Key of inserted item
  * @return Pointer on created item in case of success, else NULL
  */
-void insert_element_hashtable(table_t *tab, char *key);
+tab_item_t *insert_element_hashtable(table_t *tab, char *key);
 
 /**
  * @brief Delete element from the hash table
