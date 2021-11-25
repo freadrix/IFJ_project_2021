@@ -11,7 +11,6 @@
 #include <stdbool.h>
 
 #include "symtable.h"
-#include "expr_handle.h"
 
 /**
  * @struct Stack item structure
