@@ -1,12 +1,12 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
- * 
+ *
  * @brief Error definitons
  * @author Ivan Tsiareshkin (xtsiar00)
  */
 
-#ifndef _ERROR_H
-#define _ERROR_H
+#ifndef _ERROR_H_
+#define _ERROR_H_
 
 #define OK 0
 
@@ -26,7 +26,7 @@
 
 #define ERR_NIL 8
 
-#define ERR_DEV_ZERO 9
+#define ERR_DIV_ZERO 9
 
 #define ERR_INTERNAL 99
 

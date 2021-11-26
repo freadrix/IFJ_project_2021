@@ -42,14 +42,14 @@ bool pop_stack(stack_t *stack) {
     }
 }
 
-bool push_stack(stack_t *stack, char elem) {
+bool push_stack(stack_t *stack, elem_enum type) {
     //push item on the top of stack
     item_stack_t *item = malloc(sizeof(item_stack_t));
     if (!(item)) {
         return false;
     } else {
         item->nxt = stack->top;
-        item->elem = elem;
+        item->type = type;
         stack->top = item;
         return true;
     }

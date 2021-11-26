@@ -1,6 +1,6 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
- * 
+ *
  * @brief Stack header
  * @author Aleksandr Verevkin (xverev00)
  */
@@ -16,7 +16,9 @@
  * @struct Stack item structure
  */
 typedef struct item_stack_struct {
-    char elem;
+
+    value_type type; //error: unknown type name ‘value_type’
+    elem_enum elem; // error: unknown type name ‘elem_type’
     struct item_stack_struct *nxt;
 } item_stack_t;
 
@@ -59,7 +61,7 @@ bool pop_stack(stack_t *stack);
  * @param elem New character
  * @return true in case of success, else false
  */
-bool push_stack(stack_t *stack, char elem);
+bool push_stack(stack_t *stack, elem_enum type); // error: unknown type name ‘elem_type’
 
 /**
  * @brief Clear entire stack from the items

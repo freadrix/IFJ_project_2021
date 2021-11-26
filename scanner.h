@@ -10,7 +10,6 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include <stdlib.h>
 
 #include "error.h"
 #include "str.h"
@@ -29,88 +28,87 @@
 #define STATE_STRING_ESCAPE_TWO 17       /*  Value: /2   */
 #define STATE_STRING_ESCAPE_TWO_FIVE 18  /*  Value: /25  */
 #define STATE_STRING_ESCAPE_OTHER 19     /*  Value: from 001 to 249  */
+#define STATE_STRING_ESCAPE_HEX 20
 
-#define STATE_DOT 20       // .
-#define STATE_LESS_THAN 21 // <
-#define STATE_MORE_THAN 22 // >
-#define STATE_EQUAL 23     // =
-#define STATE_TILDE 24     // ~
-#define STATE_MINUS 25     // -
-#define STATE_SLASH 26     // /
+#define STATE_DOT 21       // .
+#define STATE_LESS_THAN 22 // < GREATER
+#define STATE_MORE_THAN 23 // >
+#define STATE_EQUAL 24     // =
+#define STATE_TILDE 25     // ~
+#define STATE_MINUS 26     // -
+#define STATE_SLASH 27     // /
 
 // Comments
-#define STATE_COMMENT_START 27        // ∑-EOL, EOF, [              (if [ go to 27)
-#define STATE_COMMENT_BLOCK_START 28   // go back to state 26 if ∑-[
-#define STATE_COMMENT_BLOCK 29        // ∑-]                        (if ] go to )
-#define STATE_COMMENT_BLOCK_END 30     // go back to state 28 if ∑-]
+#define STATE_COMMENT_START 28        // ∑-EOL, EOF, [              (if [ go to 27)
+#define STATE_COMMENT_BLOCK_START 29  // go back to state 26 if ∑-[
+#define STATE_COMMENT_BLOCK 30        // ∑-]                        (if ] go to )
+#define STATE_COMMENT_BLOCK_END 31    // go back to state 28 if ∑-]
 
 // Number
-#define STATE_NUMBER 31
-#define STATE_NUMBER_POINT 32
-#define STATE_NUMBER_DOUBLE 33
-#define STATE_NUMBER_EXPONENT 34
-#define STATE_NUMBER_EXPONENT_SIGN 35
-#define STATE_NUMBER_EXPONENT_END 36
+#define STATE_NUMBER 32
+#define STATE_NUMBER_POINT 33
+#define STATE_NUMBER_DOUBLE 34
+#define STATE_NUMBER_EXPONENT 35
+#define STATE_NUMBER_EXPONENT_SIGN 36
+#define STATE_NUMBER_EXPONENT_END 37
 
-#define STATE_EOL 37 // End of line
-#define STATE_EOF 38 // End of file
+#define STATE_EOL 38 // End of line
+#define STATE_EOF 39 // End of file
 /* STATES END */
 
 typedef enum {
+    TOKEN_EMPTY,            // 0
+    TOKEN_EOL,              // 1
+    TOKEN_EOF,              // 2
 
-    TOKEN_EOL,
-    TOKEN_EOF,
+    TOKEN_ID,               // 3
+    TOKEN_KEYWORD,          // 4
 
-    TOKEN_ID,
-    TOKEN_KEYWORD,
+    TOKEN_INT,              // 5
+    TOKEN_DOUBLE,           // 6
+    TOKEN_STRING,           // 7
 
-    TOKEN_INT,
-    TOKEN_DOUBLE,
-    TOKEN_STRING,
+    TOKEN_EQUAL,            // 8
+    TOKEN_NOT_EQUAL,        // 9
+    TOKEN_PLUS,             // 10
+    TOKEN_MINUS,            // 11
+    TOKEN_MUL,              // 12
+    TOKEN_DIV,              // 13
+    TOKEN_IDIV,             // 14
+    TOKEN_CONCAT,           // 15
+    TOKEN_UNARY_LENGTH,     // 16
 
-    TOKEN_EQUAL,
-    TOKEN_NOT_EQUAL,
-    TOKEN_PLUS,
-    TOKEN_MINUS,
-    TOKEN_MUL,
-    TOKEN_DIV,
-    TOKEN_IDIV,
-    TOKEN_CONCAT,
-    TOKEN_UNARY_LENGTH,
+    TOKEN_ASSIGN,           // 17
+    TOKEN_GREATER,          // 18
+    TOKEN_GREATER_OR_EQ,    // 19
+    TOKEN_LESS,             // 20
+    TOKEN_LESS_OR_EQ,       // 21
 
-    TOKEN_ASSIGN,
-    TOKEN_GREATER,
-    TOKEN_GREATER_OR_EQ,
-    TOKEN_LESS,
-    TOKEN_LESS_OR_EQ,
-
-    TOKEN_DDOT,
-    TOKEN_COMMA,
-    TOKEN_BRACKET_SQUARE_R,
-    TOKEN_BRACKET_SQUARE_L,
-    TOKEN_BRACKET_ROUND_R,
-    TOKEN_BRACKET_ROUND_L,
-    //TOKEN_BRACKET_CURLY_R, // Curly brackets are used for internal functions, don't know how exactly scanner works with them
-    //TOKEN_BRACKET_CURLY_L,
+    TOKEN_DDOT,             // 22
+    TOKEN_COMMA,            // 23
+    TOKEN_BRACKET_SQUARE_R, // 24
+    TOKEN_BRACKET_SQUARE_L, // 25
+    TOKEN_BRACKET_ROUND_R,  // 26
+    TOKEN_BRACKET_ROUND_L   // 27
 } token_type;
 
 typedef enum {
 
-    KEYWORD_DO,
-    KEYWORD_ELSE,
-    KEYWORD_END,
-    KEYWORD_FUNCTION,
-    KEYWORD_GLOBAL,
-    KEYWORD_IF,
-    KEYWORD_LOCAL,
-    KEYWORD_NIL,
-    KEYWORD_REQUIRE,
-    KEYWORD_RETURN,
-    KEYWORD_THEN,
-    KEYWORD_WHILE,
-    KEYWORD_INTEGER,
-    KEYWORD_NUMBER,
-    KEYWORD_STRING,
+    KEYWORD_DO,         // 0
+    KEYWORD_ELSE,       // 1
+    KEYWORD_END,        // 2
+    KEYWORD_FUNCTION,   // 3
+    KEYWORD_GLOBAL,     // 4
+    KEYWORD_IF,         // 5
+    KEYWORD_LOCAL,      // 6
+    KEYWORD_NIL,        // 7
+    KEYWORD_REQUIRE,    // 8
+    KEYWORD_RETURN,     // 9
+    KEYWORD_THEN,       // 10
+    KEYWORD_WHILE,      // 11
+    KEYWORD_INTEGER,    // 12
+    KEYWORD_NUMBER,     // 13
+    KEYWORD_STRING      // 14
 } keyword_type;
 
 typedef union {
