@@ -58,17 +58,16 @@ tab_item_t *insert_element_hashtable(table_t *tab, char *key) {
             free (inserted);
             return NULL;
         }
-        if (!(inserted->data = (tab_item_data_t) malloc(sizeof (tab_item_data_t)))) { // error: conversion to non-scalar type requested
-
+        if (!(inserted->data = (tab_item_data_t *) malloc(sizeof (tab_item_data_t)))) { // error: conversion to non-scalar type requested
             free (inserted->key);
             free (inserted);
             return NULL;
         }
         strcpy(inserted->key, key);
-        inserted->data.identifier = inserted->key;
-        inserted->data.defined = false;
-        inserted->data.type_id = UNDEFINED;
-        inserted->data.type_data = TYPE_UNDEFINED;
+        inserted->data->identifier = inserted->key;
+        inserted->data->defined = false;
+        inserted->data->type_id = UNDEFINED;
+        inserted->data->type_data = TYPE_UNDEFINED;
         inserted->next_item = (*tab)[get_hash(key)];
         (*tab)[get_hash(key)] = inserted;
         return inserted;

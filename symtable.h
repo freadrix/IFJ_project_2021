@@ -67,7 +67,7 @@ typedef struct table_item_data {
  */
 typedef struct table_item {
     char *key;
-    tab_item_data_t data;
+    tab_item_data_t *data;
     struct table_item *next_item;
 }tab_item_t;
 
