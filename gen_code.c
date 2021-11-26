@@ -1,6 +1,6 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
- * 
+ *
  * @brief Code generation
  * @author TODO
  */
@@ -84,5 +84,5 @@ void code_write_out(FILE *out_file) {
     fputs(generated_code.string, out_file);
     //free string
     string_free(&generated_code);
-    return true;
+    return;
 }

@@ -1,6 +1,6 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
- * 
+ *
  * @brief Expression handling
  * @author Aleksandr Verevkin (xverev00)
  */
@@ -21,7 +21,7 @@ typedef enum {
     T_MINUS,    // =
     T_DIV,      // /
     T_MUL,      // *
-    T_IDIV,     // // 
+    T_IDIV,     // //
     T_RBR,      // (
     T_LBR,      // )
     T_ID,       // id, int, str, double
@@ -172,7 +172,7 @@ static rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_
     }
 }
 
-static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, rules_enum rule, value_type *type) {
+static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, rules_enum rule, value_type *type) { // error: unknown type name ‘value_type’
 
     if ((rule == E_PLUS_E) || (rule == E_MINUS_E) || (rule == E_MUL_E)) {
         if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) || (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {

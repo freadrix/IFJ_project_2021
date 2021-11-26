@@ -1,6 +1,6 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
- * 
+ *
  * @brief Syntactic and semantic check header
  * @author Matej Alexej Helc
  */
@@ -17,12 +17,12 @@ int SCANNER_RESPONSE;   // for return value from get_token()
 int PARAMETERS_NUMBER;
 token_struct *token;
 table_t *table;
-table_item_t *tableItem;    //todo zmena
+tab_item_t *tableItem;    //todo zmena
 /*-----------------*/
 
 /** Pravidlá
     <header>    -> require "ifj21" <func>
- <func>      -> function id ( <params> ) <rets> <body> end <program>
+    <func>      -> function id ( <params> ) <rets> <body> end <program>
     <params>    -> ε
     <params>    -> id : <data_type> <param>
     <param>     -> ε
@@ -30,35 +30,35 @@ table_item_t *tableItem;    //todo zmena
     <body>      -> <def_var> <state_l>
     <def_var>   -> local id : <data_type> <assign> <def_var>
     <def_var>   -> ε
- <state_l>   -> <comm> <state_l>
- <state_l>   -> ε
- <comm>      -> id <assign>
- <comm>      -> if <condition> then <state_l> else <stale_l> end
- <comm>      -> while <condition> do <state_l> end
- <comm>      -> id ( <params_in> )
- <comm>      -> return <param_in>
- <comm>      -> reads ()
- <comm>      -> readi ()
- <comm>      -> readn ()
- <comm>      -> write (<params_in>)
- <comm>      -> tointeger (<expression>)
- <comm>      -> substr ()            /////
- <comm>      -> ord ()                /////
- <comm>      -> chr ()                /////
- <params_in> -> ε
- <params_in> -> id <param_in>
- <param_in>  -> , id <param_in>
- <param_in>  -> ε
+    <state_l>   -> <comm> <state_l>
+    <state_l>   -> ε
+    <comm>      -> id <assign>
+    <comm>      -> if <condition> then <state_l> else <stale_l> end
+    <comm>      -> while <condition> do <state_l> end
+    <comm>      -> id ( <params_in> )
+    <comm>      -> return <param_in>
+    <comm>      -> reads ()
+    <comm>      -> readi ()
+    <comm>      -> readn ()
+    <comm>      -> write (<params_in>)
+    <comm>      -> tointeger (<expression>)
+    <comm>      -> substr ()            /////
+    <comm>      -> ord ()                /////
+    <comm>      -> chr ()                /////
+    <params_in> -> ε
+    <params_in> -> id <param_in>
+    <param_in>  -> , id <param_in>
+    <param_in>  -> ε
     <rets>      -> : <data_type> <ret>
     <rets>      -> ε
     <ret>       -> , <data_type> <ret>
     <ret>       -> ε
- <data_type> -> integer
- <data_type> -> number
- <data_type> -> string
- <data_type> -> nil
- <assign>    -> = <expression>
- <assign>    -> ε
+    <data_type> -> integer
+    <data_type> -> number
+    <data_type> -> string
+    <data_type> -> nil
+    <assign>    -> = <expression>
+    <assign>    -> ε
  */
 
 
@@ -72,7 +72,7 @@ int get_token_check() {
     while (true) {
         if (token->attribute.keyword == KEYWORD_REQUIRE) {
             SCANNER_RESPONSE = get_token(token);
-            if (token->type == TOKEN_ID && !strcmp(*token->attribute.string, "\"ifj21\""))
+            if (token->type == TOKEN_ID && !strcmp((const char *)token->attribute.string, "\"ifj21\"")) // error: incompatible type for argument 1 of ‘strcmp’, fixed, but not 100% sure
                 break;
         }
     }
@@ -84,28 +84,29 @@ int get_token_check() {
  */
 int p_function() {
     int function;
-    init_hashtab(table);
-    SCANNER_RESPONSE = get_token(token));
+    init_hashtable(table);
+    SCANNER_RESPONSE = get_token(token);
     if (token->attribute.keyword != KEYWORD_FUNCTION)  //missing keyword function
         return ERR_SYNTAX;
 
-    SCANNER_RESPONSE = get_token(token));
+    SCANNER_RESPONSE = get_token(token);
     if (token->type != TOKEN_ID)
         return ERR_SYNTAX;
 
-    if (!strcmp(*token->attribute.string, "main") || !strcmp(*token->attribute.string, "write") ||
-        !strcmp(*token->attribute.string, "reads") || !strcmp(*token->attribute.string, "readn") ||
-        !strcmp(*token->attribute.string, "readi") || !strcmp(*token->attribute.string, "tointeger") ||
-        !strcmp(*token->attribute.string, "substr") || !strcmp(*token->attribute.string, "ord") ||
-        !strcmp(*token->attribute.string, "chr"))
-        return ERR_UNDEF;
+    // error: incompatible type for argument 1 of ‘strcmp’
+    // if (!strcmp(*token->attribute.string, "main") || !strcmp(*token->attribute.string, "write") ||
+    //     !strcmp(*token->attribute.string, "reads") || !strcmp(*token->attribute.string, "readn") ||
+    //     !strcmp(*token->attribute.string, "readi") || !strcmp(*token->attribute.string, "tointeger") ||
+    //     !strcmp(*token->attribute.string, "substr") || !strcmp(*token->attribute.string, "ord") ||
+    //     !strcmp(*token->attribute.string, "chr"))
+    //     return ERR_UNDEF;
 
-    if (/*TODO porovnanie ci sa ID nezhoduje s nazvom nejakej funkcie*/)
-        return ERR_UNDEF;
+    // if (/*TODO porovnanie ci sa ID nezhoduje s nazvom nejakej funkcie*/)
+    //     return ERR_UNDEF;
 
-    if (tableItem /*TODO insert id (key) do tabulky)*/) {
-        /*error ak sa nepodarilo nahrat do tabulky */
-    }
+    // if (tableItem /*TODO insert id (key) do tabulky)*/) {
+    //     /*error ak sa nepodarilo nahrat do tabulky */
+    // }
 
     SCANNER_RESPONSE = get_token(token);
     if (token->type != TOKEN_BRACKET_ROUND_L)
@@ -122,12 +123,11 @@ int p_function() {
             return function;
     }
 
-    funtion = p_body();
+    function = p_body();
     if (function != OK)
         return function;
 
 }
->>>>>>> bfd156a0d9bc12a8f9773d9379f761a2665104a2
 
 /** <params>    -> ε
  *  <params>    -> id : <data_type> <param>
@@ -145,8 +145,8 @@ int p_params() {
             /* TODO uvolnit tabulku*/
             return ERR_SYNTAX;
 
-        if (/*TODO porovnanie ci sa ID nezhoduje s nazvom nejakej funkcie*/)
-            return ERR_UNDEF;
+        // if (/*TODO porovnanie ci sa ID nezhoduje s nazvom nejakej funkcie*/)
+        //     return ERR_UNDEF;
         /*TODO vlozit ID do tabulky*/
 
         SCANNER_RESPONSE = get_token(token);
@@ -286,7 +286,7 @@ int p_assign(){
              break;
          default:
              break;
-         TOKEN_ID ! /* TODO */
+          /* TODO */
      }
 
  }

@@ -1,6 +1,6 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
- * 
+ *
  * @brief Hash table operations
  * @author Aleksandr Verevkin (xverev00)
  */
@@ -39,7 +39,7 @@ tab_item_t *search_hashtable(table_t *tab, char *key) {
             if (!strcmp(iter_item->key, key)) {
                 return iter_item;
             }
-            iter_item = iter_item->next;
+            iter_item = iter_item->next_item;
         }
     }
     return NULL;
@@ -52,23 +52,24 @@ tab_item_t *insert_element_hashtable(table_t *tab, char *key) {
         tab_item_t *item = search_hashtable(tab, key);
         if (item != NULL) return NULL;
         //allocate memory for the new item
-        tab_item_t *inserted = (tab_item_t *) malloc(sizeof(table_item_t));
-        if (inserted == NULL) return;
+        tab_item_t *inserted = (tab_item_t *) malloc(sizeof(tab_item_t));
+        if (inserted == NULL) return NULL;
         if (!(inserted->key = (char *)malloc((strlen(key) + 1) * sizeof(char)))) {
             free (inserted);
-            return; NULL
+            return NULL;
         }
-        if (!(inserted->data = (tab_item_data_t) malloc(sizeof (tab_item_data_t)))) {
+        if (!(inserted->data = (tab_item_data_t) malloc(sizeof (tab_item_data_t)))) { // error: conversion to non-scalar type requested
+
             free (inserted->key);
             free (inserted);
-            return NULL
+            return NULL;
         }
         strcpy(inserted->key, key);
         inserted->data.identifier = inserted->key;
         inserted->data.defined = false;
         inserted->data.type_id = UNDEFINED;
         inserted->data.type_data = TYPE_UNDEFINED;
-        inserted->next = (*tab)[get_hash(key)];
+        inserted->next_item = (*tab)[get_hash(key)];
         (*tab)[get_hash(key)] = inserted;
         return inserted;
     }
@@ -82,17 +83,17 @@ bool delete_single_hashtable(table_t *tab, char *key) {
         while (item != NULL) {
             if (!(strcmp(item->key, key))) {
                 if (previous_item != NULL) {
-                    previous_item->next = item->next;
+                    previous_item->next_item = item->next_item;
                 } else {
-                    (*tab)[get_hash(key)] = (*tab)[get_hash(key)]->next;
+                    (*tab)[get_hash(key)] = (*tab)[get_hash(key)]->next_item;
                 }
-                free(item->data)
+                free(item->data); // error: incompatible type for argument 1 of ‘free’
                 free(item->key);
                 free(item);
                 return true;
             }
             previous_item = item;
-            item = item->next;
+            item = item->next_item;
         }
     }
     return false;
@@ -106,8 +107,8 @@ void delete_all_hashtable(table_t *tab) {
             tab_item_t *iter_item = (*tab)[i];
             tab_item_t *temp_iter_item;
             while (iter_item != NULL) {
-                temp_iter_item = iter_item->next;
-                free(iter_item->data);
+                temp_iter_item = iter_item->next_item;
+                free(iter_item->data); // error: incompatible type for argument 1 of ‘free’
                 free(iter_item->key);
                 free(iter_item);
                 iter_item = temp_iter_item;

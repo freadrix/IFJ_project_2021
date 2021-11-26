@@ -1,6 +1,6 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
- * 
+ *
  * @brief Syntactic and semantic check
  * @author Matej Alexej Helc
  */
@@ -18,9 +18,9 @@
 typedef struct {
 
     token_struct tok;
-//    table_t local; //  think that wont need
+    //table_t local;  //  think that wont need
     table_t global;
-    stack_t
+    //stack_t
     //TODO
 } code_struct;
 
