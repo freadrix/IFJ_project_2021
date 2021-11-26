@@ -85,12 +85,12 @@ int get_token_check() {
 int p_function() {
     init_hashtable(table);
     int function;
-    SCANNER_RESPONSE = get_token(token));
+    SCANNER_RESPONSE = get_token(token);
     while (1) {
         if (token->attribute.keyword != KEYWORD_FUNCTION)  //missing keyword function
             return ERR_SYNTAX;
 
-        SCANNER_RESPONSE = get_token(token));
+        SCANNER_RESPONSE = get_token(token);
         if (token->type != TOKEN_ID)
             return ERR_SYNTAX;
 
@@ -128,7 +128,7 @@ int p_function() {
                 return function;
         }
 
-        funtion = p_body();
+        function = p_body();
         if (function != OK)
             return function;
 
@@ -137,7 +137,7 @@ int p_function() {
             delete_all_hashtable(table);
             return ERR_SYNTAX;
         }
-        SCANNER_RESPONSE = get_token(token));   //not EOF, loading next function
+        SCANNER_RESPONSE = get_token(token);   //not EOF, loading next function
         if (token->type == TOKEN_EOF)
             return OK;
     }

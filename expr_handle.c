@@ -172,7 +172,7 @@ static rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_
     }
 }
 
-static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, rules_enum rule, value_type *type) { // error: unknown type name ‘value_type’
+static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, rules_enum rule, tab_item_data_type *type) {
 
     if ((rule == E_PLUS_E) || (rule == E_MINUS_E) || (rule == E_MUL_E)) {
         if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) || (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {

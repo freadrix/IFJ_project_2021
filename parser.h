@@ -20,7 +20,7 @@ typedef struct {
     token_struct tok;
 //    table_t local; //  think that wont need
     table_t global;
-    stack_t
+//    stack_t
     //TODO
 } code_struct;
 

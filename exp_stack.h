@@ -11,14 +11,15 @@
 #include <stdbool.h>
 
 #include "symtable.h"
+#include "expr_handle.h"
 
 /**
  * @struct Stack item structure
  */
 typedef struct item_stack_struct {
 
-    value_type type; //error: unknown type name ‘value_type’
-    elem_enum elem; // error: unknown type name ‘elem_type’
+    tab_item_data_type type;
+    elem_enum elem;
     struct item_stack_struct *nxt;
 } item_stack_t;
 
@@ -61,7 +62,7 @@ bool pop_stack(stack_t *stack);
  * @param elem New character
  * @return true in case of success, else false
  */
-bool push_stack(stack_t *stack, elem_enum type); // error: unknown type name ‘elem_type’
+bool push_stack(stack_t *stack, elem_enum type);
 
 /**
  * @brief Clear entire stack from the items
