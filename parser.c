@@ -67,15 +67,16 @@ table_item *table_item;
  *
  */
 int get_token_check() {
-    token_struct *token;
     SCANNER_RESPONSE = get_token(token);
-    while (true) {
+    while (token->type != TOKEN_EOF) {
         if (token->attribute.keyword == KEYWORD_REQUIRE) {
             SCANNER_RESPONSE = get_token(token);
             if (token->type == TOKEN_ID && !strcmp(*token->attribute.string, "\"ifj21\""))
-                break;
+                return OK;
         }
+        SCANNER_RESPONSE = get_token(token);
     }
+    return 1;   //File is empty
 }
 
 /** <func>      -> function id ( <params> ) <rets> <body> end <program>
