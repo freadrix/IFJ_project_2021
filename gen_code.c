@@ -19,7 +19,7 @@ string_struct generated_code;
 //return input in case of success, if input type is wrong, return nil
 bool builtin_reads() {
     if(!(add_string_to_string(&generated_code, (
-        "LABEL $reads\n"
+        "\nLABEL $reads\n"
         "PUSHFRAME\n"
         "DEFVAR LF@%retval\n"
         "DEFVAR LF@%reads_type\n"
@@ -45,7 +45,7 @@ bool builtin_reads() {
 //return input in case of success, if input type is wrong, return nil
 bool builtin_readi() {
     if(!(add_string_to_string(&generated_code, (
-        "LABEL $readi\n"
+        "\nLABEL $readi\n"
         "PUSHFRAME\n"
         "DEFVAR LF@%retval\n"
         "DEFVAR LF@%readi_type\n"
@@ -71,7 +71,7 @@ bool builtin_readi() {
 //return input in case of success, if input type is wrong, return nil
 bool builtin_readn() {
     if(!(add_string_to_string(&generated_code, (
-        "LABEL $readn\n"
+        "\nLABEL $readn\n"
         "PUSHFRAME\n"
         "DEFVAR LF@%retval\n"
         "DEFVAR LF@%readn_type\n"
@@ -92,8 +92,29 @@ bool builtin_readn() {
     return true;
 }
 
+//built-in write function
+//write all passed as parameters terms
+//parameters passed ON STACK
+//count of terms is stored ON TOP OF THE STACK
+//terms is stored AFTER TOP OF THE STACK
 bool builtin_write() {
+    if(!(add_string_to_string(&generated_code, (
+        "\nLABEL $write\n"
+        "PUSHFRAME\n"
+        "DEFVAR LF@%write_count\n"
+        "POPS LF@%write_count\n"
+        "DEFVAR LF@%write_str\n"
 
+        "LABEL $write_loop\n"
+        "POPS LF@%write_str\n"
+        "WRITE LF@%write_str\n"
+        "SUB LF@%write_count LF@%write_count int@1\n"
+        "JUMPIFNEQ $write_loop LF@%write_count int@0\n"
+
+        "POPFRAME\n"
+        "RETURN\n")))) {
+        return false;
+    }
     return true;
 }
 
@@ -104,7 +125,7 @@ bool builtin_write() {
 //exit with error 5 if given parameter of wrong type
 bool builtin_tointeger() {
     if(!(add_string_to_string(&generated_code, (
-        "LABEL $tointeger\n"
+        "\nLABEL $tointeger\n"
         "PUSHFRAME\n"
         "DEFVAR LF@%retval\n"
         //check if parameter is nil
@@ -131,15 +152,15 @@ bool builtin_tointeger() {
 
 //built-in substr function
 //found substring, of given string, trough given indexes
-//return substring of given string, empty string in case of wrong intervals
+//return substring of given string in LF@%retval, empty string in case of wrong intervals
 //exit with error 5 if given parameter of wrong type
 //exit with error 8 if given nil in parameter
 bool builtin_substr() {
     if(!(add_string_to_string(&generated_code, (
-        "LABEL $substr\n"
+        "\nLABEL $substr\n"
         "PUSHFRAME\n"
         "DEFVAR LF@%retval\n"
-        //check of ine of the parameters is nil
+        //check of one of the parameters is nil
         "JUMPIFEQ $substr_err_8 nil@nil LF@%0\n"
         "JUMPIFEQ $substr_err_8 nil@nil LF@%1\n"
         "JUMPIFEQ $substr_err_8 nil@nil LF@%2\n"
@@ -208,10 +229,10 @@ bool builtin_substr() {
 //exit with error 8 if given nil in parameter
 bool builtin_ord() {
     if(!(add_string_to_string(&generated_code, (
-        "LABEL $ord\n"
+        "\nLABEL $ord\n"
         "PUSHFRAME\n"
         "DEFVAR LF@%retval\n"
-        //check of ine of the parameters is nil
+        //check of one of the parameters is nil
         "JUMPIFEQ $ord_err_8 nil@nil LF@%0\n"
         "JUMPIFEQ $ord_err_8 nil@nil LF@%1\n"
         "JUMP $ord_err_8_end\n"
@@ -259,7 +280,7 @@ bool builtin_ord() {
 //exit with error 8 if given nil in parameter
 bool builtin_chr() {
     if(!(add_string_to_string(&generated_code, (
-        "LABEL $chr\n"
+        "\nLABEL $chr\n"
         "PUSHFRAME\n"
         "DEFVAR LF@%retval\n"
         //check for nil in parameter
@@ -299,6 +320,10 @@ bool code_generator_init() {
     }
     //generate header
     if(!(add_string_to_string(&generated_code, (".IFJcode21\n"
+                                                "DEFVAR GF@%gl_1\n"
+                                                "DEFVAR GF@%gl_2\n"
+                                                "DEFVAR GF@%gl_3\n"
+                                                "DEFVAR GF@%gl_res\n"
                                                 "JUMP $$main\n")))) {
         return false;
     }
@@ -318,7 +343,7 @@ void code_write_out(FILE *out_file) {
 }
 
 bool code_generate_main_start() {
-    if(!(add_string_to_string(&generated_code, ("LABEL $$main\n"
+    if(!(add_string_to_string(&generated_code, ("\nLABEL $$main\n"
                                                 "CREATEFRAME\n"
                                                 "PUSHFRAME\n")))) {
         return false;
@@ -332,6 +357,99 @@ bool code_generate_main_end() {
         return false;
     }
     return true;
+}
+
+bool code_generate_function_call(char *f_name) {
+    if(!(add_string_to_string(&generated_code, ("CALL $"))) ||
+       !(add_string_to_string(&generated_code, (f_name))) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+        return false;
+    }
+    return true;
+}
+
+bool code_generate_empty_variables_frame() {
+    if(!(add_string_to_string(&generated_code, ("CREATEFRAME\n")))) {
+        return false;
+    }
+    return true;    
+}
+
+//help function to find and generate value of given token
+static bool code_generate_token_value(token_struct token) {
+    string_struct term_value;
+    //initialize string
+    if (!(string_init(&term_value))) {
+        return false;
+    }
+    char term[50];
+    unsigned char ch;
+    if (token.type == TOKEN_ID) {
+        if (!(add_string_to_string(&generated_code, ("LF@"))) || 
+            !(add_string_to_string(&generated_code, (token.attribute.string->string)))) {
+                return false;
+            }
+    } else if (token.type == TOKEN_INT) {
+        sprintf(term, "%d", token.attribute.int_value);
+        if (!(add_string_to_string(&generated_code, ("int@"))) || 
+            !(add_string_to_string(&generated_code, term))) {
+                return false;
+            }
+    } else if (token.type == TOKEN_DOUBLE) {
+        sprintf(term, "%g", token.attribute.double_value);
+        if (!(add_string_to_string(&generated_code, ("float@"))) || 
+            !(add_string_to_string(&generated_code, term))) {
+                return false;
+            }
+    } else if (token.type == TOKEN_STRING) {
+        for (int i = 0; (ch = (unsigned char) (token.attribute.string->string)[i]) != '\0'; i++) {
+            if (ch == '#' || ch == '\\' || ch < 33 || !(isprint(ch))) {
+                sprintf(term, "%03d", ch);
+                if (!(add_char_to_string(&term_value, ('\\'))) ||
+                    !(add_string_to_string(&term_value, term))) {
+                    return false;
+                }
+            } else {
+                if (!(add_char_to_string(&term_value, ch))) {
+                    return false;
+                }
+            }
+        }
+        if (!(add_string_to_string(&generated_code, ("string@"))) || 
+            !(add_string_to_string(&generated_code, (term_value.string)))) {
+                return false;
+            }
+    } else {
+        string_free(&term_value);
+        return false;
+    }
+    string_free(&term_value);
+    return true;
+}
+
+bool code_generate_function_parameter(token_struct token, int param_num) {
+    char index[5];
+    sprintf(index, "%d", param_num);
+    if(!(add_string_to_string(&generated_code, ("DEFVAR TF@%"))) || 
+       !(add_string_to_string(&generated_code, (index))) ||
+       !(add_string_to_string(&generated_code, ("\n"
+                                                "MOVE TF@%"))) ||
+       !(add_string_to_string(&generated_code, (index))) ||
+       !(add_string_to_string(&generated_code, (" "))) ||
+       !(code_generate_token_value(token)) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+        return false;
+    }
+    return true;    
+}
+
+bool code_generate_function_return(char *f_name) {
+    if(!(add_string_to_string(&generated_code, ("JUMP $"))) ||
+       !(add_string_to_string(&generated_code, (f_name))) ||
+       !(add_string_to_string(&generated_code, ("_ret\n")))) {
+        return false;
+    }
+    return true;  
 }
 
 bool code_generate_function_start(char *f_name) {
@@ -350,6 +468,255 @@ bool code_generate_function_end(char *f_name) {
        !(add_string_to_string(&generated_code, ("_ret\n"
                                                 "POPFRAME\n"
                                                 "RETURN\n")))) {
+        return false;
+    }
+    return true;
+}
+
+bool code_generate_write_function(int terms_count, ...) {
+    //list of arguments
+    va_list valist;
+    va_start(valist, terms_count);
+    //2d array for terms
+    char *terms_arr[terms_count];
+    //assign terms to array
+    for (int i = 0; i > terms_count; i++) {
+        terms_arr[i] = va_arg(valist, char*);
+    }
+    //generate push on stack from back of the array
+    for (int i = terms_count - 1; i >= 0; i--) {
+        if(!(add_string_to_string(&generated_code, ("PUSHS string@"))) ||
+           !(add_string_to_string(&generated_code, terms_arr[i])) ||
+           !(add_string_to_string(&generated_code, ("\n")))) {
+            va_end(valist);
+            return false;
+        }
+    }
+    //put number of terms on top of the stack
+    //and call write
+    char count[10];
+    sprintf(count, "%d", terms_count);
+    if(!(add_string_to_string(&generated_code, ("PUSHS int@"))) ||
+       !(add_string_to_string(&generated_code, (count))) ||
+       !(add_string_to_string(&generated_code, ("\n"))) ||
+       !(add_string_to_string(&generated_code, ("CALL $write\n")))) {
+        va_end(valist);
+        return false;
+    }
+    va_end(valist);
+    return true;
+}
+
+bool code_generate_length() {
+    if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_3\n"
+                                                "STRLEN GF@%gl_3 GF@%gl_3\n"
+                                                "PUSHS GF@%gl_3\n")))) {
+        return false;
+    }
+    return true;
+}
+
+bool code_generate_concatenation() {
+    if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_3\n"
+                                                "POPS GF@%gl_2\n"
+                                                "CONCAT GF@%gl_1 GF@%gl_2 GF@%gl_3\n"
+                                                "PUSHS GF@%gl_1\n")))) {
+        return false;
+    }
+    return true;
+}
+
+bool code_generate_variable_create(char *var_name) {
+    if(!(add_string_to_string(&generated_code, ("DEFVAR LF@"))) ||
+       !(add_string_to_string(&generated_code, (var_name))) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+        return false;
+    }
+    return true;
+}
+
+//help function to generate empty type values
+bool code_generate_variable_type(tab_item_data_type type) {
+    if (type == TYPE_BOOL) {
+        if (!(add_string_to_string(&generated_code, ("bool@false")))) {
+            return false;
+        }
+    } else if (type == TYPE_INTEGER) {
+        if (!(add_string_to_string(&generated_code, ("int@0")))) {
+            return false;
+        }
+    } else if (type == TYPE_DOUBLE) {
+        if (!(add_string_to_string(&generated_code, ("float@0x0.0p+0")))) {
+            return false;
+        }
+    } else if (type == TYPE_STRING) {
+        if (!(add_string_to_string(&generated_code, ("string@")))) {
+            return false;
+        }
+    } else {
+        return false;
+    }
+    return true;
+}
+
+bool code_generate_variable_define_type(char *var_name, tab_item_data_type type) {
+    if(!(add_string_to_string(&generated_code, ("MOVE LF@"))) ||
+       !(add_string_to_string(&generated_code, (var_name))) ||
+       !(add_string_to_string(&generated_code, (" "))) ||
+       !(code_generate_variable_type(type)) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+        return false;
+    }
+    return true;
+}
+
+// //help function to generate type values
+// bool code_generate_value_create(tab_item_data_type type) {
+//     if (type == TYPE_BOOL) {
+//         if (!(add_string_to_string(&generated_code, ("bool@")))) {
+//             return false;
+//         }
+//     } else if (type == TYPE_INTEGER) {
+//         if (!(add_string_to_string(&generated_code, ("int@")))) {
+//             return false;
+//         }
+//     } else if (type == TYPE_DOUBLE) {
+//         if (!(add_string_to_string(&generated_code, ("float@")))) {
+//             return false;
+//         }
+//     } else if (type == TYPE_STRING) {
+//         if (!(add_string_to_string(&generated_code, ("string@")))) {
+//             return false;
+//         }
+//     } else {
+//         return false;
+//     }
+//     return true;
+// }
+
+bool code_generate_variable_define_string(char *var_name, token_struct token) {
+    if(!(add_string_to_string(&generated_code, ("MOVE LF@"))) ||
+       !(add_string_to_string(&generated_code, (var_name))) ||
+       !(add_string_to_string(&generated_code, (" "))) ||
+       !(code_generate_token_value(token)) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+        return false;
+    }
+    return true;
+}
+
+bool code_generate_stack_push(token_struct token) {
+    if(!(add_string_to_string(&generated_code, ("PUSHS "))) ||
+       !(code_generate_token_value(token)) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+        return false;
+    }
+    return true;
+}
+
+bool code_generate_stack_convert_float_first() {
+    if(!(add_string_to_string(&generated_code, ("INT2FLOATS\n")))) {
+        return false;
+    }
+    return true;
+}
+
+bool code_generate_stack_convert_float_second() {
+    if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_1\n"
+                                                "INT2FLOATS\n"
+                                                "PUSHS GF@%gl_1\n")))) {
+        return false;
+    }
+    return true;    
+}
+
+bool code_generate_stack_convert_int_first() {
+    if(!(add_string_to_string(&generated_code, ("FLOAT2INTS\n")))) {
+        return false;
+    }
+    return true;    
+}
+
+bool code_generate_stack_convert_int_second() {
+    if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_1\n"
+                                                "FLOAT2INTS\n"
+                                                "PUSHS GF@%gl_1\n")))) {
+        return false;
+    }
+    return true;        
+}
+
+bool code_generate_operations(rules_enum r) {
+    if (r == E_LT_E) {
+        if(!(add_string_to_string(&generated_code, ("LTS\n")))) {
+            return false;
+        } 
+    } else if (r == E_GT_E) {
+        if(!(add_string_to_string(&generated_code, ("GTS\n")))) {
+            return false;
+        }
+    } else if (r == E_GEQ_E) {
+        if(!(add_string_to_string(&generated_code, (
+            "POPS GF@%gl_1\n"
+            "POPS GF@%gl_2\n"
+            "PUSHS GF@%gl_2\n"
+            "PUSHS GF@%gl_1\n"
+            "GTS\n"
+            "PUSHS GF@%gl_2\n"
+            "PUSHS GF@%gl_1\n"
+            "EQS\n"
+            "ORS\n")))) {
+            return false;
+        } 
+    } else if (r == E_LEQ_E) {
+        if(!(add_string_to_string(&generated_code, (
+            "POPS GF@%gl_1\n"
+            "POPS GF@%gl_2\n"
+            "PUSHS GF@%gl_2\n"
+            "PUSHS GF@%gl_1\n"
+            "LTS\n"
+            "PUSHS GF@%gl_2\n"
+            "PUSHS GF@%gl_1\n"
+            "EQS\n"
+            "ORS\n")))) {
+            return false;
+        } 
+    } else if (r == E_EQ_E) {
+        if(!(add_string_to_string(&generated_code, ("EQS\n")))) {
+            return false;
+        }
+    } else if (r == E_NE_E) {
+        if(!(add_string_to_string(&generated_code, ("EQS\n"
+                                                    "NOTS\n")))) {
+            return false;
+        }
+    } else if (r == E_MINUS_E) {
+        if(!(add_string_to_string(&generated_code, ("SUBS\n")))) {
+            return false;
+        }        
+    } else if (r == E_PLUS_E) {
+        if(!(add_string_to_string(&generated_code, ("ADDS\n")))) {
+            return false;
+        }        
+    } else if (r == E_MUL_E) {
+        if(!(add_string_to_string(&generated_code, ("MULS\n")))) {
+            return false;
+        }        
+    } else if (r == E_DIV_E) {
+        if(!(add_string_to_string(&generated_code, ("DIVS\n")))) {
+            return false;
+        }        
+    } else if (r == E_IDIV_E) {
+        if(!(add_string_to_string(&generated_code, ("IDIVS\n")))) {
+            return false;
+        }           
+    }
+
+    return true;
+}
+
+bool code_generate_pop_stack_result() {
+    if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_res\n")))) {
         return false;
     }
     return true;
