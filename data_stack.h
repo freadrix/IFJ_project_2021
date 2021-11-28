@@ -31,7 +31,6 @@ typedef struct {
 
 
 // Functions
-
 /**
  * @param stack pointer on stack
  * @brief func initialize stack

@@ -13,12 +13,13 @@
 #include "scanner.h"
 #include "str.h"
 
-//max size of the table
+// max size of the table
 #define MAX_HT_SIZE 6133  //TODO //How many? For optimization. Must be prime number
 #define MAX_RETURN_TYPES 10 // max values which func return
 #define MAX_PARAMETERS 10   // max parameters which func can have
 
 
+// structs
 /**
  * @enum Type of data
  */
@@ -71,6 +72,8 @@ typedef struct table_item {
     struct table_item *next_item;
 }tab_item_t;
 
+
+// functions
 /**
  * @typedef type of table, which is array of items
  * */
