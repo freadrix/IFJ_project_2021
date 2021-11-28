@@ -29,6 +29,7 @@ bool push_data_item(data_stack_t *stack) {
     if (!data_stack_is_empty(stack)) stack->top->next = item;
     item->next = NULL;
     stack->top = item;
+    item->table = malloc(MAX_HT_SIZE * sizeof(tab_item_t*));
     init_hashtable(item->table);
     return true;
 }
@@ -37,8 +38,11 @@ bool pop_data_item(data_stack_t *stack) {
     if (stack->top == NULL) return false;
     item_data_stack_t *item = stack->top;
     delete_all_hashtable(item->table);
+    free(item->table);
     stack->top = item->previous;
-    stack->top->next = NULL;
+    if(!data_stack_is_empty(stack)) {
+        stack->top->next = NULL;
+    }
     free(item);
     return true;
 }

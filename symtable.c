@@ -26,8 +26,6 @@ static unsigned get_hash(const char *str) {
 
 void init_hashtable(table_t *tab) {
     //initialization of hash table
-    // before using table we need to write
-    // table_t *table = malloc(MAX_HT_SIZE * sizeof(tab_item_t*));
     for (int i = 0; i < MAX_HT_SIZE; ++i) {
         (*tab)[i] = NULL;
     }
@@ -38,7 +36,7 @@ tab_item_t *search_hashtable(table_t *tab, char *key) {
     if (tab != NULL && key != NULL) {
         tab_item_t *iter_item = (*tab)[get_hash(key)];
         while (iter_item != NULL) {
-            if (iter_item->key == key) {
+            if (!strcmp(iter_item->key, key)) {
                 return iter_item;
             }
             iter_item = iter_item->next_item;
@@ -110,8 +108,6 @@ bool delete_single_hashtable(table_t *tab, char *key) {
 
 void delete_all_hashtable(table_t *tab) {
     // fully clear hash table and free allocated memory
-    // after this we need to write
-    // free(table);
     if (tab != NULL) {
         int i = 0;
         while (i < MAX_HT_SIZE) {
@@ -119,6 +115,7 @@ void delete_all_hashtable(table_t *tab) {
             tab_item_t *temp_iter_item;
             while (iter_item != NULL) {
                 temp_iter_item = iter_item->next_item;
+                free(iter_item->data->identifier);
                 free(iter_item->data);
                 free(iter_item->key);
                 free(iter_item);
