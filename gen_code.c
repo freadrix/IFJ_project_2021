@@ -428,7 +428,7 @@ static bool code_generate_token_value(token_struct token) {
 }
 
 bool code_generate_function_parameter(token_struct token, int param_num) {
-    char index[5];
+    char index[10];
     sprintf(index, "%d", param_num);
     if(!(add_string_to_string(&generated_code, ("DEFVAR TF@%"))) || 
        !(add_string_to_string(&generated_code, (index))) ||
@@ -594,7 +594,7 @@ bool code_generate_variable_define_type(char *var_name, tab_item_data_type type)
 //     return true;
 // }
 
-bool code_generate_variable_define_string(char *var_name, token_struct token) {
+bool code_generate_variable_define_value(char *var_name, token_struct token) {
     if(!(add_string_to_string(&generated_code, ("MOVE LF@"))) ||
        !(add_string_to_string(&generated_code, (var_name))) ||
        !(add_string_to_string(&generated_code, (" "))) ||
@@ -721,3 +721,82 @@ bool code_generate_pop_stack_result() {
     }
     return true;
 }
+
+// ======================== IF ELSE START ======================== //
+bool code_generate_if_start(int if_index) {
+    char index_char[10];
+    sprintf(index_char, "%d", if_index);
+    if(!(add_string_to_string(&generated_code, ("JUMPIFNEQ $ENDIF_\n"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, (" GF@%gl_res bool@true\n")))) {
+        return false;
+    }
+    return true;
+}
+
+bool code_generate_if_end(int if_index) {
+    char index_char[10];
+    sprintf(index_char, "%d", if_index);
+    if(!(add_string_to_string(&generated_code, ("LABEL $ENDIF_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+        return false;
+    }
+    return true;
+}
+
+bool code_generate_else(int if_index) {
+    char index_char[10];
+    sprintf(index_char, "%d", if_index);
+    if(!(add_string_to_string(&generated_code, ("JUMP $ENDELSE_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("\n"
+                                                "LABEL $ENDIF_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+        return false;
+    }
+    return true;    
+}
+
+bool code_generate_else_end(int if_index) {
+    char index_char[10];
+    sprintf(index_char, "%d", if_index);
+    if(!(add_string_to_string(&generated_code, ("LABEL $ENDELSE_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+        return false;
+    }
+    return true;
+}
+// ======================== IF ELSE END ======================== //
+
+// ======================== WHILE START ======================== //
+bool code_generate_while_start(int while_index) {
+    char index_char[10];
+    sprintf(index_char, "%d", while_index);
+    if(!(add_string_to_string(&generated_code, ("LABEL $WHILESTART_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+        return false;
+    }
+    return true;
+}
+
+bool code_generate_while_end(int while_index) {
+    char index_char[10];
+    sprintf(index_char, "%d", while_index);
+    if(!(add_string_to_string(&generated_code, ("JUMPIFEQ $WHILEEND_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("\n"))) ||
+       !(add_string_to_string(&generated_code, ("JUMP $WHILESTART_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("\n"))) ||
+       !(add_string_to_string(&generated_code, ("LABEL $WHILEEND_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+        return false;
+    }
+    return true;
+}
+// ======================== WHILE END ======================== //

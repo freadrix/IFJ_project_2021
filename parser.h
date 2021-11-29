@@ -22,13 +22,16 @@ typedef struct {
     table_t global;
 //    stack_t
     //TODO
+
+    int if_label_counter;       //counter of IF's used in code (for labels)
+    int while_label_counter;    //counter of WHILE's used in code (for labels)
 } code_struct;
 
 
 // functions declaration
 int get_token_check() ;
 int p_params();
-int p_rets(table_item*);
+int p_rets(table_item*);        //ERROR: error here, was renamed
 int p_body();
 int p_defvar();
 int p_assign();
