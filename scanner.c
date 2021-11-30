@@ -7,6 +7,13 @@
 
 #include "scanner.h"
 
+string_struct *working_string;
+
+void define_working_str(string_struct *s)
+{
+	working_string = s;
+}
+
 int get_token(token_struct *token) {
     int state = STATE_START;
     char c;
@@ -15,6 +22,8 @@ int get_token(token_struct *token) {
 
     string_struct string;
     string_struct *str = &string;
+
+    token->attribute.string = working_string;
 
     if (!string_init(str)) {
         return ERR_INTERNAL;
@@ -28,123 +37,79 @@ int get_token(token_struct *token) {
             case (STATE_START):
                 if (c == '\n') {
                     state = STATE_EOL;
-                }
-                else
-                if (isspace(c)) {
+                } else if (isspace(c)) {
                     state = STATE_START;
-                }
-				else
-                if (isalpha(c) || c == '_') {
+                } else if (isalpha(c) || c == '_') {
                     add_char_to_string(str, c);
                     state = STATE_ID_OR_KEYWORD;
-                }
-                else
-                if (c == '"') {
+                } else if (c == '"') {
                     state = STATE_STRING_START;
-                }
-                else
-                if (isdigit(c)) {
+                } else if (isdigit(c)) {
                     if (c == '0') {
                         c = getchar();
                         if (c == '.') {
                             add_char_to_string(str, c);
                             state = STATE_NUMBER_POINT;
-                        }
-                        else
-                        if (tolower(c) == 'e') {
+                        } else if (tolower(c) == 'e') {
                             add_char_to_string(str, c);
                             state = STATE_NUMBER_EXPONENT;
-                        }
-                        else
-                        if (isdigit(c)) {
+                        } else if (isdigit(c)) {
                             add_char_to_string(str, c);
                             state = STATE_NUMBER;
                         }
-                    }
-                    else {
+                    } else {
                         add_char_to_string(str, c);
                         state = STATE_NUMBER;
                     }
                     break;
-                }
-                else
-                if (c == '-') {
+                } else if (c == '-') {
                     add_char_to_string(str, c);
                     state = STATE_MINUS;
-                }
-                else
-                if (c == '<') {
+                } else if (c == '<') {
                     state = STATE_LESS_THAN;
-                }
-                else
-                if (c == '>') {
+                } else if (c == '>') {
                     state = STATE_MORE_THAN;
-                }
-                else
-                if (c == '=') {
+                } else if (c == '=') {
                     state = STATE_EQUAL;
-                }
-                else
-                if (c == '~') {
+                } else if (c == '~') {
                     state = STATE_TILDE;
-                }
-                else
-                if (c == '/') {
+                } else if (c == '/') {
                     state = STATE_SLASH;
-                }
-                else
-                if (c == '.') {
+                } else if (c == '.') {
                     state = STATE_DOT;
-                }
-                else
-                if (c == ':') {
+                } else if (c == ':') {
                     token->type = TOKEN_DDOT;
                     string_free(str);
                     return OK;
-                }
-                else
-                if (c == ',') {
+                } else if (c == ',') {
                     token->type = TOKEN_COMMA;
                     string_free(str);
                     return OK;
-                }
-                else
-                if (c == ']') {
+                } else if (c == ']') {
                     token->type = TOKEN_BRACKET_SQUARE_R;
                     string_free(str);
                     return OK;
-                }
-                else
-                if (c == '[') {
+                } else if (c == '[') {
                     token->type = TOKEN_BRACKET_SQUARE_L;
                     string_free(str);
                     return OK;
-                }
-                else
-                if (c == ')') {
+                } else if (c == ')') {
                     token->type = TOKEN_BRACKET_ROUND_R;
                     string_free(str);
                     return OK;
-                }
-                else
-                if (c == '(') {
+                } else if (c == '(') {
                     token->type = TOKEN_BRACKET_ROUND_L;
                     string_free(str);
                     return OK;
-                }
-                else
-                if (c == '#') {
+                } else if (c == '#') {
                     token->type = TOKEN_UNARY_LENGTH;
                     string_free(str);
                     return OK;
-                }
-                else
-                if (c == EOF) {
+                } else if (c == EOF) {
                     token->type = TOKEN_EOF;
                     string_free(str);
                     return OK;
-                }
-                else {
+                }else {
                     string_free(str);
                     return ERR_LEXER;
                 }
@@ -160,74 +125,42 @@ int get_token(token_struct *token) {
             case (STATE_ID_OR_KEYWORD):
                 if (c == '_' || isalpha(c) || isdigit(c)) {
                     add_char_to_string(str, c);
-                }
-                else {
+                } else {
                     ungetc(c, stdin);
-
                     if (strcmp(str->string, "do") == 0) {
                         token->attribute.keyword = KEYWORD_DO;
-                    }
-                    else
-                    if (strcmp(str->string, "else") == 0) {
+                    } else if (strcmp(str->string, "else") == 0) {
                         token->attribute.keyword = KEYWORD_ELSE;
-                    }
-                    else
-                    if (strcmp(str->string, "end") == 0) {
+                    } else if (strcmp(str->string, "end") == 0) {
                         token->attribute.keyword = KEYWORD_END;
-                    }
-                    else
-                    if (strcmp(str->string, "function") == 0) {
+                    } else if (strcmp(str->string, "function") == 0) {
                         token->attribute.keyword = KEYWORD_FUNCTION;
-                    }
-                    else
-                    if (strcmp(str->string, "global") == 0) {
+                    } else if (strcmp(str->string, "global") == 0) {
                         token->attribute.keyword = KEYWORD_GLOBAL;
-                    }
-                    else
-                    if (strcmp(str->string, "if") == 0) {
+                    } else if (strcmp(str->string, "if") == 0) {
                         token->attribute.keyword = KEYWORD_IF;
-                    }
-                    else
-                    if (strcmp(str->string, "local") == 0) {
+                    } else if (strcmp(str->string, "local") == 0) {
                         token->attribute.keyword = KEYWORD_LOCAL;
-                    }
-                    else
-                    if (strcmp(str->string, "nil") == 0) {
+                    } else if (strcmp(str->string, "nil") == 0) {
                         token->attribute.keyword = KEYWORD_NIL;
-                    }
-                    else
-                    if (strcmp(str->string, "require") == 0) {
+                    } else if (strcmp(str->string, "require") == 0) {
                         token->attribute.keyword = KEYWORD_REQUIRE;
-                    }
-                    else
-                    if (strcmp(str->string, "return") == 0) {
+                    } else if (strcmp(str->string, "return") == 0) {
                         token->attribute.keyword = KEYWORD_RETURN;
-                    }
-                    else
-                    if (strcmp(str->string, "then") == 0) {
+                    } else if (strcmp(str->string, "then") == 0) {
                         token->attribute.keyword = KEYWORD_THEN;
-                    }
-                    else
-                    if (strcmp(str->string, "while") == 0) {
+                    } else if (strcmp(str->string, "while") == 0) {
                         token->attribute.keyword = KEYWORD_WHILE;
-                    }
-                    else
-                    if (strcmp(str->string, "integer") == 0) {
+                    } else if (strcmp(str->string, "integer") == 0) {
                         token->attribute.keyword = KEYWORD_INTEGER;
-                    }
-                    else
-                    if (strcmp(str->string, "number") == 0) {
+                    } else if (strcmp(str->string, "number") == 0) {
                         token->attribute.keyword = KEYWORD_NUMBER;
-                    }
-                    else
-                    if (strcmp(str->string, "string") == 0) {
+                    } else if (strcmp(str->string, "string") == 0) {
                         token->attribute.keyword = KEYWORD_STRING;
-                    }
-                    else {
+                    } else {
                         token->type = TOKEN_ID;
                         token->attribute.string = str;
                     }
-
                     string_free(str);
                     return OK;
                 }
@@ -236,25 +169,22 @@ int get_token(token_struct *token) {
                 if ((c < 32 && c != 10) || c == EOF) {
                     string_free(str);
                     return ERR_LEXER;
-                }
-                else
-                if (c == '\\') {
+                } else if (c == '\\') {
                     if (isdigit(c = getchar())) {
                         ungetc(c, stdin);
-                    }
-                    else {
+                    } else {
                         ungetc(c, stdin);
                     }
                     state = STATE_STRING_ESCAPE;
-                }
-                else
-                if (c == '"') {
+                } else if (c == '"') {
                     token->type = TOKEN_STRING;
-                    token->attribute.string = str;
-//                    string_free(str);         // doesn't work with this free
+                    if(!(string_copy(str, token->attribute.string))) {
+                        string_free(str);
+                        return ERR_INTERNAL;
+                    }
+                    string_free(str);
                     return OK;
-                }
-                else {
+                } else {
                     add_char_to_string(str, c);
                 }
                 break;
@@ -262,42 +192,27 @@ int get_token(token_struct *token) {
                 if (c == '\\') {
                     add_char_to_string(str, '\\');
                     state = STATE_STRING_START;
-                }
-                else
-                if (c == '"') {
+                } else if (c == '"') {
                     add_char_to_string(str, '"');
                     state = STATE_STRING_START;
-                }
-                else
-                if (c == 'n') {
+                } else if (c == 'n') {
                     add_char_to_string(str, '\n');
                     state = STATE_STRING_START;
-                }
-                else
-                if (c == 't') {
+                } else if (c == 't') {
                     add_char_to_string(str, '\t');
                     state = STATE_STRING_START;
-                }
-                else
-                if (c == '0') {
+                } else if (c == '0') {
                     string_number[0] = c;
                     state = STATE_STRING_ESCAPE_ZERO;
-                }
-                else
-                if (c == '1') {
+                } else if (c == '1') {
                     string_number[0] = c;
                     state = STATE_STRING_ESCAPE_ONE;
-                }
-                else
-                if (c == '2') {
+                } else if (c == '2') {
                     string_number[0] = c;
                     state = STATE_STRING_ESCAPE_TWO;
-                }
-                else
-                if (tolower(c) == 'x') {
+                } else if (tolower(c) == 'x') {
                     state = STATE_STRING_ESCAPE_HEX;
-                }
-                else {
+                } else {
                     string_free(str);
                     return ERR_LEXER;
                 }
@@ -306,13 +221,10 @@ int get_token(token_struct *token) {
                 if (c == '0') {
                     string_number[1] = c;
                     state = STATE_STRING_ESCAPE_ZERO_ZERO;
-                }
-                else
-                if (isdigit(c)) {
+                } else if (isdigit(c)) {
                     string_number[1] = c;
                     state = STATE_STRING_ESCAPE_OTHER;
-                }
-                else {
+                } else {
                     string_free(str);
                     return ERR_LEXER;
                 }
@@ -321,8 +233,7 @@ int get_token(token_struct *token) {
                 if (isdigit(c)) {
                     string_number[1] = c;
                     state = STATE_STRING_ESCAPE_OTHER;
-                }
-                else {
+                } else {
                     string_free(str);
                     return ERR_LEXER;
                 }
@@ -331,13 +242,10 @@ int get_token(token_struct *token) {
                 if (0 <= atoi(&c) && atoi(&c) <= 4) { // 0..4
                     string_number[1] = c;
                     state = STATE_STRING_ESCAPE_OTHER;
-                }
-                else
-                if (c == '5') {
+                } else if (c == '5') {
                     string_number[1] = c;
                     state = STATE_STRING_ESCAPE_TWO_FIVE;
-                }
-                else {
+                } else {
                     string_free(str);
                     return ERR_LEXER;
                 }
@@ -349,8 +257,7 @@ int get_token(token_struct *token) {
                     c = (char) value;
                     add_char_to_string(str, c);
                     state = STATE_STRING_START;
-                }
-                else {
+                } else {
                     string_free(str);
                     return ERR_LEXER;
                 }
@@ -362,8 +269,7 @@ int get_token(token_struct *token) {
                     c = (char) value;
                     add_char_to_string(str, c);
                     state = STATE_STRING_START;
-                }
-                else {
+                } else {
                     string_free(str);
                     return ERR_LEXER;
                 }
@@ -375,8 +281,7 @@ int get_token(token_struct *token) {
                     c = (char) value;
                     add_char_to_string(str, c);
                     state = STATE_STRING_START;
-                }
-                else {
+                } else {
                     string_free(str);
                     return ERR_LEXER;
                 }
@@ -385,43 +290,32 @@ int get_token(token_struct *token) {
                 hex[0] = hex[1] = hex[2] = '\0';
                 if (isxdigit(c)) {
                     hex[0] = (char) c;
-
                     c = getchar();
-
                     if(isxdigit(c)) {
                         hex[1] = (char) c;
                     }
                 }
                 if (strlen(hex) == 2) {
                     char value;
-
                     if (isdigit(hex[0])) {
                         value = 16 * (hex[0] - '0');
-                    }
-                    else
-                    if( hex[0] >= 'A' && hex[0] <='F') {
+                    } else if( hex[0] >= 'A' && hex[0] <='F') {
                         value = 16 * (hex[0] - 'A' + 10);
-                    }
-                    else {
+                    } else {
                         value = 16 * (hex[0] - 'a' + 10);
                     }
-
                     if(isdigit(hex[1])) {
                         value += hex[1] - '0';
-                    }
-                    else
-                    if( hex[1] >= 'A' && hex[1] <='F') {
+                    } else if( hex[1] >= 'A' && hex[1] <='F') {
                         value += hex[1] - 'A' + 10;
-                    }
-                    else {
+                    } else {
                         value += hex[1] - 'a' + 10;
                     }
                     hex[0] = hex[1] = hex[2] = '\0';
                     add_char_to_string(str, value);
                     state = STATE_STRING_START;
 
-                }
-                else {
+                } else {
                     ungetc(c, stdin);
                     string_free(str);
                     return ERR_LEXER;
@@ -431,18 +325,13 @@ int get_token(token_struct *token) {
             case (STATE_NUMBER):
                 if (isdigit(c)) {
                     add_char_to_string(str, c);
-                }
-                else
-                if (tolower(c) == 'e') {
+                } else if (tolower(c) == 'e') {
                     add_char_to_string(str, c);
                     state = STATE_NUMBER_EXPONENT;
-                }
-                else
-                if (c == '.') {
+                } else if (c == '.') {
                     add_char_to_string(str, c);
                     state = STATE_NUMBER_POINT;
-                }
-                else {
+                } else {
                     ungetc(c, stdin);
                     int value = atoi(str->string);
                     token->attribute.int_value = value;
@@ -455,13 +344,10 @@ int get_token(token_struct *token) {
                 if (isdigit(c)) {
                     add_char_to_string(str, c);
                     state = STATE_NUMBER_EXPONENT_END;
-                }
-                else
-                if (c == '+' || c == '-') {
+                } else if (c == '+' || c == '-') {
                     add_char_to_string(str, c);
                     state = STATE_NUMBER_EXPONENT_SIGN;
-                }
-                else {
+                } else {
                     string_free(str);
                     return ERR_LEXER;
                 }
@@ -470,8 +356,7 @@ int get_token(token_struct *token) {
                 if (isdigit(c)) {
                     add_char_to_string(str, c);
                     state = STATE_NUMBER_EXPONENT_END;
-                }
-                else {
+                } else {
                     string_free(str);
                     return ERR_LEXER;
                 }
@@ -479,8 +364,7 @@ int get_token(token_struct *token) {
             case (STATE_NUMBER_EXPONENT_END):
                 if (isdigit(c)) {
                     add_char_to_string(str, c);
-                }
-                else {
+                } else {
                     ungetc(c, stdin);
                     double value = atof(str->string);
                     token->attribute.double_value = value;
@@ -493,8 +377,7 @@ int get_token(token_struct *token) {
                 if (isdigit(c)) {
                     add_char_to_string(str, c);
                     state = STATE_NUMBER_DOUBLE;
-                }
-                else {
+                } else {
                     string_free(str);
                     return ERR_LEXER;
                 }
@@ -502,13 +385,10 @@ int get_token(token_struct *token) {
             case (STATE_NUMBER_DOUBLE):
                 if (isdigit(c)) {
                     add_char_to_string(str, c);
-                }
-                else
-                if (tolower(c) == 'e') {
+                } else if (tolower(c) == 'e') {
                     add_char_to_string(str, c);
                     state = STATE_NUMBER_EXPONENT;
-                }
-                else {
+                } else {
                     ungetc(c, stdin);
                     double value = atof(str->string);
                     token->attribute.double_value = value;
@@ -521,8 +401,7 @@ int get_token(token_struct *token) {
                 if (c == '-') {
                     string_clear(str);
                     state = STATE_COMMENT_START;
-                }
-                else {
+                } else {
                     ungetc(c, stdin);
                     token->type = TOKEN_MINUS;
                     string_free(str);
@@ -533,9 +412,7 @@ int get_token(token_struct *token) {
                 if (c == '\n' || c == EOF) {
                     ungetc(c, stdin);
                     state = STATE_START;
-                }
-                else
-                if (c == '[') {
+                } else if (c == '[') {
                     state = STATE_COMMENT_BLOCK_START;
                 }
                 break;
@@ -543,12 +420,10 @@ int get_token(token_struct *token) {
                 if (c == '\n' || c == EOF) {
                     ungetc(c, stdin);
                     state = STATE_START;
-                }
-                else
+                } else
                 if (c == '[') {
                     state = STATE_COMMENT_BLOCK;
-                }
-                else {
+                } else {
                     state = STATE_COMMENT_START;
                 }
                 break;
@@ -557,26 +432,21 @@ int get_token(token_struct *token) {
                     ungetc(c, stdin);
                     string_free(str);
                     return ERR_LEXER;
-                }
-                else
-                if (c == ']') {
+                } else if (c == ']') {
                     state = STATE_COMMENT_BLOCK_END;
                 }
                 break;
             case (STATE_COMMENT_BLOCK_END):
-
                 if (c == ']') {
                     state = STATE_START;
-                }
-                else {
+                } else {
                     state = STATE_COMMENT_BLOCK;
                 }
                 break;
             case (STATE_MORE_THAN):
                 if (c == '=') {
                     token->type = TOKEN_LESS_OR_EQ;
-                }
-                else {
+                } else {
                     ungetc(c, stdin);
                     token->type = TOKEN_LESS;
                 }
@@ -585,8 +455,7 @@ int get_token(token_struct *token) {
             case (STATE_LESS_THAN):
                 if (c == '=') {
                     token->type = TOKEN_LESS_OR_EQ;
-                }
-                else {
+                } else {
                     ungetc(c, stdin);
                     token->type = TOKEN_GREATER;;
                 }
@@ -595,8 +464,7 @@ int get_token(token_struct *token) {
             case (STATE_EQUAL):
                 if (c == '=') {
                     token->type = TOKEN_ASSIGN;
-                }
-                else {
+                } else {
                     ungetc(c, stdin);
                     token->type = TOKEN_EQUAL;
                 }
@@ -605,8 +473,7 @@ int get_token(token_struct *token) {
             case (STATE_TILDE):
                 if (c == '=') {
                     token->type = TOKEN_NOT_EQUAL;
-                }
-                else {
+                } else {
                     ungetc(c, stdin);
                     string_free(str);
                     return ERR_LEXER;
@@ -616,8 +483,7 @@ int get_token(token_struct *token) {
             case (STATE_SLASH):
                 if (c == '/') {
                     token->type = TOKEN_IDIV;
-                }
-                else {
+                } else {
                     ungetc(c, stdin);
                     token->type = TOKEN_DIV;
                 }
@@ -626,8 +492,7 @@ int get_token(token_struct *token) {
             case (STATE_DOT):
                 if (c == '.') {
                     token->type = TOKEN_CONCAT;
-                }
-                else {
+                } else {
                     ungetc(c, stdin);
                     string_free(str);
                     return ERR_LEXER;

@@ -49,6 +49,14 @@ void string_clear(string_struct *str);
 
 int re_lenght(string_struct *str);
 
+/**
+* @brief function copy one string to another correctly
+* @param str_to_copy string to copy
+* @param copy_here string, where to copy
+* @return STR_OK(1) in case of success, STR_ERR(0) else
+*/
+int string_copy(string_struct *str_to_copy, string_struct *copy_here);
+
 int add_char_to_string(string_struct *str, char c);
 
 /**

@@ -93,7 +93,6 @@ typedef enum {
 } token_type;
 
 typedef enum {
-
     KEYWORD_DO,         // 0
     KEYWORD_ELSE,       // 1
     KEYWORD_END,        // 2
@@ -126,5 +125,11 @@ typedef struct {
 } token_struct;
 
 int get_token(token_struct *token);
+
+/**
+* @brief function define string in scanner to work in parser
+* @param str string to define in scanner
+*/
+void define_working_str(string_struct *str);
 
 #endif

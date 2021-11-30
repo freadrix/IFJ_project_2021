@@ -6,30 +6,22 @@
  */
 
 
-//#include <stdio.h>
-//#include <stdlib.h>
-//
-//#include "parser.h"
-//
-//
-//int main() {
-//
-//    FILE *fp = stdin;
-//    // TODO output
-//    // TODO errors handling (analysis?)
-//
-//    return 0;   //TODO errors return
-//}
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "parser.h"
 #include "scanner.h"
 #include "str.h"
 
 
 int main() {
-    // simple check of scanner
-    token_struct *token = malloc(sizeof(token_struct*));
-    while (token->type != EOF) {
-        get_token(token);
-    }
-    free(token);
+    // // simple check of scanner
+    // token_struct *token = malloc(sizeof(token_struct*));
+    // while (token->type != EOF) {
+    //     get_token(token);
+    // }
+    // free(token);
+
+    parser();
     return 0;
 }
