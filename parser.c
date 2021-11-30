@@ -22,7 +22,7 @@ token->attribute.string->string);                               \
 if (item == NULL) return ERR_INTERNAL
 
 //
-#define SEARCH_ITEM(_STRING) \
+#define SEARCH_ITEM(_STRING)                                    \
 tab_item_t *item = search_hashtable(stack->top->table,          \
 (_STRING));                                                     \
 if (item == NULL) return ERR_INTERNAL
