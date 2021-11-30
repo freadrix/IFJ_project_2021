@@ -53,6 +53,14 @@ int function_parser();
  * @return return code which is in error.h
  * */
 int global_parser();
+
+/**
+ * @brief TODO
+ * @return return code which is in error.h
+ * */
+int global_function_parser();
+
+
 //int p_params();
 //int p_rets(table_item*);
 //int p_body();
