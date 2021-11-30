@@ -104,6 +104,12 @@ int parser() {
     stack = (data_stack_t *)malloc(sizeof(data_stack_t));
     init_data_stack(stack);
 
+    string_struct string;
+    if (!(string_init(&string))) {
+        return ERR_INTERNAL;
+    }
+    define_working_str(&string);
+
     // main stage
     PARSER_RESPONSE = start_program_parser();
     if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
@@ -144,7 +150,6 @@ int start_program_parser() {
                 if (!push_data_item(stack)) return ERR_INTERNAL;
                 return OK;
             }
-
         }
         GET_TOKEN;
     }
