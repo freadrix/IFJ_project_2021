@@ -7,6 +7,13 @@
 
 #include "scanner.h"
 
+string_struct *working_string;
+
+void define_working_str(string_struct *s)
+{
+	working_string = s;
+}
+
 int get_token(token_struct *token) {
     int state = STATE_START;
     char c;
@@ -15,6 +22,8 @@ int get_token(token_struct *token) {
 
     string_struct string;
     string_struct *str = &string;
+
+    token->attribute.string = working_string;
 
     if (!string_init(str)) {
         return ERR_INTERNAL;
@@ -169,8 +178,11 @@ int get_token(token_struct *token) {
                     state = STATE_STRING_ESCAPE;
                 } else if (c == '"') {
                     token->type = TOKEN_STRING;
-                    token->attribute.string = str;
-//                    string_free(str);         // doesn't work with this free
+                    if(!(string_copy(str, token->attribute.string))) {
+                        string_free(str);
+                        return ERR_INTERNAL;
+                    }
+                    string_free(str);
                     return OK;
                 } else {
                     add_char_to_string(str, c);

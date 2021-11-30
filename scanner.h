@@ -126,4 +126,10 @@ typedef struct {
 
 int get_token(token_struct *token);
 
+/**
+* @brief function define string in scanner to work in parser
+* @param str string to define in scanner
+*/
+void define_working_str(string_struct *str);
+
 #endif

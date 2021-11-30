@@ -57,18 +57,33 @@ int re_lenght(string_struct *str) {
     return STR_OK;
 }
 
+int string_copy(string_struct *str_to_copy, string_struct *copy_here) {
+	int len_copy = str_to_copy->length;
+	if (len_copy >= copy_here->alloc_length) {
+        int len_plus_esc = len_copy + 1;
+		if (!(copy_here->string = (char *) realloc(copy_here->string, len_plus_esc))) {   
+			return STR_ERR;
+		}
+		copy_here->alloc_length = len_plus_esc;
+	}
+	strcpy(copy_here->string, str_to_copy->string);
+	copy_here->length = len_copy;
+
+	return STR_OK;
+}
+
 int add_char_to_string(string_struct *str, char c) {
     if (str->length + 1 >= str->alloc_length) {
         if(!re_lenght(str)) {
             string_clear(str);
             return STR_ERR;
         }
-   }
-   str->string[str->length] = c;
+    }
+    str->string[str->length] = c;
     (str->length)++;
-   str->string[str->length] = '\0';
+    str->string[str->length] = '\0';
 
-   return STR_OK;
+    return STR_OK;
 }
 
 int add_string_to_string(string_struct *str, const char *str_to_add) {
