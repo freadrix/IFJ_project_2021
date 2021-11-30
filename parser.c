@@ -104,17 +104,12 @@ int parser() {
     stack = (data_stack_t *)malloc(sizeof(data_stack_t));
     init_data_stack(stack);
 
-    string_struct string;
-    if (!(string_init(&string))) {
-        return 1;                           //TODO ERR_INTERNAL
-    }
-    define_working_str(&string);
-
     // main stage
     PARSER_RESPONSE = start_program_parser();
     if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
     GET_TOKEN;
     while (token->type != TOKEN_EOF) {
+        printf("%s\n", token->attribute.string->string);
         if ((token->type == TOKEN_KEYWORD) && (token->attribute.keyword == KEYWORD_GLOBAL)) {
             PARSER_RESPONSE = global_parser();
             if(PARSER_RESPONSE != OK) return PARSER_RESPONSE;
@@ -124,8 +119,7 @@ int parser() {
             if(PARSER_RESPONSE != OK) return PARSER_RESPONSE;
         }
         if (token->type == TOKEN_ID) {
-            SEARCH_ITEM(token->attribute.string->string);
-
+//            SEARCH_ITEM(token->attribute.string->string);
         }
         GET_TOKEN;
     }
@@ -134,7 +128,6 @@ int parser() {
     empty_data_stack(stack);
     free(token);
     free(stack);
-    string_free(&string);
     return OK;
 }
 
@@ -146,10 +139,12 @@ int start_program_parser() {
     while (token->type != TOKEN_EOF) {
         if (token->attribute.keyword == KEYWORD_REQUIRE) {
             GET_TOKEN;
+            printf("%s\n", token->attribute.string->string);
             if ((token->type == TOKEN_STRING) && (!strcmp(token->attribute.string->string, "ifj21"))) {
-                if (push_data_item(stack)) printf("making first item of stack done ok\n");
+                if (!push_data_item(stack)) return ERR_INTERNAL;
                 return OK;
             }
+
         }
         GET_TOKEN;
     }
@@ -241,6 +236,7 @@ int global_function_parser(tab_item_t *item) {
             }
             GET_TOKEN;
         }
+        return OK;
     }
 }
 
