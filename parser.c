@@ -86,7 +86,7 @@ int parser() {
 
     string_struct string;
     if (!(string_init(&string))) {
-        return 1;                           //TODO ERR_INTERNAL
+        return ERR_INTERNAL;
     }
     define_working_str(&string);
 
