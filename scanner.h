@@ -93,7 +93,6 @@ typedef enum {
 } token_type;
 
 typedef enum {
-
     KEYWORD_DO,         // 0
     KEYWORD_ELSE,       // 1
     KEYWORD_END,        // 2
