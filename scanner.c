@@ -225,6 +225,7 @@ int get_token(token_struct *token) {
                     }
                     else {
                         token->type = TOKEN_ID;
+                        token->attribute.string = str;
                     }
 
                     string_free(str);
@@ -249,7 +250,8 @@ int get_token(token_struct *token) {
                 else
                 if (c == '"') {
                     token->type = TOKEN_STRING;
-                    string_free(str);
+                    token->attribute.string = str;
+//                    string_free(str);         // doesn't work with this free
                     return OK;
                 }
                 else {

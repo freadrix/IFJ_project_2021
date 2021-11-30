@@ -8,8 +8,10 @@
 #ifndef _STR_H_
 #define _STR_H_
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define STRING_CONST_LENGHT 8
 
@@ -22,6 +24,22 @@ typedef struct {
 	int length;
 	int alloc_length;
 } string_struct;
+
+// Functions
+///**
+// * @brief functiong count number of characters
+// * @param string
+// * @return amount of characters in string
+// * */
+//int string_length(char *string);
+//
+///**
+// * @brief function compare strings and return true if it success
+// * @param string1 first string
+// * @param string2 second string
+// * @return true if strings the same, otherwise false
+// * */
+//bool string_compare(char *string1, char *string2);
 
 int string_init(string_struct *str);
 

@@ -5,8 +5,8 @@
  * @author Anton Medvedev (xmedve04)
  * */
 
-#ifndef _DATA_STACK_
-#define _DATA_STACK_
+#ifndef _DATA_STACK_H_
+#define _DATA_STACK_H_
 
 #include "symtable.h"
 #include <stdbool.h>

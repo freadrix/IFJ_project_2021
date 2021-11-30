@@ -7,6 +7,24 @@
 
 #include "str.h"
 
+//int string_length(char *string) {
+//    int c = 0;
+//    while (string[c] != '\0') {
+//        c++;
+//    }
+//    return c;
+//}
+//
+//bool string_compare(char *string1, char *string2) {
+//    int first_string_length = string_length(string1);
+//    int second_string_length = string_length(string2);
+//    if (first_string_length != second_string_length) return false;
+//    for (int i = 0; i < first_string_length; ++i) {
+//        if (string1[i] != string2[i]) return false;
+//    }
+//    return true;
+//}
+
 int string_init(string_struct *str) {
     str->string = (char*) malloc(STRING_CONST_LENGHT * sizeof(char));
     if (!str->string) {
@@ -20,7 +38,7 @@ int string_init(string_struct *str) {
 }
 
 void string_free(string_struct *str) {
-    free(str->string);
+    if (str != NULL) free(str->string);
 }
 
 void string_clear(string_struct *str) {

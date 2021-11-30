@@ -3,7 +3,7 @@
 
 CFLAGS = -std=c99 -g -Wall -pedantic -lm # -Wextra -Werror
 CC = gcc
-FILES = symtable.c data_stack.c scanner.c str.c gen_code.c expr_handle.c parser.c #exp_stack.c
+FILES = symtable.c data_stack.c scanner.c str.c parser.c#gen_code.c expr_handle.c parser.c #exp_stack.c
 MAIN_FILE = test.c #main.c
 COMPILE = -o test # main
 
