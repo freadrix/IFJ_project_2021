@@ -21,61 +21,81 @@ tab_item_t *item = insert_element_hashtable(stack->top->table,  \
 token->attribute.string->string);                               \
 if (item == NULL) return ERR_INTERNAL
 
-//
+// macro that we use for searching item in table
 #define SEARCH_ITEM(_STRING)                                    \
 tab_item_t *item = search_hashtable(stack->top->table,          \
 (_STRING));                                                     \
 if (item == NULL) return ERR_INTERNAL
 
+// macro that we use for check if keyword of token is type
+#define IS_TYPE                                                 \
+(token->type == TOKEN_KEYWORD) &&                               \
+((token->attribute.keyword == KEYWORD_INTEGER) ||               \
+(token->attribute.keyword == KEYWORD_NUMBER)  ||                \
+(token->attribute.keyword == KEYWORD_STRING)  ||                \
+(token->attribute.keyword == KEYWORD_NIL))
+
+//
+#define IS_FUNCTION                                             \
+(token->type == TOKEN_KEYWORD) &&                               \
+(token->attribute.keyword == KEYWORD_FUNCTION)
 
 /* Global variables*/
 int SCANNER_RESPONSE;       // for return value from get_token()
 int PARSER_RESPONSE;        // for return value from parser functions
 token_struct *token;        // token
 data_stack_t *stack;        // stack
-//table_t *table;
-//table_item *table_item;
 /*-----------------*/
 
 /** Pravidlá
-    <header>    -> require "ifj21" <func>/<global>
-    !<func>      -> function id ( <params> ) <rets> <body> end <program>
-    <params>    -> ε
-    <params>    -> id : <data_type> <param>
-    <param>     -> ε
-    <param>     -> , id : <data_type> <param>
-    <body>      -> <def_var> <state_l>
-    <def_var>   -> local id : <data_type> <assign> <def_var>
-    <def_var>   -> ε
-    <state_l>   -> <comm> <state_l>
-    <state_l>   -> ε
-    !<comm>      -> id <assign>
-    !<comm>      -> if <condition> then <state_l> else <stale_l> end
-    !<comm>      -> while <condition> do <state_l> end
-    !<comm>      -> id ( <params_in> )
-    !<comm>      -> return <param_in>
-    !<comm>      -> reads ()
-    !<comm>      -> readi ()
-    !<comm>      -> readn ()
-    !<comm>      -> write (<params_in>)
-    !<comm>      -> tointeger (<expression>)
-    !<comm>      -> substr ()            /////
-    !<comm>      -> ord ()                /////
-    !<comm>      -> chr ()                /////
-    !<params_in> -> ε
-    !<params_in> -> id <param_in>
-    !<param_in>  -> , id <param_in>
-    !<param_in>  -> ε
-    <rets>      -> : <data_type> <ret>
-    <rets>      -> ε
-    <ret>       -> , <data_type> <ret>
-    <ret>       -> ε
-    <data_type> -> integer
-    <data_type> -> number
-    <data_type> -> string
-    <data_type> -> nil
-    !<assign>    -> = <expression>
-    !<assign>    -> ε
+    <header>        -> require "ifj21" <program>
+    <program>       -> global id : function(<params_g>) <rets> <program>
+    <program>       -> function id ( <params> ) <rets> <state_l> end <program>
+    <program>       -> id (<params_in>) <program>
+    <program>       -> ε
+    <params_g>      -> <data_type> <param_g>
+    <pramms_g>      -> ε
+    <param_g>       -> , <data_type> <param_g>
+    <param_g>       -> ε
+    <params>        -> ε
+    <params>        -> id : <data_type> <param>
+    <param>         -> ε
+    <param>         -> , id : <data_type> <param>
+    <def_var>       -> local id : <data_type> <assign>
+    <def_var>       -> ε
+    <state_l>       -> <comm> <state_l>
+    <state_l>       -> ε
+    <comm>          -> <def_var>
+    <comm>          -> id <assign>
+    <comm>          -> if <conditions> then <state_l> else <stale_l> end
+    <comm>          -> while <conditions> do <state_l> end
+    <comm>          -> id ( <expressions> )
+    <comm>          -> return <expressions>
+    <comm>          -> write (<expressions>)
+    <params_in>     -> ε
+    <params_in>     -> id <param_in>
+    <param_in>      -> , id <param_in>
+    <param_in>      -> ε
+    <rets>          -> : <data_type> <ret>
+    <rets>          -> ε
+    <ret>           -> , <data_type> <ret>
+    <ret>           -> ε
+    <data_type>     -> integer
+    <data_type>     -> number
+    <data_type>     -> string
+    <data_type>     -> nil
+    <assign>        -> = <expressions>
+    <assign>        -> ε
+    <expressions>   -> expression <expression>
+    <expression>    -> , expression <expression>
+    <expression>    -> ε
+    <expressions>   -> readi ()
+    <expressions>   -> readn ()
+    <expressions>   -> reads ()
+    <expressions>   -> substr ( expression, expression, expression ) /// string, number, number : string
+    <expressions>   -> tointeger ( expression )                      /// number : integer
+    <expressions>   -> ord ( expression, expression )                /// string, integer : integer
+    <expressions>   -> chr ( expression )                            /// integer : string
  */
 
 int parser() {
@@ -86,16 +106,20 @@ int parser() {
 
     // main stage
     PARSER_RESPONSE = start_program_parser();
-    if(PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+    if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
     GET_TOKEN;
     while (token->type != TOKEN_EOF) {
-        if((token->type == TOKEN_KEYWORD) && (token->attribute.keyword == KEYWORD_FUNCTION)) {
+        if ((token->type == TOKEN_KEYWORD) && (token->attribute.keyword == KEYWORD_GLOBAL)) {
+            PARSER_RESPONSE = global_parser();
+            if(PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+        }
+        if (IS_FUNCTION) {
             PARSER_RESPONSE = function_parser();
             if(PARSER_RESPONSE != OK) return PARSER_RESPONSE;
         }
-        if((token->type == TOKEN_KEYWORD) && (token->attribute.keyword == KEYWORD_GLOBAL)) {
-            PARSER_RESPONSE = global_parser();
-            if(PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+        if (token->type == TOKEN_ID) {
+            SEARCH_ITEM(token->attribute.string->string);
+
         }
         GET_TOKEN;
     }
@@ -135,7 +159,7 @@ int function_parser() {
 }
 
 /**
- * <global>    -> TODO
+ * <program>       -> global id : function
  * */
 int global_parser() {
     GET_TOKEN;
@@ -143,10 +167,77 @@ int global_parser() {
     INSERT_ITEM;
     GET_TOKEN;
     if (token->type != TOKEN_DDOT) return ERR_SYNTAX;
-
-
-    return OK;
+    GET_TOKEN;
+    if (IS_FUNCTION) {
+        item->data->type_id = FUNCTION;
+        return global_function_parser(item);
+    }else {
+        return ERR_SYNTAX;
+    }
 }
+
+/**
+ * (<params_g>) <rets> <program>
+ * */
+int global_function_parser(tab_item_t *item) {
+    GET_TOKEN;
+    if (token->type != TOKEN_BRACKET_ROUND_L) return ERR_SYNTAX;
+    GET_TOKEN;
+    for (int i = 0; token->type != TOKEN_BRACKET_ROUND_R; ++i) {
+        if (token->type == TOKEN_EOL) {
+            i--;
+        } else if ((i % 2) == 0) {
+            if (IS_TYPE) {
+                if (token->attribute.keyword == KEYWORD_INTEGER)
+                    item->data->type_parameter_values[(int) (i / 2)] = TYPE_INTEGER;
+                else if (token->attribute.keyword == KEYWORD_NUMBER)
+                    item->data->type_parameter_values[(int) (i / 2)] = TYPE_DOUBLE;
+                else if (token->attribute.keyword == KEYWORD_STRING)
+                    item->data->type_parameter_values[(int) (i / 2)] = TYPE_STRING;
+                else
+                    item->data->type_parameter_values[(int) (i / 1)] = TYPE_NULL;
+            } else {
+                return ERR_SYNTAX;
+            }
+        } else {
+            if (token->type != TOKEN_COMMA) return ERR_SYNTAX;
+        }
+        GET_TOKEN;
+    }
+    GET_TOKEN;
+    item->data->defined = true;
+    if (token->type != TOKEN_DDOT) {
+        // mozna potrebujeme vypis
+        if ((IS_FUNCTION) || (token->type == TOKEN_ID)) {
+            return OK;
+        } else {
+            return ERR_SYNTAX;
+        }
+    } else {
+        for (int i = 0; !((IS_FUNCTION) || (token->type == TOKEN_ID)); ++i) {
+            if (token->type == TOKEN_EOL) {
+                i--;
+            } else if ((i % 2) == 0) {
+                if (IS_TYPE) {
+                    if (token->attribute.keyword == KEYWORD_INTEGER)
+                        item->data->type_return_values[(int) (i / 2)] = TYPE_INTEGER;
+                    else if (token->attribute.keyword == KEYWORD_NUMBER)
+                        item->data->type_return_values[(int) (i / 2)] = TYPE_DOUBLE;
+                    else if (token->attribute.keyword == KEYWORD_STRING)
+                        item->data->type_return_values[(int) (i / 2)] = TYPE_STRING;
+                    else
+                        item->data->type_return_values[(int) (i / 1)] = TYPE_NULL;
+                } else {
+                    return ERR_SYNTAX;
+                }
+            } else {
+                if (token->type != TOKEN_COMMA) return ERR_SYNTAX;
+            }
+            GET_TOKEN;
+        }
+    }
+}
+
 
 //
 ///** <func>      -> function id ( <params> ) <rets> <body> end <program>
