@@ -194,7 +194,10 @@ int get_token(token_struct *token) {
                         token->attribute.keyword = KEYWORD_STRING;
                     } else {
                         token->type = TOKEN_ID;
-                        token->attribute.string = str;
+                        if(!(string_copy(str, token->attribute.string))) {
+                            string_free(str);
+                            return ERR_INTERNAL;
+                        }
                         string_free(str);
                         return OK;
                     }
