@@ -132,6 +132,7 @@ int parser() {
 
     // clear all we used
     empty_data_stack(stack);
+    string_free(&string);
     free(token);
     free(stack);
     return OK;
