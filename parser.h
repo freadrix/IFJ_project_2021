@@ -56,9 +56,16 @@ int global_parser();
 
 /**
  * @brief TODO
+ * @param item element of table with function struct
  * @return return code which is in error.h
  * */
-int global_function_parser();
+int global_function_parser(tab_item_t *item);
+
+/**
+ * @brief TODO
+ * @return return code which is in error.h
+ * */
+int call_function_parser();
 
 
 //int p_params();

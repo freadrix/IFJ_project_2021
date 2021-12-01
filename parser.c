@@ -2,7 +2,7 @@
  * Implementace překladače imperativního jazyka IFJ21.
  * 
  * @brief Syntactic and semantic check header
- * @author Matej Alexej Helc
+ * @authors Matej Alexej Helc, Anton Medvedev Hulk
  */
 
 #include <stdio.h>
@@ -13,7 +13,11 @@
 // macro that we use for get new token and check return value
 #define GET_TOKEN                                               \
 SCANNER_RESPONSE = get_token(token);                            \
-if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE
+if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE;             \
+while (token->type == TOKEN_EOL) {                              \
+    SCANNER_RESPONSE = get_token(token);                        \
+    if(SCANNER_RESPONSE != OK) break;                           \
+} if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE
 
 // macro that we use for insert new item to table
 #define INSERT_ITEM                                             \
@@ -22,29 +26,60 @@ token->attribute.string->string);                               \
 if (item == NULL) return ERR_INTERNAL
 
 // macro that we use for searching item in table
-#define SEARCH_ITEM(_STRING)                                    \
-tab_item_t *item = search_hashtable(stack->top->table,          \
-(_STRING));                                                     \
-if (item == NULL) return ERR_INTERNAL
+#define SEARCH_ITEM(_TABLE, _STRING)                            \
+tab_item_t *item = search_hashtable((_TABLE), (_STRING));       \
+bool is_there = false;                                          \
+if (item != NULL) is_there = true
 
 // macro that we use for check if keyword of token is type
 #define IS_TYPE                                                 \
-(token->type == TOKEN_KEYWORD) &&                               \
+(token->type == TOKEN_KEYWORD)                 &&               \
 ((token->attribute.keyword == KEYWORD_INTEGER) ||               \
-(token->attribute.keyword == KEYWORD_NUMBER)  ||                \
-(token->attribute.keyword == KEYWORD_STRING)  ||                \
+(token->attribute.keyword == KEYWORD_NUMBER)   ||               \
+(token->attribute.keyword == KEYWORD_STRING)   ||               \
 (token->attribute.keyword == KEYWORD_NIL))
 
-//
+// macro that we use for check if token is ID
+#define IS_ID (token->type == TOKEN_ID)
+
+// macro that we use for check if token string is build-in func string
+#define IS_BUILT_IN_FUNCTION \
+IS_ID                                                   &&      \
+((!strcmp(token->attribute.string->string, "readi"))    ||      \
+(!strcmp(token->attribute.string->string, "reads"))     ||      \
+(!strcmp(token->attribute.string->string, "readn"))     ||      \
+(!strcmp(token->attribute.string->string, "substr"))    ||      \
+(!strcmp(token->attribute.string->string, "tointeger")) ||      \
+(!strcmp(token->attribute.string->string, "ord"))       ||      \
+(!strcmp(token->attribute.string->string, "chr"))       ||      \
+(!strcmp(token->attribute.string->string, "write")))
+
+// macro that we use for check if keyword is function
 #define IS_FUNCTION                                             \
 (token->type == TOKEN_KEYWORD) &&                               \
 (token->attribute.keyword == KEYWORD_FUNCTION)
+
+// macro we need for allocate memory
+#define ALLOC                                                   \
+token = (token_struct *)malloc(sizeof(token_struct));           \
+stack = (data_stack_t *)malloc(sizeof(data_stack_t));           \
+init_data_stack(stack);                                         \
+if (!(string_init(&string))) return ERR_INTERNAL;               \
+define_working_str(&string)
+
+// macro we need for memory free
+#define CLEAN                                                   \
+string_free(&string);                                           \
+empty_data_stack(stack);                                        \
+free(token);                                                    \
+free(stack)
 
 /* Global variables*/
 int SCANNER_RESPONSE;       // for return value from get_token()
 int PARSER_RESPONSE;        // for return value from parser functions
 token_struct *token;        // token
 data_stack_t *stack;        // stack
+string_struct string;       // string
 /*-----------------*/
 
 /** Pravidlá
@@ -100,52 +135,52 @@ data_stack_t *stack;        // stack
 
 int parser() {
     // allocate all we need to work with
-    token = (token_struct *)malloc(sizeof(token_struct));
-    stack = (data_stack_t *)malloc(sizeof(data_stack_t));
-    init_data_stack(stack);
-
-    string_struct string;
-    if (!(string_init(&string))) {
-        return ERR_INTERNAL;
-    }
-    define_working_str(&string);
+    ALLOC;
 
     // main stage
     PARSER_RESPONSE = start_program_parser();
-    if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+    printf("%d\n", PARSER_RESPONSE);
+    if (PARSER_RESPONSE != OK){
+        CLEAN;
+        return PARSER_RESPONSE;
+    }
     GET_TOKEN;
     while (token->type != TOKEN_EOF) {
-        printf("%s\n", token->attribute.string->string);
         if ((token->type == TOKEN_KEYWORD) && (token->attribute.keyword == KEYWORD_GLOBAL)) {
             PARSER_RESPONSE = global_parser();
-            if(PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+            printf("%d\n", PARSER_RESPONSE);
+            if(PARSER_RESPONSE != OK) {
+                CLEAN;
+                return PARSER_RESPONSE;
+            }
         }
-        if (IS_FUNCTION) {
-            PARSER_RESPONSE = function_parser();
-            if(PARSER_RESPONSE != OK) return PARSER_RESPONSE;
-        }
-        if (token->type == TOKEN_ID) {
-//            SEARCH_ITEM(token->attribute.string->string);
+//        if (IS_FUNCTION) {
+//            PARSER_RESPONSE = function_parser();
+//            if(PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+//        }
+        if (IS_ID) {
+            PARSER_RESPONSE = call_function_parser();
+            printf("%d\n", PARSER_RESPONSE);
+            if(PARSER_RESPONSE != OK) {
+                CLEAN;
+                return PARSER_RESPONSE;
+            }
         }
         GET_TOKEN;
     }
 
-    // clear all we used
-    empty_data_stack(stack);
-    free(token);
-    free(stack);
+    CLEAN;
     return OK;
 }
 
 /**
- * <header>    -> require "ifj21" <func>
+ * <header>     -> require "ifj21" <func>
  */
 int start_program_parser() {
     GET_TOKEN;
     while (token->type != TOKEN_EOF) {
         if (token->attribute.keyword == KEYWORD_REQUIRE) {
             GET_TOKEN;
-            printf("%s\n", token->attribute.string->string);
             if ((token->type == TOKEN_STRING) && (!strcmp(token->attribute.string->string, "ifj21"))) {
                 if (!push_data_item(stack)) return ERR_INTERNAL;
                 return OK;
@@ -157,27 +192,28 @@ int start_program_parser() {
 }
 
 /**
- * <func>      -> function id ( <params> ) <rets> <body> end <program>
+ * <func>   -> function id ( <params> ) <rets> <body> end <program>
  * */
-int function_parser() {
-    printf("i love u so much!\n");
-    return 0;
-}
+//int function_parser() {
+//    printf("i love u so much!\n");
+//    return 0;
+//}
 
 /**
- * <program>       -> global id : function
+ * <program>    -> global id : function
  * */
 int global_parser() {
     GET_TOKEN;
     if (token->type != TOKEN_ID) return ERR_SYNTAX;
     INSERT_ITEM;
+    printf("%s\n", item->key);
     GET_TOKEN;
     if (token->type != TOKEN_DDOT) return ERR_SYNTAX;
     GET_TOKEN;
     if (IS_FUNCTION) {
-        item->data->type_id = FUNCTION;
+        item->data->item_id_type = FUNCTION;
         return global_function_parser(item);
-    }else {
+    } else {
         return ERR_SYNTAX;
     }
 }
@@ -189,19 +225,19 @@ int global_function_parser(tab_item_t *item) {
     GET_TOKEN;
     if (token->type != TOKEN_BRACKET_ROUND_L) return ERR_SYNTAX;
     GET_TOKEN;
-    for (int i = 0; token->type != TOKEN_BRACKET_ROUND_R; ++i) {
-        if (token->type == TOKEN_EOL) {
-            i--;
-        } else if ((i % 2) == 0) {
+    int i;
+    for (i = 0; token->type != TOKEN_BRACKET_ROUND_R; ++i) {
+        if ((i % 2) == 0) {
             if (IS_TYPE) {
-                if (token->attribute.keyword == KEYWORD_INTEGER)
-                    item->data->type_parameter_values[(int) (i / 2)] = TYPE_INTEGER;
-                else if (token->attribute.keyword == KEYWORD_NUMBER)
-                    item->data->type_parameter_values[(int) (i / 2)] = TYPE_DOUBLE;
-                else if (token->attribute.keyword == KEYWORD_STRING)
-                    item->data->type_parameter_values[(int) (i / 2)] = TYPE_STRING;
-                else
-                    item->data->type_parameter_values[(int) (i / 1)] = TYPE_NULL;
+                if (token->attribute.keyword == KEYWORD_INTEGER) {
+                    if (!insert_parameter_item(item, TYPE_INTEGER)) return ERR_SYNTAX;
+                } else if (token->attribute.keyword == KEYWORD_NUMBER) {
+                    if (!insert_parameter_item(item, TYPE_DOUBLE)) return ERR_SYNTAX;
+                } else if (token->attribute.keyword == KEYWORD_STRING) {
+                    if (!insert_parameter_item(item, TYPE_STRING)) return ERR_SYNTAX;
+                } else {
+                    if (!insert_parameter_item(item, TYPE_NULL)) return ERR_SYNTAX;
+                }
             } else {
                 return ERR_SYNTAX;
             }
@@ -210,8 +246,9 @@ int global_function_parser(tab_item_t *item) {
         }
         GET_TOKEN;
     }
+    i--;
+    if ((i % 2) != 0) return ERR_SYNTAX;
     GET_TOKEN;
-    item->data->defined = true;
     if (token->type != TOKEN_DDOT) {
         // mozna potrebujeme vypis
         if ((IS_FUNCTION) || (token->type == TOKEN_ID)) {
@@ -220,19 +257,19 @@ int global_function_parser(tab_item_t *item) {
             return ERR_SYNTAX;
         }
     } else {
-        for (int i = 0; !((IS_FUNCTION) || (token->type == TOKEN_ID)); ++i) {
-            if (token->type == TOKEN_EOL) {
-                i--;
-            } else if ((i % 2) == 0) {
+        GET_TOKEN;
+        for (i = 0; !((IS_FUNCTION) || (token->type == TOKEN_ID)); ++i) {
+            if ((i % 2) == 0) {
                 if (IS_TYPE) {
-                    if (token->attribute.keyword == KEYWORD_INTEGER)
-                        item->data->type_return_values[(int) (i / 2)] = TYPE_INTEGER;
-                    else if (token->attribute.keyword == KEYWORD_NUMBER)
-                        item->data->type_return_values[(int) (i / 2)] = TYPE_DOUBLE;
-                    else if (token->attribute.keyword == KEYWORD_STRING)
-                        item->data->type_return_values[(int) (i / 2)] = TYPE_STRING;
-                    else
-                        item->data->type_return_values[(int) (i / 1)] = TYPE_NULL;
+                    if (token->attribute.keyword == KEYWORD_INTEGER) {
+                        if (!insert_return_item(item, TYPE_INTEGER)) return ERR_SYNTAX;
+                    } else if (token->attribute.keyword == KEYWORD_NUMBER) {
+                        if (!insert_return_item(item, TYPE_DOUBLE)) return ERR_SYNTAX;
+                    } else if (token->attribute.keyword == KEYWORD_STRING) {
+                        if (!insert_return_item(item, TYPE_STRING)) return ERR_SYNTAX;
+                    } else {
+                        if (!insert_return_item(item, TYPE_NULL)) return ERR_SYNTAX;
+                    }
                 } else {
                     return ERR_SYNTAX;
                 }
@@ -241,10 +278,49 @@ int global_function_parser(tab_item_t *item) {
             }
             GET_TOKEN;
         }
+        i--;
+        if ((i % 2) != 0) return ERR_SYNTAX;
         return OK;
     }
 }
 
+/**
+ * <call>    -> id ( <expressions> )
+ * */
+int call_function_parser() {
+    item_data_stack_t *global_frame = get_global_frame_stack(stack);
+    SEARCH_ITEM(global_frame->table, token->attribute.string->string);
+    if(is_there == false) return ERR_SYNTAX;
+    tab_item_t *declarative_function = item;
+    GET_TOKEN;
+    if (token->type != TOKEN_BRACKET_ROUND_L) return ERR_SYNTAX;
+    GET_TOKEN;
+    tab_item_t *argument_function;
+    int i;      // counter
+    for (i = 0; token->type != TOKEN_BRACKET_ROUND_R; i++) {
+        if (i % 2 == 0) {
+            if (IS_ID) {
+                item_data_stack_t *stack_frame = stack->top;
+                while (stack_frame != NULL) {
+                    argument_function = search_hashtable(stack_frame->table, token->attribute.string->string);
+                    if (argument_function != NULL) break;
+                    stack_frame = stack_frame->previous;
+                }
+                if (stack_frame == NULL) return ERR_SYNTAX;
+                if (argument_function->data->item_data_type                                      \
+                    != declarative_function->data->item_parameters.type_parameters[(int) (i/2)])
+                    return ERR_SYNTAX;
+            }
+        } else {
+            if (token->type != TOKEN_COMMA) return ERR_SYNTAX;
+        }
+        GET_TOKEN;
+    }
+    i--;
+    if (((i % 2) != 0) || (((int) (i/2)) != (declarative_function->data->item_parameters.count_parameters - 1) ))
+        return ERR_SYNTAX;
+    return OK;
+}
 
 //
 ///** <func>      -> function id ( <params> ) <rets> <body> end <program>

@@ -46,10 +46,10 @@ bool data_stack_is_empty(data_stack_t *stack);
 
 /**
  * @param stack pointer on stack
- * @brief func return top of stack
- * @return top element of stack
+ * @brief func return first frame of stack
+ * @return first element of stack
  * */
-item_data_stack_t *get_top_of_stack(data_stack_t *stack);
+item_data_stack_t *get_global_frame_stack(data_stack_t *stack);
 
 /**
  * @param stack pointer on stack
