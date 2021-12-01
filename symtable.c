@@ -132,7 +132,7 @@ bool insert_parameter_item(tab_item_t *item, tab_item_data_type type) {
     if (item->data->item_id_type != FUNCTION) return false;
     item->data->item_parameters.type_parameters[item->data->item_parameters.count_parameters] = type;
     item->data->item_parameters.count_parameters++;
-    if (item->data->item_parameters.count_parameters < 10) return true;
+    if (item->data->item_parameters.count_parameters < MAX_PARAMETERS) return true;
     return false;
 }
 
@@ -140,6 +140,6 @@ bool insert_return_item(tab_item_t *item, tab_item_data_type type) {
     if (item->data->item_id_type != FUNCTION) return false;
     item->data->item_returns.type_returns[item->data->item_returns.count_returns] = type;
     item->data->item_returns.count_returns++;
-    if (item->data->item_returns.count_returns < 10) return true;
+    if (item->data->item_returns.count_returns < MAX_RETURNS) return true;
     return false;
 }
