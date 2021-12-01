@@ -54,7 +54,7 @@ item_data_stack_t *get_global_frame_stack(data_stack_t *stack);
 /**
  * @param stack pointer on stack
  * @brief func alloc memory and add one more element to top of stack
- * @return result of adding
+ * @return result of adding true if success else false
  * */
 bool push_data_item(data_stack_t *stack);
 

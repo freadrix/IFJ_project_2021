@@ -84,6 +84,12 @@ bool code_generate_function_start(char *f_name);
 bool code_generate_function_end(char *f_name);
 
 /**
+ * @brief Generation of pushing retval from function on TOP OF STACK
+ * @return true in case of success, false otherwise
+ */
+bool code_generate_retval_on_stack();
+
+/**
  * @brief Generation of call of write function
  * @param term_count count of passed parameters
  * @return true in case of success, false otherwise

@@ -52,6 +52,18 @@ int function_parser();
  * @brief function TODO
  * @return return code which is in error.h
  * */
+int function_params_parser(tab_item_t *item);
+
+/**
+ * @brief function TODO
+ * @return return code which is in error.h
+ * */
+int function_rets_parser();
+
+/**
+ * @brief function TODO
+ * @return return code which is in error.h
+ * */
 int global_parser();
 
 /**

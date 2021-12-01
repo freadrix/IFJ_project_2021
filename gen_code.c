@@ -16,7 +16,7 @@ string_struct generated_code;
 
 //built-in reads function
 //read string from user input
-//return input in case of success, if input type is wrong, return nil
+//return input in LF@%retval in case of success, if input type is wrong, return nil
 bool builtin_reads() {
     if(!(add_string_to_string(&generated_code, (
         "\nLABEL $reads\n"
@@ -42,7 +42,7 @@ bool builtin_reads() {
 
 //built-in readi function
 //read integer from user input
-//return input in case of success, if input type is wrong, return nil
+//return input in LF@%retval in case of success, if input type is wrong, return nil
 bool builtin_readi() {
     if(!(add_string_to_string(&generated_code, (
         "\nLABEL $readi\n"
@@ -68,7 +68,7 @@ bool builtin_readi() {
 
 //built-in readn function
 //read float from user input
-//return input in case of success, if input type is wrong, return nil
+//return input in LF@%retval in case of success, if input type is wrong, return nil
 bool builtin_readn() {
     if(!(add_string_to_string(&generated_code, (
         "\nLABEL $readn\n"
@@ -473,6 +473,13 @@ bool code_generate_function_end(char *f_name) {
     return true;
 }
 
+bool code_generate_retval_on_stack() {
+    if(!(add_string_to_string(&generated_code, ("PUSHS TF@%retval\n")))) {
+        return false;
+    }
+    return true;
+}
+
 bool code_generate_write_function(int terms_count, ...) {
     //list of arguments
     va_list valist;
@@ -569,30 +576,6 @@ bool code_generate_variable_define_type(char *var_name, tab_item_data_type type)
     }
     return true;
 }
-
-// //help function to generate type values
-// bool code_generate_value_create(tab_item_data_type type) {
-//     if (type == TYPE_BOOL) {
-//         if (!(add_string_to_string(&generated_code, ("bool@")))) {
-//             return false;
-//         }
-//     } else if (type == TYPE_INTEGER) {
-//         if (!(add_string_to_string(&generated_code, ("int@")))) {
-//             return false;
-//         }
-//     } else if (type == TYPE_DOUBLE) {
-//         if (!(add_string_to_string(&generated_code, ("float@")))) {
-//             return false;
-//         }
-//     } else if (type == TYPE_STRING) {
-//         if (!(add_string_to_string(&generated_code, ("string@")))) {
-//             return false;
-//         }
-//     } else {
-//         return false;
-//     }
-//     return true;
-// }
 
 bool code_generate_variable_define_value(char *var_name, token_struct token) {
     if(!(add_string_to_string(&generated_code, ("MOVE LF@"))) ||
