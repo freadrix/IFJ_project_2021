@@ -8,51 +8,34 @@
 #include <stdio.h>
 
 #include "expr_handle.h"
-#include "exp_stack.h"
-#include "scanner.h"
-#include "error.h"
 
 stack_t stack;
 
 
 typedef enum {
 
-    T_PLUS,     // +
-    T_MINUS,    // =
-    T_DIV,      // /
-    T_MUL,      // *
-    T_IDIV,     // //
-    T_RBR,      // (
-    T_LBR,      // )
-    T_ID,       // id, int, str, double
-    T_LT,      // <
-    T_GT,      // >
-    T_LEQ,      // <=
-    T_GEQ,      // >=
-    T_EQ,       // ==
-    T_NE,       // ~=
-    T_SIGN      // $
+    T_PLUS_MINUS,     // +-
+    T_DIV_MUL_IDIV,   // /*//
+    T_RBR,            // (
+    T_LBR,            // )
+    T_ID,             // id, int, str, double
+    T_REL,            // relations
+    T_LEN,            // #
+    T_CONCAT,         // ..
+    T_SIGN            // $
 } prec_enum;
 
-char precedence_tab[17][17] = {
-//    +    -    /    *    //   (    )    id   <    >    <=   >=   ==   ~=   #   ..   $
-    {'>' ,'>' ,'>' ,'>' ,'>' ,'>' ,'<' ,'>' ,'<' ,'<' ,'<' ,'<' ,'<' ,'<' ,'>' ,'<' ,'<' },  // +
-    {'>' ,'>' ,'>' ,'>' ,'>' ,'>' ,'<' ,'>' ,'<' ,'<' ,'<' ,'<' ,'<' ,'<' ,'>' ,'<' ,'<' },  // -
-    {'<' ,'<' ,'>' ,'>' ,'>' ,'<' ,'>' ,'>' ,'<' ,'<', '<' ,'<' ,'<' ,'<' ,'>' ,'<' ,'<' },  // /
-    {'<' ,'<' ,'>' ,'>' ,'>' ,'<' ,'>' ,'>' ,'<' ,'<', '<' ,'<' ,'<' ,'<' ,'>' ,'<' ,'<' },  // *
-    {'<' ,'<' ,'>' ,'>' ,'>' ,'<' ,'>' ,'>' ,'<' ,'<', '<' ,'<' ,'<' ,'<' ,'>' ,'<' ,'<' },  // //
-    {'<' ,'<' ,'<' ,'<' ,'<' ,'<' ,'N' ,'N' ,'<' ,'<' ,'<' ,'<' ,'<' ,'<' ,'<' ,'<' ,'<' },  // (
-    {'>' ,'>' ,'>' ,'>' ,'>' ,'=' ,'>' ,'>' ,'>' ,'>' ,'>' ,'>' ,'>' ,'>' ,'>' ,'>' ,'#' },  // )
-    {'<' ,'<' ,'<' ,'<' ,'<' ,'<' ,'N' ,'N' ,'<' ,'<' ,'<' ,'<' ,'<' ,'<' ,'<' ,'<' ,'<' },  // id
-    {'>' ,'>' ,'>' ,'>' ,'>' ,'<' ,'>' ,'>' ,'#' ,'#' ,'#' ,'#' ,'#' ,'#' ,'>' ,'>' ,'<' },  // <
-    {'>' ,'>' ,'>' ,'>' ,'>' ,'<' ,'>' ,'>' ,'#' ,'#' ,'#' ,'#' ,'#' ,'#' ,'>' ,'>' ,'<' },  // >
-    {'>' ,'>' ,'>' ,'>' ,'>' ,'<' ,'>' ,'>' ,'#' ,'#' ,'#' ,'#' ,'#' ,'#' ,'>' ,'>' ,'<' },  // <=
-    {'>' ,'>' ,'>' ,'>' ,'>' ,'<' ,'>' ,'>' ,'#' ,'#' ,'#' ,'#' ,'#' ,'#' ,'>' ,'>' ,'<' },  // >=
-    {'>' ,'>' ,'>' ,'>' ,'>' ,'<' ,'>' ,'>' ,'#' ,'#' ,'#' ,'#' ,'#' ,'#' ,'>' ,'>' ,'<' },  // ==
-    {'>' ,'>' ,'>' ,'>' ,'>' ,'<' ,'>' ,'>' ,'#' ,'#' ,'#' ,'#' ,'#' ,'#' ,'>' ,'>' ,'<' },  // ~=
-    {'<' ,'<' ,'<' ,'<' ,'<' ,'>' ,'<' ,'>' ,'<' ,'<' ,'<' ,'<' ,'<' ,'<' ,'>' ,'<' ,'<' },  // #
-    {'>' ,'>' ,'>' ,'>' ,'>' ,'>' ,'<' ,'>' ,'<' ,'<' ,'<' ,'<' ,'<' ,'<' ,'>' ,'>' ,'<' },  // ..
-    {'>' ,'>' ,'>' ,'>' ,'>' ,'>' ,'#' ,'>' ,'>' ,'>' ,'>' ,'>' ,'>' ,'>' ,'>' ,'>' ,'#' },  // $
+char precedence_tab[9][9] = {
+//                +-  /*//  (    )    id  rel   #   ..    $
+/*   +-   */    {'>' ,'<' ,'<' ,'>' ,'<' ,'>' ,'<' ,'>' ,'>' },
+/* / * // */    {'>' ,'>' ,'<' ,'>' ,'<' ,'>' ,'<' ,'>' ,'>' },
+/*   (    */    {'<' ,'<' ,'<' ,'=' ,'<' ,'<' ,'<' ,'<' ,'#' },
+/*    )   */    {'>' ,'>' ,'#' ,'>' ,'#' ,'>' ,'#' ,'>' ,'>' },
+/*   id   */    {'>' ,'>' ,'#' ,'>' ,'#' ,'>' ,'#' ,'>' ,'>' },
+/*   rel  */    {'<' ,'<' ,'<' ,'>' ,'<' ,'#' ,'<' ,'>' ,'>' },
+/*    #   */    {'>' ,'>' ,'<' ,'>' ,'<' ,'>' ,'>' ,'>' ,'>' },
+/*    ..  */    {'<' ,'<' ,'<' ,'>' ,'<' ,'>' ,'<' ,'>' ,'>' },
+/*    $   */    {'<' ,'<' ,'<' ,'#' ,'<' ,'<' ,'<' ,'<' ,'#' },
 };
 
 static elem_enum get_type(token_struct *tkn) {
@@ -87,6 +70,10 @@ static elem_enum get_type(token_struct *tkn) {
         return EQ;
     } else if (tkn->type == TOKEN_NOT_EQUAL) {
         return NE;
+    } else if (tkn->type == TOKEN_UNARY_LENGTH) {
+        return LEN;
+    } else if (tkn->type == TOKEN_CONCAT) {
+        return CONCAT;
     } else if (tkn->type == TOKEN_BRACKET_ROUND_L) {
         return LBR;
     } else if (tkn->type == TOKEN_BRACKET_ROUND_R) {
@@ -98,34 +85,22 @@ static elem_enum get_type(token_struct *tkn) {
 
 static prec_enum get_precedence(elem_enum elem) {
 
-    if (elem == PLUS) {
-        return T_PLUS;
-    } else if (elem == MINUS) {
-        return T_MINUS;
-    } else if (elem == DIV) {
-        return T_DIV;
-    } else if (elem == MUL) {
-        return T_MUL;
-    } else if (elem == IDIV) {
-        return T_IDIV;
+    if ((elem == PLUS) || (elem == MINUS)) {
+        return T_PLUS_MINUS;
+    } else if ((elem == DIV) || (elem == MUL) || (elem == IDIV)) {
+        return T_DIV_MUL_IDIV;
     } else if (elem == LBR) {
         return T_LBR;
     } else if (elem == RBR) {
         return T_RBR;
     } else if ((elem == ID) || (elem == INT) || (elem == STRING) || (elem == DOUBLE)) {
         return T_ID;
-    } else if (elem == LT) {
-        return T_LT;
-    } else if (elem == GT) {
-        return T_GT;
-    } else if (elem == LEQ) {
-        return T_LEQ;
-    } else if (elem == GEQ) {
-        return T_GEQ;
-    } else if (elem == EQ) {
-        return T_EQ;
-    } else if (elem == NE) {
-        return T_NE;
+    } else if ((elem == LT) || (elem == GT) || (elem == LEQ) || (elem == GEQ) || (elem == EQ) || (elem == NE)) {
+        return T_REL;
+    } else if (elem == LEN) {
+        return T_LEN;
+    } else if (elem == CONCAT) {
+        return T_CONCAT;
     } else {
         return T_SIGN;
     }
@@ -163,10 +138,14 @@ static rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_
                 return E_EQ_E;
             } else if (middle->elem == NE) {
                 return E_NE_E;
+            } else if (middle->elem == LEN) {
+                return E_LEN;
+            } else if (middle->elem == CONCAT) {
+                return E_CONCAT_E;
             } else {
                 return NO_RULE;
             }
-        } else if ((left->elem == LBR) && (left->elem == EXP) && (left->elem == RBR)) {
+        } else if ((left->elem == LBR) && (middle->elem == EXP) && (right->elem == RBR)) {
             return BR_E_BR;
         } else {
             return NO_RULE;
@@ -259,4 +238,8 @@ static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *r
     }
 }
 
-//TODO expression handling
+int exp_processing() {
+
+    return OK;
+}
+

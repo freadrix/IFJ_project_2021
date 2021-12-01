@@ -8,6 +8,10 @@
 #ifndef _EXPR_HANDLE_H_
 #define _EXPR_HANDLE_H_
 
+#include "exp_stack.h"
+#include "scanner.h"
+#include "error.h"
+
 /**
  * @enum Available symbols
  */
@@ -24,6 +28,8 @@ typedef enum {
     MUL,        // *
     DIV,        // /
     IDIV,       // //
+    LEN,        // #
+    CONCAT,     // ..
 
     LBR,        // (
     RBR,        // )
@@ -33,7 +39,7 @@ typedef enum {
     STRING,
     
     EXP,        // expression
-    SIGN,       // $
+    SIGN        // $
 } elem_enum;
 
 /**
@@ -52,6 +58,8 @@ typedef enum {
     E_MUL_E,        // E * E
     E_DIV_E,        // E / E
     E_IDIV_E,       // E // E
+    E_LEN,          // # E
+    E_CONCAT_E,     // E .. E
 
     ID_RULE,        // id
     BR_E_BR,        // (E)
