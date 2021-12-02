@@ -26,8 +26,18 @@ bool is_empty_stack(stack_t *stack) {
 }
 
 item_stack_t *stack_top(stack_t *stack) {
-    
     return stack->top;
+}
+
+item_stack_t *stack_top_term(stack_t *stack) {
+    item_stack_t *iter_item = stack_top(&stack);
+    while (iter_item) {
+        if (iter_item->elem < STOP) {
+            return iter_item;
+        }
+        iter_item = iter_item->nxt;
+    }
+    return NULL;
 }
 
 bool pop_stack(stack_t *stack) {
@@ -42,13 +52,14 @@ bool pop_stack(stack_t *stack) {
     }
 }
 
-bool push_stack(stack_t *stack, elem_enum type) {
+bool push_stack(stack_t *stack, elem_enum elem, tab_item_data_type type) {
     //push item on the top of stack
     item_stack_t *item = malloc(sizeof(item_stack_t));
     if (!(item)) {
         return false;
     } else {
         item->nxt = stack->top;
+        item->elem = elem;
         item->type = type;
         stack->top = item;
         return true;

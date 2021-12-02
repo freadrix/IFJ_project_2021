@@ -115,7 +115,7 @@ static rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_
             return NO_RULE;
         }
     } else {
-        if ((left->elem == EXP) && (right->elem == EXP)) {
+        if ((left->elem == EXPR) && (right->elem == EXPR)) {
             if (middle->elem == PLUS) {
                 return E_PLUS_E;
             } else if (middle->elem == MINUS) {
@@ -145,7 +145,7 @@ static rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_
             } else {
                 return NO_RULE;
             }
-        } else if ((left->elem == LBR) && (middle->elem == EXP) && (right->elem == RBR)) {
+        } else if ((left->elem == LBR) && (middle->elem == EXPR) && (right->elem == RBR)) {
             return BR_E_BR;
         } else {
             return NO_RULE;
@@ -156,79 +156,137 @@ static rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_
 static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, rules_enum rule, tab_item_data_type *type) {
 
     if ((rule == E_PLUS_E) || (rule == E_MINUS_E) || (rule == E_MUL_E)) {
-        if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) || (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
-            return ERR_INCOMPATIBILITY;
-        } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
-            return ERR_UNDEF;
+        if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) ||
+            (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)  ||
+            (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+            return ERR_SEMANTIC_EXP;
+        } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
+            return ERR_SEMANTIC_DEF;
         } else if ((left->type == TYPE_INTEGER) && (right->type == TYPE_INTEGER)) {
             *type = TYPE_INTEGER;
             return OK;
         } else {
-            //TODO convertation INT->DOUBLE
+            if (left->type == TYPE_INTEGER) {
+                if (!(code_generate_stack_convert_float_second())) {
+                    return ERR_INTERNAL;
+                }
+            } else if (right->type == TYPE_INTEGER) {
+                if (!(code_generate_stack_convert_float_first())) {
+                    return ERR_INTERNAL;
+                }
+            }
             *type = TYPE_DOUBLE;
             return OK;
         }
     } else if (rule == E_DIV_E) {
-        if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) || (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
-            return ERR_INCOMPATIBILITY;
-        } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
-            return ERR_UNDEF;
+        if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) ||
+            (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)  ||
+            (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+            return ERR_SEMANTIC_EXP;
+        } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
+            return ERR_SEMANTIC_DEF;
         } else {
-            //TODO convertation INT->DOUBLE
+            if (left->type == TYPE_INTEGER) {
+                if (!(code_generate_stack_convert_float_second())) {
+                    return ERR_INTERNAL;
+                }
+            }
+            if (right->type == TYPE_INTEGER) {
+                if (!(code_generate_stack_convert_float_first())) {
+                    return ERR_INTERNAL;
+                }
+            }
             *type = TYPE_DOUBLE;
             return OK;
         }
     } else if (rule == E_IDIV_E) {
-        if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) || (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
-            return ERR_INCOMPATIBILITY;
-        } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
-            return ERR_UNDEF;
+        if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) ||
+            (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)  ||
+            (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+            return ERR_SEMANTIC_EXP;
+        } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
+            return ERR_SEMANTIC_DEF;
         } else {
-            //TODO convertation DOUBLE->INT
+            if (left->type == TYPE_DOUBLE) {
+                if (!(code_generate_stack_convert_int_second())) {
+                    return ERR_INTERNAL;
+                }
+            }
+            if (right->type == TYPE_DOUBLE) {
+                if (!(code_generate_stack_convert_int_first())) {
+                    return ERR_INTERNAL;
+                }
+            }
             *type = TYPE_INTEGER;
             return OK;
         }
     } else if ((rule == E_LT_E) || (rule == E_GT_E) || (rule == E_LEQ_E) || (rule == E_GEQ_E)) {
-        if ((right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
-            return ERR_INCOMPATIBILITY;
-        } else if ((left->type == TYPE_STRING) && ((right->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE))) {
-            return ERR_INCOMPATIBILITY;
-        } else if (((left->type == TYPE_INTEGER) || (left->type == TYPE_DOUBLE)) && (right->type == TYPE_STRING)) {
-            return ERR_INCOMPATIBILITY;
-        } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
-            return ERR_UNDEF;
+        if ((right->type == TYPE_BOOL) || (left->type == TYPE_BOOL) ||
+            (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+            return ERR_SEMANTIC_EXP;
+        } else if (((left->type == TYPE_STRING) && ((right->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE))) ||
+                  (((left->type == TYPE_INTEGER) || (left->type == TYPE_DOUBLE)) && (right->type == TYPE_STRING))) {
+            return ERR_SEMANTIC_EXP;
+        } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
+            return ERR_SEMANTIC_DEF;
         } else {
-            //TODO convertation INT->DOUBLE
+            if ((left->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE)) {
+                if (!(code_generate_stack_convert_float_second())) {
+                    return ERR_INTERNAL;
+                }
+            } else if ((left->type == TYPE_DOUBLE) || (right->type == TYPE_INTEGER)) {
+                if (!(code_generate_stack_convert_float_first())) {
+                    return ERR_INTERNAL;
+                }
+            }
             *type = TYPE_BOOL;
             return OK;
         }
     } else if ((rule == E_NE_E) || (rule == E_EQ_E)) {
-        //TODO comparation with NIL
         if ((right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
-            return ERR_INCOMPATIBILITY;
-        } else if ((left->type == TYPE_STRING) && ((right->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE))) {
-            return ERR_INCOMPATIBILITY;
-        } else if (((left->type == TYPE_INTEGER) || (left->type == TYPE_DOUBLE)) && (right->type == TYPE_STRING)) {
-            return ERR_INCOMPATIBILITY;
-        } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
-            return ERR_UNDEF;
+            return ERR_SEMANTIC_EXP;
+        } else if (((left->type == TYPE_STRING) && ((right->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE))) ||
+                  (((left->type == TYPE_INTEGER) || (left->type == TYPE_DOUBLE)) && (right->type == TYPE_STRING))) {
+            return ERR_SEMANTIC_EXP;
+        } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
+            return ERR_SEMANTIC_DEF;
         } else {
-            //TODO convertation INT->DOUBLE
+            if ((left->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE)) {
+                if (!(code_generate_stack_convert_float_second())) {
+                    return ERR_INTERNAL;
+                }
+            } else if ((left->type == TYPE_DOUBLE) || (right->type == TYPE_INTEGER)) {
+                if (!(code_generate_stack_convert_float_first())) {
+                    return ERR_INTERNAL;
+                }
+            }
             *type = TYPE_BOOL;
             return OK;
         }
+    } else if (rule == E_LEN) {
+        if (middle->type != TYPE_STRING) {
+            return ERR_SEMANTIC_EXP;
+        } else {
+            *type = TYPE_INTEGER;
+        }
+    } else if (rule == E_CONCAT_E) {
+        if ((left->type != TYPE_STRING) || (right->type != TYPE_STRING)) {
+            return ERR_SEMANTIC_EXP;
+        } else {
+            *type = TYPE_STRING;
+        }
     } else if (rule == ID_RULE) {
-        if (left->type == TYPE_NULL) {
-            return ERR_UNDEF;
+        if (left->type == TYPE_UNDEFINED) {
+            return ERR_SEMANTIC_DEF;
         } else if (left->type == TYPE_BOOL) {
-            return ERR_INCOMPATIBILITY;
+            return ERR_SEMANTIC_EXP;
         } else {
             *type = left->type;
             return OK;
         }
     } else if (rule == BR_E_BR) {
-        if (middle->type == TYPE_NULL) {
-            return ERR_UNDEF;
+        if (middle->type == TYPE_UNDEFINED) {
+            return ERR_SEMANTIC_DEF;
         } else {
             *type = middle->type;
             return OK;
@@ -238,7 +296,62 @@ static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *r
     }
 }
 
-int exp_processing() {
+int exp_processing(token_struct *token) {
+    //initialize stack
+    init_stack(&stack);
+    //variables for given symbol and terminal on top of the stack
+    elem_enum given_symbol;
+    item_stack_t *stack_term;
+    //push $ on top of the initialized stack
+    if(!(push_stack(&stack, SIGN, TYPE_UNDEFINED))) {
+        empty_stack(&stack);
+        return ERR_INTERNAL;
+    }
+    for (bool end = false; !end;) {
+        //assign variables;
+        if(!(stack_term = stack_top_term(&stack))) {
+            empty_stack(&stack);
+            return ERR_INTERNAL;
+        }
+        given_symbol = get_type(&token);
+        char prec_symbol = precedence_tab[get_precedence(stack_term)][get_precedence(given_symbol)];
+
+        if (prec_symbol == '>') {
+
+        } else if (prec_symbol == '<') {
+
+        } else if (prec_symbol == '=') {
+
+            // tab_item_data_type type;
+
+            // if (token->type == TOKEN_INT) {
+            //     type = TYPE_INTEGER;
+            // } else if (token->type == TOKEN_DOUBLE) {
+            //     type = TYPE_DOUBLE;
+            // } else if (token->type == TOKEN_STRING) {
+            //     type = TYPE_STRING;
+            // } else if (token->type = TOKEN_ID) {
+            //     //TODO find id in symtable and assign his type
+            // } else {
+            //     type = TYPE_UNDEFINED;
+            // }
+
+            // if(!(push_stack(&stack, given_symbol, type))) {
+            //     empty_stack(&stack);
+            //     return ERR_INTERNAL;
+            // }
+
+
+
+        } else if (prec_symbol == '#') {
+            if ((stack_term == SIGN) && (given_symbol == SIGN)) {
+                break;
+            } else {
+                empty_stack(&stack);
+                return ERR_SYNTAX;
+            }
+        }
+    }
 
     return OK;
 }
