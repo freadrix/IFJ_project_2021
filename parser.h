@@ -18,16 +18,6 @@
 #include "error.h"
 
 
-//typedef struct {
-//
-//    token_struct tok;
-////    table_t local; //  think that wont need
-//    table_t global;
-////    stack_t
-//    //TODO
-//} code_struct;
-
-
 // Functions declaration
 /**
  * @brief cycle which will get token and work out him
@@ -52,13 +42,25 @@ int function_parser();
  * @brief function TODO
  * @return return code which is in error.h
  * */
-int function_params_parser(tab_item_t *item);
+int function_params_parser(tab_item_t *function_item);
 
 /**
  * @brief function TODO
  * @return return code which is in error.h
  * */
-int function_rets_parser();
+int function_rets_parser(tab_item_t *function_item);
+
+/**
+ * @brief function TODO
+ * @return return code which is in error.h
+ * */
+int function_body_parser(tab_item_t *function_item);
+
+/**
+ * @brief function TODO
+ * @return return code which is in error.h
+ * */
+int def_var_parser(tab_item_t *function_item);
 
 /**
  * @brief function TODO

@@ -48,7 +48,7 @@ if ((_NAME) != NULL) is_there = true
 #define IS_ID (token->type == TOKEN_ID)
 
 // macro that we use for check if token string is build-in func string
-#define IS_BUILT_IN_FUNCTION \
+#define IS_BUILT_IN_FUNCTION                                    \
 IS_ID                                                   &&      \
 ((!strcmp(token->attribute.string->string, "readi"))    ||      \
 (!strcmp(token->attribute.string->string, "reads"))     ||      \
@@ -58,6 +58,15 @@ IS_ID                                                   &&      \
 (!strcmp(token->attribute.string->string, "ord"))       ||      \
 (!strcmp(token->attribute.string->string, "chr"))       ||      \
 (!strcmp(token->attribute.string->string, "write")))
+
+// macro that we use for check if token can be part of function body
+#define IS_FUNCTION_BODY                                        \
+IS_ID                                                   ||      \
+(token->type == TOKEN_KEYWORD)                          &&      \
+((token->attribute.keyword == KEYWORD_IF)               ||      \
+(token->attribute.keyword == KEYWORD_WHILE)             ||      \
+(token->attribute.keyword == KEYWORD_LOCAL))
+
 
 // macro that we use for check if keyword is function
 #define IS_FUNCTION                                             \
@@ -134,7 +143,7 @@ string_struct string;       // string
     <assign>        -> = <assigns>
     <assign>        -> ε
     <assigns>       -> <call> <expressions>
-    <expressions>   -> expression <expression>
+    <expressions>   -> expression <expression>     // mozna potrebujeme spravit
     <expression>    -> , expression <expression>
     <expression>    -> ε
     <expressions>   -> readi ()
@@ -146,20 +155,24 @@ string_struct string;       // string
     <expressions>   -> chr ( expression )                            /// integer : string
  */
 
+
+/**
+ * <header>        -> require "ifj21" <program>
+ * */
 int parser() {
     // allocate all we need to work with
     ALLOC;
 
-    // main stage
     PARSER_RESPONSE = start_program_parser();
     printf("%d\n", PARSER_RESPONSE);
     if (PARSER_RESPONSE != OK){
         CLEAN;
         return PARSER_RESPONSE;
     }
+    /// <program>
     GET_TOKEN;
     while (token->type != TOKEN_EOF) {
-        if (IS_GLOBAL) {
+        if (IS_GLOBAL) {  /// <program>       -> global id : function ( <params_g> ) <rets>
             PARSER_RESPONSE = global_parser();
             printf("%d\n", PARSER_RESPONSE);
             if(PARSER_RESPONSE != OK) {
@@ -167,7 +180,7 @@ int parser() {
                 return PARSER_RESPONSE;
             }
         }
-        if (IS_FUNCTION) {
+        if (IS_FUNCTION) { /// <program>       -> function id ( <params> ) <rets> <state_l> end
             PARSER_RESPONSE = function_parser();
             printf("%d\n", PARSER_RESPONSE);
             if(PARSER_RESPONSE != OK) {
@@ -175,7 +188,7 @@ int parser() {
                 return PARSER_RESPONSE;
             }
         }
-        if (IS_ID) {
+        if (IS_ID) {      /// <program>       -> <call>
             PARSER_RESPONSE = call_function_parser();
             printf("%d\n", PARSER_RESPONSE);
             if(PARSER_RESPONSE != OK) {
@@ -191,7 +204,7 @@ int parser() {
 }
 
 /**
- * <header>     -> require "ifj21" <func>
+ * <header>     -> require "ifj21" <program>
  */
 int start_program_parser() {
     GET_TOKEN;
@@ -236,7 +249,16 @@ int function_parser() {
         PARSER_RESPONSE = function_rets_parser(function_item);
         if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
     }
-    // <body>
+    if ((token->type == TOKEN_KEYWORD) && (token->attribute.keyword == KEYWORD_END)) {
+        if (function_item->data->item_returns.count_returns != 0) return ERR_SEMANTIC_PARRET;
+        return OK;
+    }
+    if (IS_FUNCTION_BODY) {
+        PARSER_RESPONSE = function_body_parser(function_item);
+        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+    } else {
+        return ERR_SYNTAX;
+    }
     return OK;
 }
 
@@ -291,20 +313,20 @@ int function_params_parser(tab_item_t *function_item) {
 /**
  * <rets>
  * */
-int function_rets_parser(tab_item_t *item) {
+int function_rets_parser(tab_item_t *function_item) {
     GET_TOKEN;
     if(!IS_TYPE) return ERR_SYNTAX;
     int i;
     for (i = 0; ((token->type == TOKEN_COMMA) || (IS_TYPE)); ++i) {
         if (IS_TYPE) {
             if (token->attribute.keyword == KEYWORD_INTEGER) {
-                if (!insert_return_item(item, TYPE_INTEGER)) return ERR_SYNTAX;
+                if (!insert_return_item(function_item, TYPE_INTEGER)) return ERR_SYNTAX;
             } else if (token->attribute.keyword == KEYWORD_NUMBER) {
-                if (!insert_return_item(item, TYPE_DOUBLE)) return ERR_SYNTAX;
+                if (!insert_return_item(function_item, TYPE_DOUBLE)) return ERR_SYNTAX;
             } else if (token->attribute.keyword == KEYWORD_STRING) {
-                if (!insert_return_item(item, TYPE_STRING)) return ERR_SYNTAX;
+                if (!insert_return_item(function_item, TYPE_STRING)) return ERR_SYNTAX;
             } else {
-                if (!insert_return_item(item, TYPE_NULL)) return ERR_SYNTAX;
+                if (!insert_return_item(function_item, TYPE_NULL)) return ERR_SYNTAX;
             }
         }
         GET_TOKEN;
@@ -312,6 +334,60 @@ int function_rets_parser(tab_item_t *item) {
     i--;
     if ((i % 2) != 0) return ERR_SYNTAX;
     return OK;
+}
+
+/**
+ * <body>
+ * */
+int function_body_parser(tab_item_t *function_item) {
+    while (!((token->type == TOKEN_KEYWORD) && (token->attribute.keyword == KEYWORD_END))) {
+        if (token->type == TOKEN_KEYWORD) {
+            if (token->attribute.keyword == KEYWORD_LOCAL) {
+                PARSER_RESPONSE = def_var_parser(function_item);
+                if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+            }
+            if (token->attribute.keyword == KEYWORD_IF) {
+                PARSER_RESPONSE =
+            }
+        }
+        GET_TOKEN;
+    }
+}
+
+/**
+ *
+ * */
+int def_var_parser(tab_item_t *function_item) {
+    GET_TOKEN;
+    if (!IS_ID) return ERR_SYNTAX;
+    SEARCH_ITEM(searched_item, stack->top->table, token->attribute.string->string);
+    if (is_there) return ERR_SEMANTIC_DEF;
+    INSERT_ITEM(inserted_item);
+    inserted_item->data->item_id_type = VARIABLE;
+    GET_TOKEN;
+    if (token->type != TOKEN_DDOT) return ERR_SYNTAX;
+    GET_TOKEN;
+    if (IS_TYPE) {
+        if (token->attribute.keyword == KEYWORD_INTEGER) {
+            inserted_item->data->item_data_type = TYPE_INTEGER;
+        } else if (token->attribute.keyword == KEYWORD_NUMBER) {
+            inserted_item->data->item_data_type = TYPE_DOUBLE;
+        } else if (token->attribute.keyword == KEYWORD_STRING) {
+            inserted_item->data->item_data_type = TYPE_STRING;
+        } else if (token->attribute.keyword == KEYWORD_NIL) {
+            inserted_item->data->item_data_type = TYPE_NULL;
+        }
+    } else {
+        return ERR_SYNTAX;
+    }
+    GET_TOKEN;
+    if (token->type == TOKEN_ASSIGN) {
+        /*TODO func. assign*/
+    } else if (IS_FUNCTION_BODY) {
+        return OK;
+    } else {
+        return ERR_SYNTAX;
+    }
 }
 
 /**
