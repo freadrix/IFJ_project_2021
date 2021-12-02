@@ -57,7 +57,7 @@ int re_lenght(string_struct *str);
 */
 int string_copy(string_struct *str_to_copy, string_struct *copy_here);
 
-int add_char_to_string(string_struct *str, char c);
+int add_char_to_string(string_struct *str, int c);
 
 /**
  * @brief Add string to a string structure, primary used for code generation
