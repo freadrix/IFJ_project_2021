@@ -73,14 +73,15 @@ IS_ID                                                   ||      \
 // macro that we use for check if token is ID
 #define IS_ID (token->type == TOKEN_ID)
 
-//// macro that we use for check if there is valid expression after keyword return
-//#define IS_VALID                                                \
-//((token->type == TOKEN_INT)                 ||                  \
-// (token->type == TOKEN_DOUBLE)              ||                  \
-// (token->type == TOKEN_STRING)              ||                  \
-//((token->type == TOKEN_KEYWORD)             &&                  \
-// (token->attribute.keyword == KEYWORD_NIL)) ||                  \
-// (token->type == TOKEN_DDOT))
+// macro that we use for check if there is valid expression after keyword return
+#define IS_VALID                                                \
+( IS_ID                                     ||                  \
+ (token->type == TOKEN_INT)                 ||                  \
+ (token->type == TOKEN_DOUBLE)              ||                  \
+ (token->type == TOKEN_STRING)              ||                  \
+((token->type == TOKEN_KEYWORD)             &&                  \
+ (token->attribute.keyword == KEYWORD_NIL)) ||                  \
+ (token->type == TOKEN_DDOT))
 
 // macro we need for allocate memory
 #define ALLOC                                                   \
@@ -137,10 +138,6 @@ string_struct string;       // string
     <comm>          -> write ( <expressions> )
     <call>          -> id ( <expressions> )
     <call>          -> ε
-    <params_in>     -> ε
-    <params_in>     -> expression <param_in>
-    <param_in>      -> , expression <param_in>
-    <param_in>      -> ε
     <rets>          -> : <data_type> <ret>
     <rets>          -> ε
     <ret>           -> , <data_type> <ret>
@@ -369,7 +366,17 @@ int function_body_parser(tab_item_t *function_item) {
             }
         }
         if (IS_ID) {
-            /*TODO*/
+            GET_TOKEN;
+            if (token->type == TOKEN_BRACKET_ROUND_L) {
+                /*TODO volanie !Definovanej funkcie!*/
+            } else if (token->type == TOKEN_ASSIGN) {
+                /*TODO func. assign*/
+            } else {
+                return ERR_SYNTAX;
+            }
+        }
+        if (IS_ID && !(strcmp(token->attribute.string->string, "while"))) {
+            /*TODO expression*/
         }
         GET_TOKEN;
     }
@@ -379,38 +386,65 @@ int function_body_parser(tab_item_t *function_item) {
  * return <expressions>
  */
 int return_parser(tab_item_t *function_item) {
-//    // current token == keyword return
-//    GET_TOKEN;  // this token should be some expression
-//    int i;
-//    for (i = 0; IS_VALID; ++i) {
-//        if ((i % 2) == 0) {
-//             if (token->type == TOKEN_INT) {
-//                 if (function_item->data->item_returns.type_returns[i/2] != TYPE_INTEGER)
-//                     return ERR_SEMANTIC_PARRET;
-//                 function_item->data->item_value.int_value = token->attribute.int_value;
-//             }
-//             if (token->type == TOKEN_DOUBLE) {
-//
-//             }
-//             if (token->type == TOKEN_STRING) {
-//
-//             }
-//             if (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_NIL) {
-//
-//             }
-//             return ERR_SYNTAX;
-//        } else {
-//            if (token->type != TOKEN_COMMA) return ERR_SYNTAX;
-//        }
-//        GET_TOKEN;
-//    }
+    // current token == keyword return
+    GET_TOKEN;  // this token should be some expression
+    int i;
+    for (i = 0; IS_VALID; ++i) {
+        if ((i % 2) == 0) {
+            PARSER_RESPONSE = expresion_parser();   //TODO example: return 5+2, a => return 7, <some value>
+             if (token->type == TOKEN_INT) {
+                if (function_item->data->item_returns.type_returns[i/2] != TYPE_INTEGER) {
+                    return ERR_SEMANTIC_PARRET;
+                } else {
+                    function_item->data->item_value.int_value = token->attribute.int_value;
+                }
+             }
+             if (token->type == TOKEN_DOUBLE) {
+                 if (function_item->data->item_returns.type_returns[i/2] != TYPE_DOUBLE) {
+                     return ERR_SEMANTIC_PARRET;
+                 } else {
+                     function_item->data->item_value.double_value = token->attribute.double_value;
+                 }
+             }
+             if (token->type == TOKEN_STRING) {
+                 if (function_item->data->item_returns.type_returns[i/2] != TYPE_STRING) {
+                     return ERR_SEMANTIC_PARRET;
+                 } else {
+                     function_item->data->item_value.string_value = token->attribute.string->string;
+                 }
+             }
+             if (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_NIL) {
+                 /*TODO*/
+             }
+             return ERR_SYNTAX;
+        } else {
+            if (token->type != TOKEN_COMMA) return ERR_SYNTAX;
+        }
+        GET_TOKEN;
+    }
+    i--;
+    if (((int) (i/2)) != (declarative_function->data->item_parameters.count_parameters - 1)) {
+        return ERR_SEMANTIC_PARRET;
+    } else {
+        return OK;
+    }
+}
+
+/**
+ * <expressions>
+ */
+int expresion_parser(){
+    token_struct *token_new = token;
+    GET_TOKEN;
+    //TODO Expression handle?
+
 }
 
 /**
  * while <conditions> do <state_l> end
- * TODO Add while cycle (depends on Expr_handle output)
  */
 int while_parser(tab_item_t *function_item) {
+    //TODO Add while cycle (depends on Expr_handle output)
     //actual token == KEYWORD_WHILE
     //TODO call Expression_handler  //<conditions>
     //GET_TOKEN;    want token DO

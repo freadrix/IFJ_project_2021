@@ -84,6 +84,12 @@ int return_parser(tab_item_t *function_item);
  * @brief function TODO
  * @return return code which is in error.h
  * */
+int expresion_parser();
+
+/**
+ * @brief function TODO
+ * @return return code which is in error.h
+ * */
 int function_body_parser();
 
 /**
