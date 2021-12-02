@@ -494,58 +494,6 @@ int def_var_parser(tab_item_t *function_item) {
         return OK;
     } else {
         return ERR_SYNTAX;
-
-// * <state_l>
-// * */
-//int function_body_parser(/*TODO Tabulka item*/) {
-//    for (int i = 0; !IS_END; ++i) {
-//        if (IS_FUNCTION) {
-//            /*TODO viz pravidla*/
-//        } else if (IS_LOCAL) {
-//            GET_TOKEN;
-//            if (IS_ID) {
-//                //vloz do tabulky
-//                GET_TOKEN;
-//                if (token->type != TOKEN_DDOT) return ERR_SYNTAX;
-//                GET_TOKEN;
-//                if (IS_TYPE) {
-//                    if (token->attribute.keyword == KEYWORD_INTEGER) {
-//                        if (!insert_return_item(/*TODO*/, TYPE_INTEGER)) return ERR_SYNTAX;
-//                    } else if (token->attribute.keyword == KEYWORD_NUMBER) {
-//                        if (!insert_return_item(/*TODO*/, TYPE_DOUBLE)) return ERR_SYNTAX;
-//                    } else if (token->attribute.keyword == KEYWORD_STRING) {
-//                        if (!insert_return_item(/*TODO*/, TYPE_STRING)) return ERR_SYNTAX;
-//                    } else {
-//                        /*TODO NULL*/
-//                    }
-//                }
-//                GET_TOKEN;
-//                if (token->type == TOKEN_ASSIGN) {
-//                    /*TODO func. assign*/
-//                }
-//                continue;   //i've got next token it can be end or another comm (i++)
-//            } else {
-//                return ERR_SYNTAX;
-//            }
-//        } else if (IS_ID) {
-//            // func() || (var = ..)
-//        } else if (IS_IF) {
-//            //TODO EXPRESSION HANDLER
-//        } else if (IS_WHILE) {
-//            //TODO EXPRESSION HANDLER
-//        } else if (IS_WRITE) {
-//            GET_TOKEN;
-//            if (token->type == TOKEN_BRACKET_ROUND_R) {
-//
-//            } else
-//                return ERR_SYNTAX;
-//        } else if (IS_RETURN) {
-//
-//        } else {
-//            return ERR_SYNTAX;
-//        }  /* TODO môžem volať funkcie s nejakou návratovou hodnotou bez priradenia?
-//            * napr. toint(20.5) ( a = toint(20.5) )
-//            * */
     }
 }
 
