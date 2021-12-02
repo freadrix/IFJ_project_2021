@@ -94,7 +94,7 @@ int get_token(token_struct *token) {
                 } else if (c == '<') {
                     state = STATE_LESS_THAN;
                 } else if (c == '>') {
-                    state = STATE_MORE_THAN;
+                    state = STATE_GREATER_THAN;
                 } else if (c == '=') {
                     state = STATE_EQUAL;
                 } else if (c == '~') {
@@ -541,7 +541,7 @@ int get_token(token_struct *token) {
                     state = STATE_COMMENT_BLOCK;
                 }
                 break;
-            case (STATE_MORE_THAN):
+            case (STATE_GREATER_THAN):
                 if (c == '=') {
                     token->type = TOKEN_GREATER_OR_EQ;
                 } else {
