@@ -38,7 +38,9 @@ int string_init(string_struct *str) {
 }
 
 void string_free(string_struct *str) {
-    if (str != NULL) free(str->string);
+    if (str != NULL) {
+        free(str->string);
+    }
 }
 
 void string_clear(string_struct *str) {
@@ -61,7 +63,7 @@ int string_copy(string_struct *str_to_copy, string_struct *copy_here) {
 	int len_copy = str_to_copy->length;
 	if (len_copy >= copy_here->alloc_length) {
         int len_plus_esc = len_copy + 1;
-		if (!(copy_here->string = (char *) realloc(copy_here->string, len_plus_esc))) {   
+		if (!(copy_here->string = (char *) realloc(copy_here->string, len_plus_esc))) {
 			return STR_ERR;
 		}
 		copy_here->alloc_length = len_plus_esc;
@@ -72,7 +74,7 @@ int string_copy(string_struct *str_to_copy, string_struct *copy_here) {
 	return STR_OK;
 }
 
-int add_char_to_string(string_struct *str, char c) {
+int add_char_to_string(string_struct *str, int c) {
     if (str->length + 1 >= str->alloc_length) {
         if(!re_lenght(str)) {
             string_clear(str);
