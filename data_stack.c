@@ -18,8 +18,12 @@ bool data_stack_is_empty(data_stack_t *stack) {
     return (stack->top == NULL ? true : false);
 }
 
-item_data_stack_t *get_top_of_stack(data_stack_t *stack) {
-    return stack->top;
+item_data_stack_t *get_global_frame_stack(data_stack_t *stack) {
+    item_data_stack_t *element = stack->top;
+    while (element->previous != NULL){
+        element = element->previous;
+    }
+    return element;
 }
 
 bool push_data_item(data_stack_t *stack) {

@@ -14,8 +14,8 @@
 #include "str.h"
 
 // max size of the table
-#define MAX_HT_SIZE 6133  //TODO //How many? For optimization. Must be prime number
-#define MAX_RETURN_TYPES 10 // max values which func return
+#define MAX_HT_SIZE 6133   //TODO //How many? For optimization. Must be prime number
+#define MAX_RETURNS 10      // max values which func return
 #define MAX_PARAMETERS 10   // max parameters which func can have
 
 
@@ -42,6 +42,22 @@ typedef enum {
 }tab_item_id_type;
 
 /**
+ * @struct parameter types
+ * */
+typedef struct table_item_parameters {
+    tab_item_data_type type_parameters[MAX_PARAMETERS];
+    int count_parameters;
+}tab_item_parameters;
+
+/**
+ * @struct return types
+ * */
+typedef struct table_item_returns {
+    tab_item_data_type type_returns[MAX_RETURNS];
+    int count_returns;
+}tab_item_returns;
+
+/**
  * @union value of table element
  * */
 typedef union t_value {
@@ -55,12 +71,12 @@ typedef union t_value {
  * */
 typedef struct table_item_data {
     char *identifier;
-    tab_item_id_type type_id;
-    tab_item_data_type type_data;
-    tab_item_data_type type_return_values[MAX_RETURN_TYPES];
-    tab_item_data_type type_parameter_values[MAX_PARAMETERS];
+    tab_item_id_type item_id_type;
+    tab_item_data_type item_data_type;
+    tab_item_returns item_returns;
+    tab_item_parameters item_parameters;
     bool defined;
-    tab_item_value value;
+    tab_item_value item_value;   // mozna nepotrebujeme
 }tab_item_data_t;
 
 /**
@@ -114,5 +130,21 @@ tab_item_t *insert_element_hashtable(table_t *tab, char *key);
  * @return true in case of success, else false
  */
 bool delete_single_hashtable(table_t *tab, char *key);
+
+/**
+ * @brief function insert type in array of parameter types
+ * @param item pointer on item of table
+ * @param type type of parameter value
+ * @return true in case of success, else false
+ * */
+bool insert_parameter_item(tab_item_t *item, tab_item_data_type type);
+
+/**
+ * @brief function insert type in array of return types
+ * @param item pointer on item of table
+ * @param type type of return value
+ * @return true in case of success, else false
+ * */
+bool insert_return_item(tab_item_t *item, tab_item_data_type type);
 
 #endif

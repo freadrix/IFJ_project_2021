@@ -14,15 +14,15 @@
 
 #define ERR_SYNTAX 2
 
-#define ERR_UNDEF 3
+#define ERR_SEMANTIC_DEF 3
 
-#define ERR_ASSIGNMENT 4
+#define ERR_SEMANTIC_ASSIGNMENT 4
 
-#define ERR_PARAM 5
+#define ERR_SEMANTIC_PARRET 5
 
-#define ERR_INCOMPATIBILITY 6
+#define ERR_SEMANTIC_EXP 6
 
-#define ERR_OTHER_SYM 7
+#define ERR_SEMANTIC_OTHERS 7
 
 #define ERR_NIL 8
 

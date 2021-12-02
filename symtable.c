@@ -2,7 +2,7 @@
  * Implementace překladače imperativního jazyka IFJ21.
  *
  * @brief Hash table operations
- * @author Aleksandr Verevkin (xverev00)
+ * @authors Aleksandr Verevkin (xverev00) Anton Medvedev (xmedve04)
  */
 
 #include <stdio.h>
@@ -72,8 +72,10 @@ tab_item_t *insert_element_hashtable(table_t *tab, char *key) {
         strcpy(inserted->key, key);
         strcpy(inserted->data->identifier, key);
         inserted->data->defined = false;
-        inserted->data->type_id = UNDEFINED;
-        inserted->data->type_data = TYPE_UNDEFINED;
+        inserted->data->item_id_type = UNDEFINED;
+        inserted->data->item_data_type = TYPE_UNDEFINED;
+        inserted->data->item_returns.count_returns = 0;
+        inserted->data->item_parameters.count_parameters = 0;
         inserted->next_item = (*tab)[get_hash(key)];
         (*tab)[get_hash(key)] = inserted;
         return inserted;
@@ -124,4 +126,20 @@ void delete_all_hashtable(table_t *tab) {
             (*tab)[i++] = NULL;
         }
     }
+}
+
+bool insert_parameter_item(tab_item_t *item, tab_item_data_type type) {
+    if (item->data->item_id_type != FUNCTION) return false;
+    item->data->item_parameters.type_parameters[item->data->item_parameters.count_parameters] = type;
+    item->data->item_parameters.count_parameters++;
+    if (item->data->item_parameters.count_parameters < MAX_PARAMETERS) return true;
+    return false;
+}
+
+bool insert_return_item(tab_item_t *item, tab_item_data_type type) {
+    if (item->data->item_id_type != FUNCTION) return false;
+    item->data->item_returns.type_returns[item->data->item_returns.count_returns] = type;
+    item->data->item_returns.count_returns++;
+    if (item->data->item_returns.count_returns < MAX_RETURNS) return true;
+    return false;
 }
