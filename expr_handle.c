@@ -157,9 +157,9 @@ static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *r
 
     if ((rule == E_PLUS_E) || (rule == E_MINUS_E) || (rule == E_MUL_E)) {
         if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) || (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
-            return ERR_INCOMPATIBILITY;
+            return ERR_SEMANTIC_EXP;
         } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
-            return ERR_UNDEF;
+            return ERR_SEMANTIC_DEF;
         } else if ((left->type == TYPE_INTEGER) && (right->type == TYPE_INTEGER)) {
             *type = TYPE_INTEGER;
             return OK;
@@ -170,9 +170,9 @@ static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *r
         }
     } else if (rule == E_DIV_E) {
         if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) || (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
-            return ERR_INCOMPATIBILITY;
+            return ERR_SEMANTIC_EXP;
         } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
-            return ERR_UNDEF;
+            return ERR_SEMANTIC_DEF;
         } else {
             //TODO convertation INT->DOUBLE
             *type = TYPE_DOUBLE;
@@ -180,9 +180,9 @@ static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *r
         }
     } else if (rule == E_IDIV_E) {
         if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) || (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
-            return ERR_INCOMPATIBILITY;
+            return ERR_SEMANTIC_EXP;
         } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
-            return ERR_UNDEF;
+            return ERR_SEMANTIC_DEF;
         } else {
             //TODO convertation DOUBLE->INT
             *type = TYPE_INTEGER;
@@ -190,13 +190,13 @@ static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *r
         }
     } else if ((rule == E_LT_E) || (rule == E_GT_E) || (rule == E_LEQ_E) || (rule == E_GEQ_E)) {
         if ((right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
-            return ERR_INCOMPATIBILITY;
+            return ERR_SEMANTIC_EXP;
         } else if ((left->type == TYPE_STRING) && ((right->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE))) {
-            return ERR_INCOMPATIBILITY;
+            return ERR_SEMANTIC_EXP;
         } else if (((left->type == TYPE_INTEGER) || (left->type == TYPE_DOUBLE)) && (right->type == TYPE_STRING)) {
-            return ERR_INCOMPATIBILITY;
+            return ERR_SEMANTIC_EXP;
         } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
-            return ERR_UNDEF;
+            return ERR_SEMANTIC_DEF;
         } else {
             //TODO convertation INT->DOUBLE
             *type = TYPE_BOOL;
@@ -205,13 +205,13 @@ static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *r
     } else if ((rule == E_NE_E) || (rule == E_EQ_E)) {
         //TODO comparation with NIL
         if ((right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
-            return ERR_INCOMPATIBILITY;
+            return ERR_SEMANTIC_EXP;
         } else if ((left->type == TYPE_STRING) && ((right->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE))) {
-            return ERR_INCOMPATIBILITY;
+            return ERR_SEMANTIC_EXP;
         } else if (((left->type == TYPE_INTEGER) || (left->type == TYPE_DOUBLE)) && (right->type == TYPE_STRING)) {
-            return ERR_INCOMPATIBILITY;
+            return ERR_SEMANTIC_EXP;
         } else if ((right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
-            return ERR_UNDEF;
+            return ERR_SEMANTIC_DEF;
         } else {
             //TODO convertation INT->DOUBLE
             *type = TYPE_BOOL;
@@ -219,16 +219,16 @@ static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *r
         }
     } else if (rule == ID_RULE) {
         if (left->type == TYPE_NULL) {
-            return ERR_UNDEF;
+            return ERR_SEMANTIC_DEF;
         } else if (left->type == TYPE_BOOL) {
-            return ERR_INCOMPATIBILITY;
+            return ERR_SEMANTIC_EXP;
         } else {
             *type = left->type;
             return OK;
         }
     } else if (rule == BR_E_BR) {
         if (middle->type == TYPE_NULL) {
-            return ERR_UNDEF;
+            return ERR_SEMANTIC_DEF;
         } else {
             *type = middle->type;
             return OK;
@@ -242,4 +242,3 @@ int exp_processing() {
 
     return OK;
 }
-

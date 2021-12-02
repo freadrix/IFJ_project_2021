@@ -16,7 +16,7 @@ void define_working_str(string_struct *s)
 
 int get_token(token_struct *token) {
     int state = STATE_START;
-    char c;
+    int c;
     char string_number[3] = { 0 };
     char hex[3] = { 0 };
 
@@ -89,14 +89,6 @@ int get_token(token_struct *token) {
                         return ERR_INTERNAL;
                     }
                     state = STATE_MINUS;
-                } else if (c == '+') {
-                    token->type = TOKEN_PLUS;
-                    string_free(str);
-                    return OK;
-                } else if (c == '*') {
-                    token->type = TOKEN_MUL;
-                    string_free(str);
-                    return OK;
                 } else if (c == '/') {
                     state = STATE_SLASH;
                 } else if (c == '<') {
@@ -109,6 +101,14 @@ int get_token(token_struct *token) {
                     state = STATE_TILDE;
                 } else if (c == '.') {
                     state = STATE_DOT;
+				} else if (c == '+') {
+					token->type = TOKEN_PLUS;
+					string_free(str);
+					return OK;
+				} else if (c == '*') {
+					token->type = TOKEN_MUL;
+					string_free(str);
+					return OK;
                 } else if (c == ':') {
                     token->type = TOKEN_DDOT;
                     string_free(str);
@@ -295,7 +295,7 @@ int get_token(token_struct *token) {
                 }
                 break;
             case (STATE_STRING_ESCAPE_TWO):
-                if (0 <= atoi(&c) && atoi(&c) <= 4) { // 0..4
+                if (0 <= c && c <= 4) { // 0..4
                     string_number[1] = c;
                     state = STATE_STRING_ESCAPE_OTHER;
                 } else if (c == '5') {
@@ -310,7 +310,7 @@ int get_token(token_struct *token) {
                 if (isdigit(c)) {
                     string_number[2] = c;
                     int value = atoi(string_number);
-                    c = (char) value;
+                    c = value;
                     if (!(add_char_to_string(str, c))) {
                         string_free(str);
                         return ERR_INTERNAL;
@@ -322,10 +322,10 @@ int get_token(token_struct *token) {
                 }
                 break;
             case (STATE_STRING_ESCAPE_TWO_FIVE):
-                if (0 <= atoi(&c) && atoi(&c) <= 5) { // 0..5
+                if (0 <= c && c <= 5) { // 0..5
                     string_number[2] = c;
                     int value = atoi(string_number);
-                    c = (char) value;
+                    c = value;
                     if (!(add_char_to_string(str, c))) {
                         string_free(str);
                         return ERR_INTERNAL;
@@ -340,7 +340,7 @@ int get_token(token_struct *token) {
                 if (isdigit(c)) {
                     string_number[2] = c;
                     int value = atoi(string_number);
-                    c = (char) value;
+                    c = value;
                     if (!(add_char_to_string(str, c))) {
                         string_free(str);
                         return ERR_INTERNAL;
@@ -361,7 +361,7 @@ int get_token(token_struct *token) {
                     }
                 }
                 if (strlen(hex) == 2) {
-                    char value;
+                    int value;
                     if (isdigit(hex[0])) {
                         value = 16 * (hex[0] - '0');
                     } else if( hex[0] >= 'A' && hex[0] <='F') {
