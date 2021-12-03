@@ -18,12 +18,13 @@
 #define GET_TOKEN                                               \
 SCANNER_RESPONSE = get_token(token);                            \
 if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE;             \
-if(IS_ID || (token->type == TOKEN_STRING))                      \
-    printf("%s\n", token->attribute.string->string);            \
 while (token->type == TOKEN_EOL) {                              \
     SCANNER_RESPONSE = get_token(token);                        \
     if(SCANNER_RESPONSE != OK) break;                           \
-} if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE
+}                                                               \
+if(IS_ID || (token->type == TOKEN_STRING))                      \
+printf("%s\n", token->attribute.string->string);                \
+if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE
 
 // macro that we use for insert new item to table
 #define INSERT_ITEM(_NAME)                                      \
@@ -58,6 +59,10 @@ IS_ID                                                   ||      \
 (token->attribute.keyword == KEYWORD_WHILE)             ||      \
 (token->attribute.keyword == KEYWORD_LOCAL)))
 
+// macro we use for call function which automatically check return value
+#define CALL(_FUNCTION)                                         \
+PARSER_RESPONSE = (_FUNCTION);                                  \
+if (PARSER_RESPONSE != OK) return PARSER_RESPONSE
 
 // macro that we use for check if keyword is function
 #define IS_FUNCTION                                             \
@@ -77,13 +82,11 @@ IS_ID                                                   ||      \
 
 // macro that we use for check if there is valid expression after keyword return
 #define IS_VALID                                                \
-( IS_ID                                                 ||      \
- (token->type == TOKEN_INT)                             ||      \
- (token->type == TOKEN_DOUBLE)                          ||      \
- (token->type == TOKEN_STRING)                          ||      \
-((token->type == TOKEN_KEYWORD)                         &&      \
- (token->attribute.keyword == KEYWORD_NIL))             ||      \
- (token->type == TOKEN_DDOT))
+(IS_ID                                                  ||      \
+(token->type == TOKEN_INT)                              ||      \
+(token->type == TOKEN_DOUBLE)                           ||      \
+(token->type == TOKEN_STRING))
+
 
 // macro we need for allocate memory
 #define ALLOC                                                   \
@@ -114,53 +117,56 @@ string_struct string;       // string
 /*-----------------*/
 
 /** Pravidlá
-    <header>        -> require "ifj21" <program>
-    <program>       -> global id : function ( <params_g> ) <rets> <program>
-    <program>       -> function id ( <params> ) <rets> <state_l> end <program>
-    <program>       -> <call> <program>
-    <program>       -> ε
-    <params_g>      -> <data_type> <param_g>
-    <params_g>      -> ε
-    <param_g>       -> , <data_type> <param_g>
-    <param_g>       -> ε
-    <params>        -> ε
-    <params>        -> id : <data_types> <param>
-    <param>         -> ε
-    <param>         -> , id : <data_type> <param>
-    <def_var>       -> local id : <data_type> <assign>
-    <def_var>       -> ε
-    <state_l>       -> <comm> <state_l>
-    <state_l>       -> ε
-    <comm>          -> <def_var>
-    <comm>          -> id <assign>
-    <comm>          -> if <conditions> then <state_l> else <stale_l> end
-    <comm>          -> while <conditions> do <state_l> end
-    <comm>          -> <call>
-    <comm>          -> return <expressions>
-    <comm>          -> write ( <expressions> )
-    <call>          -> id ( <expressions> )
-    <call>          -> ε
-    <rets>          -> : <data_type> <ret>
-    <rets>          -> ε
-    <ret>           -> , <data_type> <ret>
-    <ret>           -> ε
-    <data_type>     -> integer
-    <data_type>     -> number
-    <data_type>     -> string
-    <data_type>     -> nil
-    <assign>        -> = <assigns>
-    <assign>        -> ε
-    <assigns>       -> <call> <expressions>
-    <expressions>   -> expression <expression>     // mozna potrebujeme spravit
-    <expression>    -> , expression <expression>
-    <expression>    -> ε
-    <expressions>   -> readi ()
-    <expressions>   -> readn ()
-    <expressions>   -> reads ()
-    <expressions>   -> substr ( expression, expression, expression ) /// string, number, number : string
-    <expressions>   -> tointeger ( expression )                      /// number : integer
-    <expressions>   -> ord ( expression, expression )                /// string, integer : integer
-    <expressions>   -> chr ( expression )                            /// integer : string
+✓    <header>        -> require "ifj21" <program>
+✓    <program>       -> global id : function ( <params_g> ) <rets> <program>
+✓~    <program>       -> function id ( <params> ) <rets> <state_l> end <program>
+✓~    <program>       -> <call> <program>
+✓    <program>       -> ε
+✓    <params_g>      -> <data_type> <param_g>
+✓    <params_g>      -> ε
+✓    <param_g>       -> , <data_type> <param_g>
+✓    <param_g>       -> ε
+✓    <params>        -> ε
+✓    <params>        -> id : <data_types> <param>
+✓    <param>         -> ε
+✓    <param>         -> , id : <data_type> <param>
+✓~    <def_var>       -> local id : <data_type> <assign>
+✓    <def_var>       -> ε
+✓~    <state_l>       -> <comm> <state_l>
+✓    <state_l>       -> ε
+✓    <comm>          -> <def_var>
+✓~    <comm>          -> <ids> <assign>
+✓~    <comm>          -> if <conditions> then <state_l> else <stale_l> end
+✓~    <comm>          -> while <conditions> do <state_l> end
+✓~    <comm>          -> <call>
+✓~    <comm>          -> return <expressions>
+✝     <comm>          -> write ( <expressions> )
+✓~    <ids>           -> id <id>
+✓~    <id>            -> , id <id>
+✓~    <id>            -> ε
+✓~    <call>          -> id ( <expressions> )
+✓    <call>          -> ε
+✓    <rets>          -> : <data_type> <ret>
+✓    <rets>          -> ε
+✓    <ret>           -> , <data_type> <ret>
+✓    <ret>           -> ε
+✓    <data_type>     -> integer
+✓    <data_type>     -> number
+✓    <data_type>     -> string
+✓    <data_type>     -> nil
+✝    <assign>        -> = <assigns>
+✝    <assign>        -> ε
+✝    <assigns>       -> <call> <expressions>
+✝    <expressions>   -> expression <expression>
+✝    <expression>    -> , expression <expression>
+✝    <expression>    -> ε
+✝    <expressions>   -> readi ()
+✝    <expressions>   -> readn ()
+✝    <expressions>   -> reads ()
+✝    <expressions>   -> substr ( expression, expression, expression ) /// string, number, number : string
+✝    <expressions>   -> tointeger ( expression )                      /// number : integer
+✝    <expressions>   -> ord ( expression, expression )                /// string, integer : integer
+✝    <expressions>   -> chr ( expression )                            /// integer : string
  */
 
 
@@ -235,7 +241,7 @@ int start_program_parser() {
  * */
 int function_parser() {
     GET_TOKEN;
-    if (IS_ID) {    // (function) ID
+    if (IS_ID) {    /// (function) ID
         SEARCH_ITEM(function_item, stack->top->table, token->attribute.string->string);
         if (IS_BUILT_IN_FUNCTION) return ERR_SEMANTIC_DEF;
         if (is_there) {
@@ -251,10 +257,10 @@ int function_parser() {
     } else return ERR_SYNTAX;
     SEARCH_ITEM(function_item, stack->top->table, token->attribute.string->string);
     if (!is_there) return ERR_SYNTAX;
-    PARSER_RESPONSE = function_params_parser(function_item);    // ( <params> )
+    PARSER_RESPONSE = function_params_parser(function_item);    /// ( <params> )
     if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
     GET_TOKEN;
-    if (token->type == TOKEN_DDOT) {    // <rets>
+    if (token->type == TOKEN_DDOT) {    /// <rets>
         PARSER_RESPONSE = function_rets_parser(function_item);
         if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
     }
@@ -274,6 +280,7 @@ int function_parser() {
 /**
  * ( <params> )
  * */
+ // TODO zamyslet nad tim jak budou pushovat elementy zasobniku
 int function_params_parser(tab_item_t *function_item) {
     GET_TOKEN;
     if (token->type != TOKEN_BRACKET_ROUND_L) return ERR_SYNTAX;
@@ -369,20 +376,24 @@ int function_body_parser(tab_item_t *function_item) {
             }
         }
         if (IS_ID) {
-            GET_TOKEN;
-            if (token->type == TOKEN_BRACKET_ROUND_L) {
-                /*TODO volanie !Definovanej funkcie!*/
-            } else if (token->type == TOKEN_ASSIGN) {
-                /*TODO func. assign*/
-            } else {
-                return ERR_SYNTAX;
-            }
+            PARSER_RESPONSE = id_in_body_parser(function_item);
+            if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+//            GET_TOKEN;
+//            if (token->type == TOKEN_BRACKET_ROUND_L) {
+//                /*TODO volanie !Definovanej funkcie!*/
+//            } else if (token->type == TOKEN_ASSIGN) {
+//                /*TODO func. assign*/
+//            } else {
+//                return ERR_SYNTAX;
+//            }
         }
-        if (IS_ID && !(strcmp(token->attribute.string->string, "while"))) {
-            /*TODO expression*/
-        }
+//        // TODO do you mean write?
+//        if (IS_ID && !(strcmp(token->attribute.string->string, "while"))) {
+//            /*TODO expression*/
+//        }
         GET_TOKEN;
     }
+    return OK;
 }
 
 /**
@@ -392,9 +403,10 @@ int return_parser(tab_item_t *function_item) {
     // current token == keyword return
     GET_TOKEN;  // this token should be some expression
     int i;
-    for (i = 0; IS_VALID; ++i) {
+    for (i = 0; IS_VALID || token->type == TOKEN_COMMA ||                            \
+    (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_NIL); ++i) {
         if ((i % 2) == 0) {
-            PARSER_RESPONSE = expresion_parser();   //TODO example: return 5+2, a => return 7, <some value>
+//            PARSER_RESPONSE = expresion_parser();   //TODO example: return 5+2, a => return 7, <some value>
              if (token->type == TOKEN_INT) {
                 if (function_item->data->item_returns.type_returns[i/2] != TYPE_INTEGER) {
                     return ERR_SEMANTIC_PARRET;
@@ -426,7 +438,7 @@ int return_parser(tab_item_t *function_item) {
         GET_TOKEN;
     }
     i--;
-    if (((int) (i/2)) != (declarative_function->data->item_parameters.count_parameters - 1)) {
+    if (((int) (i/2)) != (function_item->data->item_parameters.count_parameters - 1)) {
         return ERR_SEMANTIC_PARRET;
     } else {
         return OK;
@@ -436,12 +448,12 @@ int return_parser(tab_item_t *function_item) {
 /**
  * <expressions>
  */
-int expresion_parser(){
-    token_struct *token_new = token;
-    GET_TOKEN;
-    //TODO Expression handle?
-
-}
+//int expression_parser(){
+//    token_struct *token_new = token;
+//    GET_TOKEN;
+//    //TODO Expression handle?
+//
+//}
 
 /**
  * while <conditions> do <state_l> end
@@ -464,7 +476,7 @@ int while_parser(tab_item_t *function_item) {
     if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END))
         return ERR_SYNTAX;
 
-    //return OK;    //end
+    return OK;    //end
 }
 
 /**
@@ -495,7 +507,7 @@ int if_parser(tab_item_t *function_item) {
     if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END))
         return ERR_SYNTAX;
 
-    //return OK;    //end
+    return OK;    //end
 }
 
 /**
@@ -506,7 +518,7 @@ int def_var_parser(tab_item_t *function_item) {
     GET_TOKEN;
     if (!IS_ID) return ERR_SYNTAX;
     SEARCH_ITEM(searched_item, stack->top->table, token->attribute.string->string);
-    if (is_there) return ERR_SEMANTIC_DEF;
+    if (is_there) return ERR_SEMANTIC_DEF;   // TODO can exist variable with same name as function?
     INSERT_ITEM(inserted_item);
     inserted_item->data->item_id_type = VARIABLE;
     GET_TOKEN;
@@ -528,13 +540,23 @@ int def_var_parser(tab_item_t *function_item) {
     GET_TOKEN;
     if (token->type == TOKEN_ASSIGN) {
         /*TODO func. assign*/
+        return OK; // todo
     } else if (IS_FUNCTION_BODY) {
         return OK;
     } else {
         return ERR_SYNTAX;
     }
-    return OK; // TODO
 }
+
+int id_in_body_parser(tab_item_t *function_item) {
+    printf("%s", function_item->key);
+//    item_data_stack_t *global_frame = get_global_frame_stack(stack);
+//    token_struct *id_token = token;
+    // TODO add rule if i want to add id , id, id, = foo()
+    GET_TOKEN;
+    return OK;
+}
+
 
 /**
  * <program>    -> global id : function
@@ -625,20 +647,28 @@ int global_function_parser(tab_item_t *inserted_item) {
  * <call>    -> id ( <expressions> )
  * */
  // TODO NE kontroluje parametry
-int call_function_parser() {
+ // TODO na zacatku bude token leve zavorky
+int call_check_parser() {
     item_data_stack_t *global_frame = get_global_frame_stack(stack);
-    SEARCH_ITEM(item, global_frame->table, token->attribute.string->string);
+    SEARCH_ITEM(declarative_function, global_frame->table, token->attribute.string->string);
     if(is_there == false) return ERR_SYNTAX;
-    tab_item_t *declarative_function = item;
     GET_TOKEN;
     if (token->type != TOKEN_BRACKET_ROUND_L) return ERR_SYNTAX;
+    CALL(call_function_parser(declarative_function));
+    return OK
+}
+
+/**
+ *
+ * */
+int call_function_parser(tab_item_t *declaration_function) {
     GET_TOKEN;
     tab_item_t *argument_function;
+    item_data_stack_t *stack_frame = stack->top;
     int i;      // counter
     for (i = 0; token->type != TOKEN_BRACKET_ROUND_R; i++) {
         if (i % 2 == 0) {
-            if (IS_ID) {
-                item_data_stack_t *stack_frame = stack->top;
+            if (IS_ID) {      // todo mozna bude expr
                 while (stack_frame != NULL) {
                     argument_function = search_hashtable(stack_frame->table, token->attribute.string->string);
                     if (argument_function != NULL) break;
@@ -654,239 +684,12 @@ int call_function_parser() {
         }
         GET_TOKEN;
     }
+    if (i == 0) {
+        if (declaration_function->data->item_parameters.count_parameters == 0) return OK;
+        else return ERR_SEMANTIC_PARRET;
+    }
     i--;
     if (((i % 2) != 0) || (((int) (i/2)) != (declarative_function->data->item_parameters.count_parameters - 1) ))
         return ERR_SYNTAX;
     return OK;
 }
-
-//
-///** <func>      -> function id ( <params> ) <rets> <body> end <program>
-// *
-// *
-// */
-//int p_function() {
-//    init_hashtable(table);
-//    int function;
-//    SCANNER_RESPONSE = get_token(token);
-//    while (1) {
-//        if (token->attribute.keyword != KEYWORD_FUNCTION)  //missing keyword function
-//            return ERR_SYNTAX;
-//
-//        SCANNER_RESPONSE = get_token(token);
-//        if (token->type != TOKEN_ID)
-//            return ERR_SYNTAX;
-//
-//        if (!strcmp(*token->attribute.string, "main") || !strcmp(*token->attribute.string, "write") ||
-//            !strcmp(*token->attribute.string, "reads") || !strcmp(*token->attribute.string, "readn") ||
-//            !strcmp(*token->attribute.string, "readi") || !strcmp(*token->attribute.string, "tointeger") ||
-//            !strcmp(*token->attribute.string, "substr") || !strcmp(*token->attribute.string, "ord") ||
-//            !strcmp(*token->attribute.string, "chr"))
-//            return ERR_UNDEF;
-//
-//        if (search_hashtable(table, *token->attribute.string) != NULL) {
-//            delete_all_hashtable(table);
-//            return ERR_UNDEF;
-//        }
-//
-//        if ((table_item = insert_element_hashtable(table, token->attribute.string->string)) == NULL) {
-//            delete_all_hashtable(table);
-//            return ERR_INTERNAL;
-//        }
-//
-//        SCANNER_RESPONSE = get_token(token);
-//        if (token->type != TOKEN_BRACKET_ROUND_L) {
-//            delete_all_hashtable(table);
-//            return ERR_SYNTAX;
-//        }
-//
-//        function = p_params();
-//        if (function != OK)
-//            return function;
-//
-//        SCANNER_RESPONSE = get_token(token);
-//        if (token->type == TOKEN_DDOT) {
-//            function = p_rets();
-//            if (function != OK)
-//                return function;
-//        }
-//
-//        function = p_body();
-//        if (function != OK)
-//            return function;
-//
-//        SCANNER_RESPONSE = get_token(token);
-//        if (token->attribute.keyword != KEYWORD_END) {
-//            delete_all_hashtable(table);
-//            return ERR_SYNTAX;
-//        }
-//        SCANNER_RESPONSE = get_token(token);   //not EOF, loading next function
-//        if (token->type == TOKEN_EOF)
-//            return OK;
-//    }
-//}
-///** <body>      -> <def_var> <state_l>
-// *
-// *
-// */
-//int p_body(){
-//    int function;
-//    while (1) {
-//        SCANNER_RESPONSE = get_token(token);
-//        if (token->attribute.keyword == KEYWORD_LOCAL) {
-//            function = p_defvar();
-//            if (function != OK) {
-//                delete_all_hashtable(table);
-//                return function;
-//            }
-//        }
-//        function = p_state_l();
-//        if (function != OK) {
-//            delete_all_hashtable(table);
-//            return function;
-//        }
-//    }
-//}
-///** <def_var>   -> local id : <data_type> <assign> <def_var>
-// *  <def_var>   -> ε
-// *
-// */
-//int p_defvar(){
-//    int function;
-//    SCANNER_RESPONSE = get_token(token);
-//    if (token->type != TOKEN_ID) {
-//        delete_all_hashtable(table);
-//        return ERR_SYNTAX;
-//    }
-//
-//    /* TODO Lokálne premenné kam?*/
-//
-//    SCANNER_RESPONSE = get_token(token);
-//    if (token->type != TOKEN_DDOT) {
-//        delete_all_hashtable(table);
-//        return ERR_SYNTAX;
-//    }
-//
-//    SCANNER_RESPONSE = get_token(token);
-//    if (token->attribute.keyword != KEYWORD_INTEGER &&
-//        token->attribute.keyword != KEYWORD_NUMBER &&
-//        token->attribute.keyword != KEYWORD_STRING) {
-//        delete_all_hashtable(table);
-//        return ERR_SYNTAX;
-//    }
-//
-//    /* TODO Lokálne premenné dát. typ*/
-//
-//    SCANNER_RESPONSE = get_token(token);
-//    if (token->type == TOKEN_ASSIGN){
-//        function = p_assign();
-//        return function;
-//    }
-//    if (token->type == TOKEN_EOL) {
-//        SCANNER_RESPONSE = get_token(token);
-//        return OK;
-//    }
-//
-//    return ERR_SYNTAX;
-//}
-///** <assign>    -> = <expression>
-// *  <assign>    -> ε
-// *
-// *
-// */
-//int p_assign(){
-//    int function;
-//    SCANNER_RESPONSE = get_token(token);
-//    if (token->type != TOKEN_ID && token->type != TOKEN_INT &&
-//        token->type != TOKEN_DOUBLE && token->type != TOKEN_STRING) {
-//        delete_all_hashtable(table);
-//        return ERR_SYNTAX;
-//    }
-//    /*TODO vložiť hodnotu do premennej*/
-//}
-//
-///** <state_l>   -> <comm> <state_l>
-// *  <state_l>   -> ε
-// *
-// */
-//int p_state_l() {
-//    int function;
-//
-//    if (token->attribute.keyword == KEYWORD_WHILE) {
-//        function = p_while();
-//        return function;
-//    } else if (token->attribute.keyword == KEYWORD_IF) {
-//        function = p_if();
-//        return function;
-//    } else if (token->type == TOKEN_ID) {
-//
-//    } else if (token->attribute.keyword == KEYWORD_RETURN) {
-//        function = p_params_in();
-//        return function;
-//    } else if (token->type == TOKEN_EOL) {
-//        return OK;
-//    }
-//
-//}
-//
-//int p_while(){
-//    int function;
-//
-//    //čakám nejakú podmienku example ( i < y )
-//    /* TODO WHILE*/
-//    SCANNER_RESPONSE = get_token(token);
-//    if (token->attribute.keyword != KEYWORD_DO) {
-//        delete_all_hashtable(table);
-//        return ERR_SYNTAX;
-//    }
-//    SCANNER_RESPONSE = get_token(token);
-//    function = p_state_l();
-//    if (function != OK) {
-//        delete_all_hashtable(table);
-//        return function;
-//    }
-//
-//    if (token->attribute.keyword != KEYWORD_END) {
-//        delete_all_hashtable(table);
-//        return ERR_SYNTAX;
-//    }
-//    return OK;
-//}
-//
-//int p_if(){
-//    int function;
-//    //čakám nejakú podmienku example ( i < y )
-//    /* TODO IF */
-//    SCANNER_RESPONSE = get_token(token);
-//    if (token->attribute.keyword != KEYWORD_THEN) {
-//        delete_all_hashtable(table);
-//        return ERR_SYNTAX;
-//    }
-//    SCANNER_RESPONSE = get_token(token);
-//    function = p_state_l();
-//    if (function != OK) {
-//        delete_all_hashtable(table);
-//        return function;
-//    }
-//    SCANNER_RESPONSE = get_token(token);
-//    if (token->attribute.keyword != KEYWORD_ELSE) {
-//        delete_all_hashtable(table);
-//        return ERR_SYNTAX;
-//    }
-//    SCANNER_RESPONSE = get_token(token);
-//    function = p_state_l();
-//    if (function != OK) {
-//        delete_all_hashtable(table);
-//        return function;
-//    }
-//    SCANNER_RESPONSE = get_token(token);
-//    if (token->attribute.keyword != KEYWORD_END) {
-//        delete_all_hashtable(table);
-//        return ERR_SYNTAX;
-//    }
-//    return OK;
-//}
-//
-//int p_params_in(){
-//    /* TODO PARAMS_IN */
-//}

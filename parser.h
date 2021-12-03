@@ -13,12 +13,13 @@
 #include "scanner.h"
 #include "str.h"
 #include "symtable.h"
-#include "exp_stack.h"
+//#include "exp_stack.h"
 #include "data_stack.h"
 #include "error.h"
 
 
 // Functions declaration
+// TODO move functions in right order
 /**
  * @brief cycle which will get token and work out him
  * @return return code which is in error.h
@@ -84,13 +85,13 @@ int return_parser(tab_item_t *function_item);
  * @brief function TODO
  * @return return code which is in error.h
  * */
-int expresion_parser();
+int expression_parser();
 
 /**
  * @brief function TODO
  * @return return code which is in error.h
  * */
-int function_body_parser();
+int id_in_body_parser(tab_item_t *function_item);
 
 /**
  * @brief function TODO
@@ -108,6 +109,11 @@ int global_function_parser(tab_item_t *item);
 /**
  * @brief TODO
  * @return return code which is in error.h
+ * */
+int call_check_parser();
+
+/**
+ *
  * */
 int call_function_parser();
 
