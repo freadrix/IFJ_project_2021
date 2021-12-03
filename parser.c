@@ -18,6 +18,8 @@
 #define GET_TOKEN                                               \
 SCANNER_RESPONSE = get_token(token);                            \
 if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE;             \
+if(IS_ID || (token->type == TOKEN_STRING))                      \
+    printf("%s\n", token->attribute.string->string);            \
 while (token->type == TOKEN_EOL) {                              \
     SCANNER_RESPONSE = get_token(token);                        \
     if(SCANNER_RESPONSE != OK) break;                           \
@@ -62,10 +64,10 @@ IS_ID                                                   &&      \
 // macro that we use for check if token can be part of function body
 #define IS_FUNCTION_BODY                                        \
 IS_ID                                                   ||      \
-(token->type == TOKEN_KEYWORD)                          &&      \
+((token->type == TOKEN_KEYWORD)                          &&     \
 ((token->attribute.keyword == KEYWORD_IF)               ||      \
 (token->attribute.keyword == KEYWORD_WHILE)             ||      \
-(token->attribute.keyword == KEYWORD_LOCAL))
+(token->attribute.keyword == KEYWORD_LOCAL)))
 
 
 // macro that we use for check if keyword is function
@@ -207,6 +209,7 @@ int parser() {
  * <header>     -> require "ifj21" <program>
  */
 int start_program_parser() {
+    // TODO musi zacinat require jako prvnim radkem
     GET_TOKEN;
     while (token->type != TOKEN_EOF) {
         if (token->attribute.keyword == KEYWORD_REQUIRE) {
@@ -346,18 +349,20 @@ int function_body_parser(tab_item_t *function_item) {
                 PARSER_RESPONSE = def_var_parser(function_item);
                 if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
             }
-            if (token->attribute.keyword == KEYWORD_IF) {
-                PARSER_RESPONSE =
-            }
+//            if (token->attribute.keyword == KEYWORD_IF) {
+//                PARSER_RESPONSE =
+//            }
         }
         GET_TOKEN;
     }
+    return OK;
 }
 
 /**
  *
  * */
 int def_var_parser(tab_item_t *function_item) {
+    printf("%s", function_item->key);
     GET_TOKEN;
     if (!IS_ID) return ERR_SYNTAX;
     SEARCH_ITEM(searched_item, stack->top->table, token->attribute.string->string);
@@ -388,6 +393,7 @@ int def_var_parser(tab_item_t *function_item) {
     } else {
         return ERR_SYNTAX;
     }
+    return OK; // TODO
 }
 
 /**
@@ -478,6 +484,7 @@ int global_function_parser(tab_item_t *inserted_item) {
 /**
  * <call>    -> id ( <expressions> )
  * */
+ // TODO NE kontroluje parametry
 int call_function_parser() {
     item_data_stack_t *global_frame = get_global_frame_stack(stack);
     SEARCH_ITEM(item, global_frame->table, token->attribute.string->string);
