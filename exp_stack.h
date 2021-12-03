@@ -27,6 +27,7 @@ typedef struct item_stack_struct {
  * @struct Stack structure
  */
 typedef struct stack_struct {
+
     item_stack_t *top;
 } stack_t;
 
@@ -50,6 +51,13 @@ bool is_empty_stack(stack_t *stack);
 item_stack_t *stack_top(stack_t *stack);
 
 /**
+ * @brief Found and return terminal until stop symobol
+ * @param stack Pointer on stack
+ * @return Pointer on stack terminal top item
+ */
+item_stack_t *stack_top_term(stack_t *stack);
+
+/**
  * @brief Pop top item from the stack
  * @param stack Pointer on stack
  * @return true in case of success, false in case of empty stack
@@ -60,9 +68,10 @@ bool pop_stack(stack_t *stack);
  * @brief Push new item on top of the stack
  * @param stack Pointer on stack
  * @param elem New character
+ * @param type Type of new element
  * @return true in case of success, else false
  */
-bool push_stack(stack_t *stack, elem_enum type);
+bool push_stack(stack_t *stack, elem_enum elem, tab_item_data_type type);
 
 /**
  * @brief Clear entire stack from the items

@@ -1,0 +1,11 @@
+Tento adresář obsahuje několik příkladů programů napsaných v IFJcode21.
+
+Na Merlinovi lze vyzkoušet příkazem:
+
+/pub/courses/ifj/ic21int/linux/ic21int example.ifjcode
+
+Základní použití interpretu ic21int zjistíte příkazem:
+
+/pub/courses/ifj/ic21int/linux/ic21int --help
+
+Pokud chcete vidět detailnější stavy paměti, tak na zajímavá místa programu v IFJcode21 vložte ladící instrukci BREAK.

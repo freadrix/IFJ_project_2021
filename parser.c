@@ -38,17 +38,6 @@ tab_item_t *(_NAME) = search_hashtable((_TABLE), (_STRING));    \
 bool is_there = false;                                          \
 if ((_NAME) != NULL) is_there = true
 
-// macro that we use for check if keyword of token is type
-#define IS_TYPE                                                 \
-(token->type == TOKEN_KEYWORD)                 &&               \
-((token->attribute.keyword == KEYWORD_INTEGER) ||               \
-(token->attribute.keyword == KEYWORD_NUMBER)   ||               \
-(token->attribute.keyword == KEYWORD_STRING)   ||               \
-(token->attribute.keyword == KEYWORD_NIL))
-
-// macro that we use for check if token is ID
-#define IS_ID (token->type == TOKEN_ID)
-
 // macro that we use for check if token string is build-in func string
 #define IS_BUILT_IN_FUNCTION                                    \
 IS_ID                                                   &&      \
@@ -64,7 +53,7 @@ IS_ID                                                   &&      \
 // macro that we use for check if token can be part of function body
 #define IS_FUNCTION_BODY                                        \
 IS_ID                                                   ||      \
-((token->type == TOKEN_KEYWORD)                          &&     \
+((token->type == TOKEN_KEYWORD)                         &&      \
 ((token->attribute.keyword == KEYWORD_IF)               ||      \
 (token->attribute.keyword == KEYWORD_WHILE)             ||      \
 (token->attribute.keyword == KEYWORD_LOCAL)))
@@ -74,6 +63,27 @@ IS_ID                                                   ||      \
 #define IS_FUNCTION                                             \
 ((token->type == TOKEN_KEYWORD) &&                              \
 (token->attribute.keyword == KEYWORD_FUNCTION))
+
+// macro that we use for check if keyword of token is type
+#define IS_TYPE                                                 \
+(token->type == TOKEN_KEYWORD)                          &&      \
+((token->attribute.keyword == KEYWORD_INTEGER)          ||      \
+(token->attribute.keyword == KEYWORD_NUMBER)            ||      \
+(token->attribute.keyword == KEYWORD_STRING)            ||      \
+(token->attribute.keyword == KEYWORD_NIL))
+
+// macro that we use for check if token is ID
+#define IS_ID (token->type == TOKEN_ID)
+
+// macro that we use for check if there is valid expression after keyword return
+#define IS_VALID                                                \
+( IS_ID                                                 ||      \
+ (token->type == TOKEN_INT)                             ||      \
+ (token->type == TOKEN_DOUBLE)                          ||      \
+ (token->type == TOKEN_STRING)                          ||      \
+((token->type == TOKEN_KEYWORD)                         &&      \
+ (token->attribute.keyword == KEYWORD_NIL))             ||      \
+ (token->type == TOKEN_DDOT))
 
 // macro we need for allocate memory
 #define ALLOC                                                   \
@@ -114,7 +124,7 @@ string_struct string;       // string
     <param_g>       -> , <data_type> <param_g>
     <param_g>       -> ε
     <params>        -> ε
-    <params>        -> id : <data_type> <param>
+    <params>        -> id : <data_types> <param>
     <param>         -> ε
     <param>         -> , id : <data_type> <param>
     <def_var>       -> local id : <data_type> <assign>
@@ -130,10 +140,6 @@ string_struct string;       // string
     <comm>          -> write ( <expressions> )
     <call>          -> id ( <expressions> )
     <call>          -> ε
-    <params_in>     -> ε
-    <params_in>     -> expression <param_in>
-    <param_in>      -> , expression <param_in>
-    <param_in>      -> ε
     <rets>          -> : <data_type> <ret>
     <rets>          -> ε
     <ret>           -> , <data_type> <ret>
@@ -245,10 +251,10 @@ int function_parser() {
     } else return ERR_SYNTAX;
     SEARCH_ITEM(function_item, stack->top->table, token->attribute.string->string);
     if (!is_there) return ERR_SYNTAX;
-    PARSER_RESPONSE = function_params_parser(function_item);
+    PARSER_RESPONSE = function_params_parser(function_item);    // ( <params> )
     if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
     GET_TOKEN;
-    if (token->type == TOKEN_DDOT) {
+    if (token->type == TOKEN_DDOT) {    // <rets>
         PARSER_RESPONSE = function_rets_parser(function_item);
         if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
     }
@@ -349,17 +355,151 @@ int function_body_parser(tab_item_t *function_item) {
                 PARSER_RESPONSE = def_var_parser(function_item);
                 if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
             }
-//            if (token->attribute.keyword == KEYWORD_IF) {
-//                PARSER_RESPONSE =
-//            }
+            if (token->attribute.keyword == KEYWORD_IF) {
+                PARSER_RESPONSE = if_parser(function_item);
+                if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+            }
+            if (token->attribute.keyword == KEYWORD_WHILE) {
+                PARSER_RESPONSE = while_parser(function_item);
+                if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+            }
+            if (token->attribute.keyword == KEYWORD_RETURN) {
+                PARSER_RESPONSE = return_parser(function_item);
+                if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+            }
+        }
+        if (IS_ID) {
+            GET_TOKEN;
+            if (token->type == TOKEN_BRACKET_ROUND_L) {
+                /*TODO volanie !Definovanej funkcie!*/
+            } else if (token->type == TOKEN_ASSIGN) {
+                /*TODO func. assign*/
+            } else {
+                return ERR_SYNTAX;
+            }
+        }
+        if (IS_ID && !(strcmp(token->attribute.string->string, "while"))) {
+            /*TODO expression*/
         }
         GET_TOKEN;
     }
-    return OK;
 }
 
 /**
- *
+ * return <expressions>
+ */
+int return_parser(tab_item_t *function_item) {
+    // current token == keyword return
+    GET_TOKEN;  // this token should be some expression
+    int i;
+    for (i = 0; IS_VALID; ++i) {
+        if ((i % 2) == 0) {
+            PARSER_RESPONSE = expresion_parser();   //TODO example: return 5+2, a => return 7, <some value>
+             if (token->type == TOKEN_INT) {
+                if (function_item->data->item_returns.type_returns[i/2] != TYPE_INTEGER) {
+                    return ERR_SEMANTIC_PARRET;
+                } else {
+                    function_item->data->item_value.int_value = token->attribute.int_value;
+                }
+             }
+             if (token->type == TOKEN_DOUBLE) {
+                 if (function_item->data->item_returns.type_returns[i/2] != TYPE_DOUBLE) {
+                     return ERR_SEMANTIC_PARRET;
+                 } else {
+                     function_item->data->item_value.double_value = token->attribute.double_value;
+                 }
+             }
+             if (token->type == TOKEN_STRING) {
+                 if (function_item->data->item_returns.type_returns[i/2] != TYPE_STRING) {
+                     return ERR_SEMANTIC_PARRET;
+                 } else {
+                     function_item->data->item_value.string_value = token->attribute.string->string;
+                 }
+             }
+             if (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_NIL) {
+                 /*TODO*/
+             }
+             return ERR_SYNTAX;
+        } else {
+            if (token->type != TOKEN_COMMA) return ERR_SYNTAX;
+        }
+        GET_TOKEN;
+    }
+    i--;
+    if (((int) (i/2)) != (declarative_function->data->item_parameters.count_parameters - 1)) {
+        return ERR_SEMANTIC_PARRET;
+    } else {
+        return OK;
+    }
+}
+
+/**
+ * <expressions>
+ */
+int expresion_parser(){
+    token_struct *token_new = token;
+    GET_TOKEN;
+    //TODO Expression handle?
+
+}
+
+/**
+ * while <conditions> do <state_l> end
+ */
+int while_parser(tab_item_t *function_item) {
+    //TODO Add while cycle (depends on Expr_handle output)
+    //actual token == KEYWORD_WHILE
+    //TODO call Expression_handler  //<conditions>
+    //GET_TOKEN;    want token DO
+    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_DO))  //do
+        return ERR_SYNTAX;
+    GET_TOKEN;
+    if (!(IS_FUNCTION_BODY || (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END)))
+        return ERR_SYNTAX;
+    if (IS_FUNCTION_BODY) { // <state_l> (<body>)
+        PARSER_RESPONSE = function_body_parser(function_item);  //if it didnt return with error than actual token is TOKEN_END
+        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+        GET_TOKEN;  //getting next token, should be END again (end of while cycle)
+    }
+    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END))
+        return ERR_SYNTAX;
+
+    //return OK;    //end
+}
+
+/**
+ * if <conditions> then <state_l> else <stale_l> end
+ */
+int if_parser(tab_item_t *function_item) {
+    //actual token == KEYWORD_IF
+    //TODO call Expression_handler  //<conditions>
+    //GET_TOKEN;    want token from IS_FUNCTION_BODY or keyword THEN
+    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_THEN))    // then
+        return ERR_SYNTAX;
+    if (!(IS_FUNCTION_BODY || (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_ELSE)))
+        return ERR_SYNTAX;
+    if (IS_FUNCTION_BODY) { // <state_l> (<body>)
+        PARSER_RESPONSE = function_body_parser(function_item);  //if it didnt return with error than actual token is TOKEN_END
+        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+        GET_TOKEN;  //getting next token, should be keyword ELSE
+    }
+    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_ELSE))    // else
+        return ERR_SYNTAX;
+    if (!(IS_FUNCTION_BODY || (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END)))
+        return ERR_SYNTAX;
+    if (IS_FUNCTION_BODY) { // <state_l> (<body>)
+        PARSER_RESPONSE = function_body_parser(function_item);  //if it didnt return with error than actual token is TOKEN_END
+        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+        GET_TOKEN;  //getting next token, should be END again (end of if else)
+    }
+    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END))
+        return ERR_SYNTAX;
+
+    //return OK;    //end
+}
+
+/**
+ *  <def_var>
  * */
 int def_var_parser(tab_item_t *function_item) {
     printf("%s", function_item->key);
@@ -585,105 +725,6 @@ int call_function_parser() {
 //            return OK;
 //    }
 //}
-//
-///** <params>    -> ε
-// *  <params>    -> id : <data_type> <param>
-// *  <param>    -> ε
-// *  <param>    -> , id : <data_type> <param>
-// *
-// */
-//int p_params() {
-//    table_item *params;
-//    SCANNER_RESPONSE = get_token(token);
-//    if (token->type != TOKEN_BRACKET_ROUND_R)  //<params>    -> ε
-//        return OK;
-//
-//    int i = 0;
-//    while (1) {
-//        if (token->type != TOKEN_ID) {
-//            delete_all_hashtable(table);
-//            return ERR_SYNTAX;
-//        }
-//
-//        if ((params = search_hashtable(table, table_item->key)) == NULL) {
-//            delete_all_hashtable(table);
-//            return ERR_INTERNAL;
-//        }
-//        table_item->data.type_parameter_values[i] = token->attribute.string->string;    //TODO
-//
-//        SCANNER_RESPONSE = get_token(token);
-//        if (token->type != TOKEN_DDOT) {
-//            delete_all_hashtable(table);
-//            return ERR_SYNTAX;
-//        }
-//
-//        SCANNER_RESPONSE = get_token(token);
-//        if (token->attribute.keyword != KEYWORD_INTEGER &&
-//            token->attribute.keyword != KEYWORD_NUMBER &&
-//            token->attribute.keyword != KEYWORD_STRING) {
-//            delete_all_hashtable(table);
-//            return ERR_SYNTAX;
-//        }
-//        /*TODO dát. typ parametru*/
-//        SCANNER_RESPONSE = get_token(token);
-//        if (token->type != TOKEN_BRACKET_ROUND_R)
-//            return OK;
-//
-//        if (token->type != TOKEN_COMMA) {
-//            delete_all_hashtable(table);
-//            return ERR_SYNTAX;
-//        }
-//
-//        SCANNER_RESPONSE = get_token(token);
-//        if (i > MAX_PARAMETERS) {
-//            delete_all_hashtable(table);
-//            return ERR_PARAM;
-//        }
-//        i++;
-//    }
-//}
-///** <rets>      -> : <data_type> <ret>
-// *  <rets>      -> ε
-// *  <ret>       -> , <data_type> <ret>
-// *  <ret>       -> ε
-// *
-// */
-//int p_rets() {
-//    table_item *returns;
-//    int i = 0;
-//    while (1) {
-//        SCANNER_RESPONSE = get_token(token);
-//        if (token->attribute.keyword != KEYWORD_INTEGER &&
-//            token->attribute.keyword != KEYWORD_NUMBER &&
-//            token->attribute.keyword != KEYWORD_STRING) {
-//            delete_all_hashtable(table);
-//            return ERR_SYNTAX;
-//        }
-//
-//        if ((returns = search_hashtable(table, table_item->key)) == NULL) {
-//            delete_all_hashtable(table);
-//            return ERR_INTERNAL;
-//        }
-//        table_item->data.type_return_values[i] = token->attribute.string->string;   //TODO
-//
-//        SCANNER_RESPONSE = get_token(token);
-//        if (token->type != TOKEN_COMMA) {
-//            delete_all_hashtable(table);
-//            return ERR_SYNTAX;
-//        }
-//        if (token->type == TOKEN_EOL)
-//            return OK;
-//
-//        SCANNER_RESPONSE = get_token(token);
-//
-//        if (i > MAX_RETURN_TYPES) {
-//            delete_all_hashtable(table);
-//            return ERR_PARAM;
-//        }
-//        i++;
-//    }
-//}
-//
 ///** <body>      -> <def_var> <state_l>
 // *
 // *

@@ -30,18 +30,18 @@
 #define STATE_STRING_ESCAPE_OTHER 19     /*  Value: from 001 to 249  */
 #define STATE_STRING_ESCAPE_HEX 20
 
-#define STATE_DOT 21       // .
-#define STATE_LESS_THAN 22 // < GREATER
-#define STATE_MORE_THAN 23 // >
-#define STATE_EQUAL 24     // =
-#define STATE_TILDE 25     // ~
-#define STATE_MINUS 26     // -
-#define STATE_SLASH 27     // /
+#define STATE_DOT 21          // .
+#define STATE_LESS_THAN 22    // <
+#define STATE_GREATER_THAN 23 // >
+#define STATE_EQUAL 24        // =
+#define STATE_TILDE 25        // ~
+#define STATE_MINUS 26        // -
+#define STATE_SLASH 27        // /
 
 // Comments
 #define STATE_COMMENT_START 28        // ∑-EOL, EOF, [              (if [ go to 27)
 #define STATE_COMMENT_BLOCK_START 29  // go back to state 26 if ∑-[
-#define STATE_COMMENT_BLOCK 30        // ∑-]                        (if ] go to )
+#define STATE_COMMENT_BLOCK 30        // ∑-]                        (if ] go to 31)
 #define STATE_COMMENT_BLOCK_END 31    // go back to state 28 if ∑-]
 
 // Number
@@ -56,6 +56,9 @@
 #define STATE_EOF 39 // End of file
 /* STATES END */
 
+/**
+* @enum Token types
+*/
 typedef enum {
     TOKEN_EMPTY,            // 0
     TOKEN_EOL,              // 1
@@ -92,6 +95,9 @@ typedef enum {
     TOKEN_BRACKET_ROUND_L   // 27
 } token_type;
 
+/**
+* @enum Keywords
+*/
 typedef enum {
     KEYWORD_DO,         // 0
     KEYWORD_ELSE,       // 1
@@ -110,6 +116,9 @@ typedef enum {
     KEYWORD_STRING      // 14
 } keyword_type;
 
+/**
+* @struct Token possible attributes
+*/
 typedef union {
 
     int int_value;
@@ -118,17 +127,24 @@ typedef union {
     keyword_type keyword;
 } token_attribute;
 
+/**
+* @struct Token representation
+*/
 typedef struct {
 
     token_type type;
     token_attribute attribute;
 } token_struct;
 
+/**
+* @brief function reads the input source file character by character and makes tokens by character value
+* @param token Pointer to work with the token structure
+*/
 int get_token(token_struct *token);
 
 /**
-* @brief function define string in scanner to work in parser
-* @param str string to define in scanner
+* @brief function defines a string in the scanner to work in the parser
+* @param str String to define in scanner
 */
 void define_working_str(string_struct *str);
 

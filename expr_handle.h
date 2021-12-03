@@ -11,6 +11,7 @@
 #include "exp_stack.h"
 #include "scanner.h"
 #include "error.h"
+#include "gen_code.h"
 
 /**
  * @enum Available symbols
@@ -38,8 +39,9 @@ typedef enum {
     DOUBLE,
     STRING,
     
-    EXP,        // expression
-    SIGN        // $
+    SIGN,       // $
+    STOP,
+    EXPR
 } elem_enum;
 
 /**
