@@ -110,4 +110,13 @@ bool push_stack(stack_t *stack, elem_enum elem, tab_item_data_type type);
  */
 void empty_stack(stack_t *stack);
 
+/**
+* @brief Insert new item after top terminal in stack
+* @param stack Pointer on stack
+* @param elem New character
+* @param type Type of new element
+* @return true in case of success, else false
+ */
+bool insert_after_top_term(stack_t *stack, elem_enum elem, tab_item_data_type type);
+
 #endif

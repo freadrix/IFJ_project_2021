@@ -9,8 +9,17 @@
 
 #include "expr_handle.h"
 
-stack_t stack;
+// macro that we use for get new token and check return value
+#define GET_TOKEN                                               \
+SCANNER_RESPONSE = get_token(token);                            \
+if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE;             \
+while (token->type == TOKEN_EOL) {                              \
+    SCANNER_RESPONSE = get_token(token);                        \
+    if(SCANNER_RESPONSE != OK) break;                           \
+} if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE
 
+stack_t stack;
+int SCANNER_RESPONSE; // idk, but it can not take declaration from parser header
 
 typedef enum {
 
@@ -38,7 +47,7 @@ char precedence_tab[9][9] = {
 /*    $   */    {'<' ,'<' ,'<' ,'#' ,'<' ,'<' ,'<' ,'<' ,'#' },
 };
 
-static elem_enum get_type(token_struct *tkn) {
+static elem_enum get_elem(token_struct *tkn) {
 
     if (tkn->type == TOKEN_PLUS) {
         return PLUS;
@@ -83,6 +92,20 @@ static elem_enum get_type(token_struct *tkn) {
     }
 }
 
+static tab_item_data_type get_elem_type(elem_enum elem) {
+    if (elem == ID) {
+        return TYPE_INTEGER;
+    } else if (elem == INT) {
+        return TYPE_INTEGER;
+    } else if (elem == DOUBLE) {
+        return TYPE_DOUBLE;
+    } else if (elem == STRING) {
+        return TYPE_STRING;
+    } else {
+        return TYPE_UNDEFINED;
+    }
+}
+
 static prec_enum get_precedence(elem_enum elem) {
 
     if ((elem == PLUS) || (elem == MINUS)) {
@@ -106,194 +129,194 @@ static prec_enum get_precedence(elem_enum elem) {
     }
 }
 
-static rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_t *right, bool id) {
-
-    if (id) {
-        if ((left->elem == ID) || (left->elem == INT) || (left->elem == DOUBLE) || (left->elem == STRING)) {
-            return ID_RULE;
-        } else {
-            return NO_RULE;
-        }
-    } else {
-        if ((left->elem == EXPR) && (right->elem == EXPR)) {
-            if (middle->elem == PLUS) {
-                return E_PLUS_E;
-            } else if (middle->elem == MINUS) {
-                return E_MINUS_E;
-            } else if (middle->elem == MUL) {
-                return E_MUL_E;
-            } else if (middle->elem == DIV) {
-                return E_DIV_E;
-            } else if (middle->elem == IDIV) {
-                return E_IDIV_E;
-            } else if (middle->elem == LT) {
-                return E_LT_E;
-            } else if (middle->elem == GT) {
-                return E_GT_E;
-            } else if (middle->elem == GEQ) {
-                return E_GEQ_E;
-            } else if (middle->elem == LEQ) {
-                return E_LEQ_E;
-            } else if (middle->elem == EQ) {
-                return E_EQ_E;
-            } else if (middle->elem == NE) {
-                return E_NE_E;
-            } else if (middle->elem == LEN) {
-                return E_LEN;
-            } else if (middle->elem == CONCAT) {
-                return E_CONCAT_E;
-            } else {
-                return NO_RULE;
-            }
-        } else if ((left->elem == LBR) && (middle->elem == EXPR) && (right->elem == RBR)) {
-            return BR_E_BR;
-        } else {
-            return NO_RULE;
-        }
-    }
-}
-
-static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, rules_enum rule, tab_item_data_type *type) {
-
-    if ((rule == E_PLUS_E) || (rule == E_MINUS_E) || (rule == E_MUL_E)) {
-        if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) ||
-            (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)  ||
-            (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
-            return ERR_SEMANTIC_EXP;
-        } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
-            return ERR_SEMANTIC_DEF;
-        } else if ((left->type == TYPE_INTEGER) && (right->type == TYPE_INTEGER)) {
-            *type = TYPE_INTEGER;
-            return OK;
-        } else {
-            if (left->type == TYPE_INTEGER) {
-                if (!(code_generate_stack_convert_float_second())) {
-                    return ERR_INTERNAL;
-                }
-            } else if (right->type == TYPE_INTEGER) {
-                if (!(code_generate_stack_convert_float_first())) {
-                    return ERR_INTERNAL;
-                }
-            }
-            *type = TYPE_DOUBLE;
-            return OK;
-        }
-    } else if (rule == E_DIV_E) {
-        if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) ||
-            (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)  ||
-            (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
-            return ERR_SEMANTIC_EXP;
-        } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
-            return ERR_SEMANTIC_DEF;
-        } else {
-            if (left->type == TYPE_INTEGER) {
-                if (!(code_generate_stack_convert_float_second())) {
-                    return ERR_INTERNAL;
-                }
-            }
-            if (right->type == TYPE_INTEGER) {
-                if (!(code_generate_stack_convert_float_first())) {
-                    return ERR_INTERNAL;
-                }
-            }
-            *type = TYPE_DOUBLE;
-            return OK;
-        }
-    } else if (rule == E_IDIV_E) {
-        if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) ||
-            (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)  ||
-            (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
-            return ERR_SEMANTIC_EXP;
-        } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
-            return ERR_SEMANTIC_DEF;
-        } else {
-            if (left->type == TYPE_DOUBLE) {
-                if (!(code_generate_stack_convert_int_second())) {
-                    return ERR_INTERNAL;
-                }
-            }
-            if (right->type == TYPE_DOUBLE) {
-                if (!(code_generate_stack_convert_int_first())) {
-                    return ERR_INTERNAL;
-                }
-            }
-            *type = TYPE_INTEGER;
-            return OK;
-        }
-    } else if ((rule == E_LT_E) || (rule == E_GT_E) || (rule == E_LEQ_E) || (rule == E_GEQ_E)) {
-        if ((right->type == TYPE_BOOL) || (left->type == TYPE_BOOL) ||
-            (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
-            return ERR_SEMANTIC_EXP;
-        } else if (((left->type == TYPE_STRING) && ((right->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE))) ||
-                  (((left->type == TYPE_INTEGER) || (left->type == TYPE_DOUBLE)) && (right->type == TYPE_STRING))) {
-            return ERR_SEMANTIC_EXP;
-        } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
-            return ERR_SEMANTIC_DEF;
-        } else {
-            if ((left->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE)) {
-                if (!(code_generate_stack_convert_float_second())) {
-                    return ERR_INTERNAL;
-                }
-            } else if ((left->type == TYPE_DOUBLE) || (right->type == TYPE_INTEGER)) {
-                if (!(code_generate_stack_convert_float_first())) {
-                    return ERR_INTERNAL;
-                }
-            }
-            *type = TYPE_BOOL;
-            return OK;
-        }
-    } else if ((rule == E_NE_E) || (rule == E_EQ_E)) {
-        if ((right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
-            return ERR_SEMANTIC_EXP;
-        } else if (((left->type == TYPE_STRING) && ((right->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE))) ||
-                  (((left->type == TYPE_INTEGER) || (left->type == TYPE_DOUBLE)) && (right->type == TYPE_STRING))) {
-            return ERR_SEMANTIC_EXP;
-        } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
-            return ERR_SEMANTIC_DEF;
-        } else {
-            if ((left->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE)) {
-                if (!(code_generate_stack_convert_float_second())) {
-                    return ERR_INTERNAL;
-                }
-            } else if ((left->type == TYPE_DOUBLE) || (right->type == TYPE_INTEGER)) {
-                if (!(code_generate_stack_convert_float_first())) {
-                    return ERR_INTERNAL;
-                }
-            }
-            *type = TYPE_BOOL;
-            return OK;
-        }
-    } else if (rule == E_LEN) {
-        if (middle->type != TYPE_STRING) {
-            return ERR_SEMANTIC_EXP;
-        } else {
-            *type = TYPE_INTEGER;
-        }
-    } else if (rule == E_CONCAT_E) {
-        if ((left->type != TYPE_STRING) || (right->type != TYPE_STRING)) {
-            return ERR_SEMANTIC_EXP;
-        } else {
-            *type = TYPE_STRING;
-        }
-    } else if (rule == ID_RULE) {
-        if (left->type == TYPE_UNDEFINED) {
-            return ERR_SEMANTIC_DEF;
-        } else if (left->type == TYPE_BOOL) {
-            return ERR_SEMANTIC_EXP;
-        } else {
-            *type = left->type;
-            return OK;
-        }
-    } else if (rule == BR_E_BR) {
-        if (middle->type == TYPE_UNDEFINED) {
-            return ERR_SEMANTIC_DEF;
-        } else {
-            *type = middle->type;
-            return OK;
-        }
-    }
-    return OK;
-}
+// static rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_t *right, bool id) {
+//
+//     if (id) {
+//         if ((left->elem == ID) || (left->elem == INT) || (left->elem == DOUBLE) || (left->elem == STRING)) {
+//             return ID_RULE;
+//         } else {
+//             return NO_RULE;
+//         }
+//     } else {
+//         if ((left->elem == EXPR) && (right->elem == EXPR)) {
+//             if (middle->elem == PLUS) {
+//                 return E_PLUS_E;
+//             } else if (middle->elem == MINUS) {
+//                 return E_MINUS_E;
+//             } else if (middle->elem == MUL) {
+//                 return E_MUL_E;
+//             } else if (middle->elem == DIV) {
+//                 return E_DIV_E;
+//             } else if (middle->elem == IDIV) {
+//                 return E_IDIV_E;
+//             } else if (middle->elem == LT) {
+//                 return E_LT_E;
+//             } else if (middle->elem == GT) {
+//                 return E_GT_E;
+//             } else if (middle->elem == GEQ) {
+//                 return E_GEQ_E;
+//             } else if (middle->elem == LEQ) {
+//                 return E_LEQ_E;
+//             } else if (middle->elem == EQ) {
+//                 return E_EQ_E;
+//             } else if (middle->elem == NE) {
+//                 return E_NE_E;
+//             } else if (middle->elem == LEN) {
+//                 return E_LEN;
+//             } else if (middle->elem == CONCAT) {
+//                 return E_CONCAT_E;
+//             } else {
+//                 return NO_RULE;
+//             }
+//         } else if ((left->elem == LBR) && (middle->elem == EXPR) && (right->elem == RBR)) {
+//             return BR_E_BR;
+//         } else {
+//             return NO_RULE;
+//         }
+//     }
+// }
+//
+// static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, rules_enum rule, tab_item_data_type *type) {
+//
+//     if ((rule == E_PLUS_E) || (rule == E_MINUS_E) || (rule == E_MUL_E)) {
+//         if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) ||
+//             (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)  ||
+//             (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+//             return ERR_SEMANTIC_EXP;
+//         } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
+//             return ERR_SEMANTIC_DEF;
+//         } else if ((left->type == TYPE_INTEGER) && (right->type == TYPE_INTEGER)) {
+//             *type = TYPE_INTEGER;
+//             return OK;
+//         } else {
+//             if (left->type == TYPE_INTEGER) {
+//                 if (!(code_generate_stack_convert_float_second())) {
+//                     return ERR_INTERNAL;
+//                 }
+//             } else if (right->type == TYPE_INTEGER) {
+//                 if (!(code_generate_stack_convert_float_first())) {
+//                     return ERR_INTERNAL;
+//                 }
+//             }
+//             *type = TYPE_DOUBLE;
+//             return OK;
+//         }
+//     } else if (rule == E_DIV_E) {
+//         if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) ||
+//             (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)  ||
+//             (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+//             return ERR_SEMANTIC_EXP;
+//         } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
+//             return ERR_SEMANTIC_DEF;
+//         } else {
+//             if (left->type == TYPE_INTEGER) {
+//                 if (!(code_generate_stack_convert_float_second())) {
+//                     return ERR_INTERNAL;
+//                 }
+//             }
+//             if (right->type == TYPE_INTEGER) {
+//                 if (!(code_generate_stack_convert_float_first())) {
+//                     return ERR_INTERNAL;
+//                 }
+//             }
+//             *type = TYPE_DOUBLE;
+//             return OK;
+//         }
+//     } else if (rule == E_IDIV_E) {
+//         if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) ||
+//             (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)  ||
+//             (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+//             return ERR_SEMANTIC_EXP;
+//         } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
+//             return ERR_SEMANTIC_DEF;
+//         } else {
+//             if (left->type == TYPE_DOUBLE) {
+//                 if (!(code_generate_stack_convert_int_second())) {
+//                     return ERR_INTERNAL;
+//                 }
+//             }
+//             if (right->type == TYPE_DOUBLE) {
+//                 if (!(code_generate_stack_convert_int_first())) {
+//                     return ERR_INTERNAL;
+//                 }
+//             }
+//             *type = TYPE_INTEGER;
+//             return OK;
+//         }
+//     } else if ((rule == E_LT_E) || (rule == E_GT_E) || (rule == E_LEQ_E) || (rule == E_GEQ_E)) {
+//         if ((right->type == TYPE_BOOL) || (left->type == TYPE_BOOL) ||
+//             (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+//             return ERR_SEMANTIC_EXP;
+//         } else if (((left->type == TYPE_STRING) && ((right->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE))) ||
+//                   (((left->type == TYPE_INTEGER) || (left->type == TYPE_DOUBLE)) && (right->type == TYPE_STRING))) {
+//             return ERR_SEMANTIC_EXP;
+//         } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
+//             return ERR_SEMANTIC_DEF;
+//         } else {
+//             if ((left->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE)) {
+//                 if (!(code_generate_stack_convert_float_second())) {
+//                     return ERR_INTERNAL;
+//                 }
+//             } else if ((left->type == TYPE_DOUBLE) || (right->type == TYPE_INTEGER)) {
+//                 if (!(code_generate_stack_convert_float_first())) {
+//                     return ERR_INTERNAL;
+//                 }
+//             }
+//             *type = TYPE_BOOL;
+//             return OK;
+//         }
+//     } else if ((rule == E_NE_E) || (rule == E_EQ_E)) {
+//         if ((right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
+//             return ERR_SEMANTIC_EXP;
+//         } else if (((left->type == TYPE_STRING) && ((right->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE))) ||
+//                   (((left->type == TYPE_INTEGER) || (left->type == TYPE_DOUBLE)) && (right->type == TYPE_STRING))) {
+//             return ERR_SEMANTIC_EXP;
+//         } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
+//             return ERR_SEMANTIC_DEF;
+//         } else {
+//             if ((left->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE)) {
+//                 if (!(code_generate_stack_convert_float_second())) {
+//                     return ERR_INTERNAL;
+//                 }
+//             } else if ((left->type == TYPE_DOUBLE) || (right->type == TYPE_INTEGER)) {
+//                 if (!(code_generate_stack_convert_float_first())) {
+//                     return ERR_INTERNAL;
+//                 }
+//             }
+//             *type = TYPE_BOOL;
+//             return OK;
+//         }
+//     } else if (rule == E_LEN) {
+//         if (middle->type != TYPE_STRING) {
+//             return ERR_SEMANTIC_EXP;
+//         } else {
+//             *type = TYPE_INTEGER;
+//         }
+//     } else if (rule == E_CONCAT_E) {
+//         if ((left->type != TYPE_STRING) || (right->type != TYPE_STRING)) {
+//             return ERR_SEMANTIC_EXP;
+//         } else {
+//             *type = TYPE_STRING;
+//         }
+//     } else if (rule == ID_RULE) {
+//         if (left->type == TYPE_UNDEFINED) {
+//             return ERR_SEMANTIC_DEF;
+//         } else if (left->type == TYPE_BOOL) {
+//             return ERR_SEMANTIC_EXP;
+//         } else {
+//             *type = left->type;
+//             return OK;
+//         }
+//     } else if (rule == BR_E_BR) {
+//         if (middle->type == TYPE_UNDEFINED) {
+//             return ERR_SEMANTIC_DEF;
+//         } else {
+//             *type = middle->type;
+//             return OK;
+//         }
+//     }
+//     return OK;
+// }
 
 int exp_processing(token_struct *token) {
     //initialize stack
@@ -306,23 +329,41 @@ int exp_processing(token_struct *token) {
         empty_stack(&stack);
         return ERR_INTERNAL;
     }
+
     for (bool end = false; !end;) {
         //assign variables;
         if(!(stack_term = stack_top_term(&stack))) {
             empty_stack(&stack);
             return ERR_INTERNAL;
         }
-        given_symbol = get_type(token);
+        given_symbol = get_elem(token);
         char prec_symbol = precedence_tab[get_precedence(stack_term->elem)][get_precedence(given_symbol)];
 
-        if (prec_symbol == '>') {
-        
-        } else if (prec_symbol == '<') {
+        if (prec_symbol == '>') { // WHY UR READING THIS FUCKING BULSHIT?
+            // TODO REDUCE
+        } else if (prec_symbol == '<') { // FIXME PLS
+            if (!(insert_after_top_term(&stack, LT, TYPE_UNDEFINED))) {
+                empty_stack(&stack);
+                return ERR_INTERNAL;
+            }
+            if(!(push_stack(&stack, given_symbol, get_elem_type(given_symbol)))) {
+                empty_stack(&stack);
+                return ERR_INTERNAL;
+            }
 
-        } else if (prec_symbol == '=') {
+            GET_TOKEN;
+            break;
+        } else if (prec_symbol == '=') { // FIXME PLS
+            if(!(push_stack(&stack, given_symbol, get_elem_type(given_symbol)))) {
+                empty_stack(&stack);
+                return ERR_INTERNAL;
+            }
 
-        } else if (prec_symbol == '#') {
+            GET_TOKEN;
+            break;
+        } else if (prec_symbol == '#') { // FIXME PLS
             if ((stack_term->elem == SIGN) && (given_symbol == SIGN)) {
+                end = true;
                 break;
             } else {
                 empty_stack(&stack);

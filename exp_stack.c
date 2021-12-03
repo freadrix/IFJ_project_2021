@@ -73,3 +73,33 @@ void empty_stack(stack_t *stack) {
         tmp = pop_stack(stack);
     }
 }
+
+bool insert_after_top_term(stack_t *stack, elem_enum elem, tab_item_data_type type) {
+    item_stack_t *tmp = stack_top(stack);
+    item_stack_t *previous = NULL;
+
+    while (tmp != NULL) {
+        if (tmp->elem < STOP) {
+            item_stack_t *new = malloc(sizeof(item_stack_t));
+            if (!new) {
+                return false;
+            } else {
+                new->elem = elem;
+                new->type = type;
+
+                if (!previous) {
+                    new->nxt = stack->top;
+                    stack->top = new;
+                } else {
+                    new->nxt = previous->nxt;
+                    previous->nxt = new;
+                }
+
+                return true;
+            }
+        }
+        previous = tmp;
+        tmp = tmp->nxt;
+    }
+    return false;
+}
