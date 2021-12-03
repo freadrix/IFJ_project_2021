@@ -34,98 +34,93 @@ int parser();
 int start_program_parser();
 
 /**
- * @brief function TODO
+ * @brief check syntax and semantics in function definition
  * @return return code which is in error.h
  * */
 int function_parser();
 
 /**
- * @brief function TODO
+ * @brief check syntax and semantics of function parameters
+ *        in function definition
+ * @param function_item element of table with function struct
  * @return return code which is in error.h
  * */
 int function_params_parser(tab_item_t *function_item);
 
 /**
- * @brief function TODO
+ * @brief check syntax and semantics of function return values
+ *        in function definition
+ * @param function_item element of table with function struct
  * @return return code which is in error.h
  * */
 int function_rets_parser(tab_item_t *function_item);
 
 /**
- * @brief function TODO
+ * @brief check syntax and semantics of function body values
+ *        in function definition
+ * @param function_item element of table with function struct
  * @return return code which is in error.h
  * */
 int function_body_parser(tab_item_t *function_item);
 
 /**
- * @brief function TODO
+ * @brief check syntax and semantics of return command
+ * @param function_item element of table with function struct
+ * @return return code which is in error.h
+ * */
+int return_parser(tab_item_t *function_item);
+
+/**
+ * @brief check syntax and semantics of while loop
+ * @param function_item element of table with function struct
+ * @return return code which is in error.h
+ * */
+int while_parser(tab_item_t *function_item);
+
+/**
+ * @brief check syntax and semantics of if else condition
+ * @param function_item element of table with function struct
+ * @return return code which is in error.h
+ * */
+int if_parser(tab_item_t *function_item);
+
+/**
+ * @brief check syntax and semantics of variable definition (declaration)
+ * @param function_item element of table with function struct
  * @return return code which is in error.h
  * */
 int def_var_parser(tab_item_t *function_item);
 
 /**
  * @brief function TODO
- * @return return code which is in error.h
- * */
-int if_parser(tab_item_t *function_item);
-
-/**
- * @brief function TODO
- * @return return code which is in error.h
- * */
-int while_parser(tab_item_t *function_item);
-
-/**
- * @brief function TODO
- * @return return code which is in error.h
- * */
-int return_parser(tab_item_t *function_item);
-
-/**
- * @brief function TODO
- * @return return code which is in error.h
- * */
-int expression_parser();
-
-/**
- * @brief function TODO
+ * @param function_item element of table with function struct
  * @return return code which is in error.h
  * */
 int id_in_body_parser(tab_item_t *function_item);
 
 /**
- * @brief function TODO
+ * @brief check syntax and semantics in function declaration
  * @return return code which is in error.h
  * */
 int global_parser();
 
 /**
- * @brief TODO
+ * @brief check syntax and semantics in function declaration
  * @param item element of table with function struct
  * @return return code which is in error.h
  * */
 int global_function_parser(tab_item_t *item);
 
 /**
- * @brief TODO
+ * @brief check if there is '(' after function ID
  * @return return code which is in error.h
  * */
 int call_check_parser();
 
 /**
- *
+ * @brief check syntax and semantics of (called) function parameters
+ * @return return code which is in error.h
  * */
 int call_function_parser();
-
-
-//int p_params();
-//int p_rets(table_item*);
-//int p_body();
-//int p_defvar();
-//int p_assign();
-//int p_state_l();
-//int p_while();
-//int p_if();
-//int p_params_in();
 
 #endif
