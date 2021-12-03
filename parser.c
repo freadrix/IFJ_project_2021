@@ -188,11 +188,13 @@ int parser() {
     GET_TOKEN;
     while (token->type != TOKEN_EOF) {
         if (IS_GLOBAL) {  /// <program>       -> global id : function ( <params_g> ) <rets>
-            PARSER_RESPONSE = global_parser();
-            printf("%d\n", PARSER_RESPONSE);
-            if(PARSER_RESPONSE != OK) {
-                CLEAN;
-                return PARSER_RESPONSE;
+            while (IS_GLOBAL) {
+                PARSER_RESPONSE = global_parser();
+                printf("%d\n", PARSER_RESPONSE);
+                if(PARSER_RESPONSE != OK) {
+                    CLEAN;
+                    return PARSER_RESPONSE;
+                }
             }
         }
         if (IS_FUNCTION) { /// <program>       -> function id ( <params> ) <rets> <state_l> end
@@ -204,7 +206,7 @@ int parser() {
             }
         }
         if (IS_ID) {      /// <program>       -> <call>
-            PARSER_RESPONSE = call_function_parser();
+            PARSER_RESPONSE = call_check_parser();
             printf("%d\n", PARSER_RESPONSE);
             if(PARSER_RESPONSE != OK) {
                 CLEAN;
@@ -250,13 +252,14 @@ int function_parser() {
                 return ERR_SEMANTIC_DEF;
             } else {    /// function is only declared, not defined yet
                 function_item->data->defined = true;
-                function_item->data->item_value
             }
         } else {
             INSERT_ITEM(inserted_item);
             inserted_item->data->item_id_type = FUNCTION;
         }
     } else return ERR_SYNTAX;
+    SEARCH_ITEM(function_item, stack->top->table, token->attribute.string->string);
+    if (!is_there) return ERR_SYNTAX;
     PARSER_RESPONSE = function_params_parser(function_item);    /// ( <params> )
     if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
     GET_TOKEN;
@@ -320,11 +323,7 @@ int function_params_parser(tab_item_t *function_item) {
         }
         GET_TOKEN;
     }
-    if (i == 0) {   /// 0 params
-        return OK;
-    }
-    //i--;    /// 1 param i == 1, 2 params i == 3, 3 params i == 5....
-    //if ((i % 2) != 0) return ERR_SYNTAX;  /*TODO should test this one */
+    if (i == 0) return OK;
     if ((i % 2) == 0) return ERR_SYNTAX;
     return OK;
 }
@@ -341,27 +340,21 @@ int function_rets_parser(tab_item_t *function_item) {
             if (IS_TYPE) {
                 if (token->attribute.keyword == KEYWORD_INTEGER) {
                     if (!insert_return_item(function_item, TYPE_INTEGER)) return ERR_SYNTAX;
-                    /*TODO set default value NIL */
                 } else if (token->attribute.keyword == KEYWORD_NUMBER) {
                     if (!insert_return_item(function_item, TYPE_DOUBLE)) return ERR_SYNTAX;
-                    /*TODO set default value NIL */
                 } else if (token->attribute.keyword == KEYWORD_STRING) {
                     if (!insert_return_item(function_item, TYPE_STRING)) return ERR_SYNTAX;
-                    /*TODO set default value NIL */
                 } else {
                     if (!insert_return_item(function_item, TYPE_NULL)) return ERR_SYNTAX;
-                    /*TODO set default value NIL */
                 }
             } else {
-                return ERR_SYNTAX
+                return ERR_SYNTAX;
             }
         } else {
             if (token->type != TOKEN_COMMA) return ERR_SYNTAX;
         }
         GET_TOKEN;
     }
-    //i--;    /// 1 param i == 1, 2 params i == 3, 3 params i == 5....
-    //if ((i % 2) != 0) return ERR_SYNTAX;  /*TODO should test this one */
     if ((i % 2) == 0) return ERR_SYNTAX;
     return OK;
 }
@@ -377,10 +370,10 @@ int function_body_parser(tab_item_t *function_item) {
                 PARSER_RESPONSE = def_var_parser(function_item);
                 if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
             } else if (token->attribute.keyword == KEYWORD_IF) {
-                PARSER_RESPONSE = if_parser(function_item);
+//                PARSER_RESPONSE = if_parser(function_item);
                 if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
             } else if (token->attribute.keyword == KEYWORD_WHILE) {
-                PARSER_RESPONSE = while_parser(function_item);
+//                PARSER_RESPONSE = while_parser(function_item);
                 if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
             } else if (token->attribute.keyword == KEYWORD_RETURN) {
                 PARSER_RESPONSE = return_parser(function_item);
@@ -389,8 +382,9 @@ int function_body_parser(tab_item_t *function_item) {
                 return ERR_SYNTAX;
             }
         } else if (IS_ID) {
-            if (!(strcmp(token->attribute.string->string, "write")) {
+            if (!(strcmp(token->attribute.string->string, "write"))) {
                 /*TODO expression*/
+                return OK;
             }
             PARSER_RESPONSE = id_in_body_parser(function_item);
             if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
@@ -454,65 +448,66 @@ int return_parser(tab_item_t *function_item) {
 /**
  * while <conditions> do <state_l> end
  */
-int while_parser(tab_item_t *function_item) {
-    //TODO Add while cycle (depends on Expr_handle output)
-    //actual token == KEYWORD_WHILE
-    //TODO call Expression_handler  //<conditions>
-    //GET_TOKEN;    want token DO
-    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_DO))  //do
-        return ERR_SYNTAX;
-    GET_TOKEN;
-    ///TODO PUSH item stack
-    if (!(IS_FUNCTION_BODY || (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END)))
-        return ERR_SYNTAX;
-    if (IS_FUNCTION_BODY) { // <state_l> (<body>)
-        PARSER_RESPONSE = function_body_parser(function_item);  //if it didnt return with error than actual token is TOKEN_END
-        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
-        GET_TOKEN;  //getting next token, should be END again (end of while cycle)
-    }
-    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END))
-        return ERR_SYNTAX;
-    ///TODO POP stack
-
-    return OK;    //end
-}
+//int while_parser(tab_item_t *function_item) {
+//    //TODO Add while cycle (depends on Expr_handle output)
+//    //actual token == KEYWORD_WHILE
+//    //TODO call Expression_handler  //<conditions>
+//    //GET_TOKEN;    want token DO
+//    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_DO))  //do
+//        return ERR_SYNTAX;
+//     if (!push_data_item(stack)) return ERR_INTERNAL;
+//    GET_TOKEN;
+//    ///TODO PUSH item stack
+//    if (!(IS_FUNCTION_BODY || (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END)))
+//        return ERR_SYNTAX;
+//    if (IS_FUNCTION_BODY) { // <state_l> (<body>)
+//        PARSER_RESPONSE = function_body_parser(function_item);  //if it didnt return with error than actual token is TOKEN_END
+//        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+//        GET_TOKEN;  //getting next token, should be END again (end of while cycle)
+//    }
+//    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END))
+//        return ERR_SYNTAX;
+//    ///TODO POP stack
+//
+//    return OK;    //end
+//}
 
 /**
  * if <conditions> then <state_l> else <stale_l> end
  */
-int if_parser(tab_item_t *function_item) {
-    //actual token == KEYWORD_IF
-    //TODO call Expression_handler  //<conditions>
-    //GET_TOKEN;    want token from IS_FUNCTION_BODY or keyword THEN
-    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_THEN))    // then
-        return ERR_SYNTAX;
-    GET_TOKEN;
-    ///TODO PUSH item stack
-    if (!(IS_FUNCTION_BODY || (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_ELSE)))
-        return ERR_SYNTAX;
-    if (IS_FUNCTION_BODY) { // <state_l> (<body>)
-        PARSER_RESPONSE = function_body_parser(function_item);  //if it didnt return with error than actual token is TOKEN_END
-        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
-        GET_TOKEN;  //getting next token, should be keyword ELSE
-    }
-    //////TODO POP item stack
-    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_ELSE))    // else
-        return ERR_SYNTAX;
-    ///TODO PUSH item stack
-    GET_TOKEN;
-    if (!(IS_FUNCTION_BODY || (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END)))
-        return ERR_SYNTAX;
-    if (IS_FUNCTION_BODY) { // <state_l> (<body>)
-        PARSER_RESPONSE = function_body_parser(function_item);  //if it didnt return with error than actual token is TOKEN_END
-        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
-        GET_TOKEN;  //getting next token, should be END again (end of if else)
-    }
-    ///TODO POP item stack
-    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END))
-        return ERR_SYNTAX;
-
-    return OK;    //end
-}
+//int if_parser(tab_item_t *function_item) {
+//    //actual token == KEYWORD_IF
+//    //TODO call Expression_handler  //<conditions>
+//    //GET_TOKEN;    want token from IS_FUNCTION_BODY or keyword THEN
+//    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_THEN))    // then
+//        return ERR_SYNTAX;
+//    GET_TOKEN;
+//    ///TODO PUSH item stack
+//    if (!(IS_FUNCTION_BODY || (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_ELSE)))
+//        return ERR_SYNTAX;
+//    if (IS_FUNCTION_BODY) { // <state_l> (<body>)
+//        PARSER_RESPONSE = function_body_parser(function_item);  //if it didnt return with error than actual token is TOKEN_END
+//        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+//        GET_TOKEN;  //getting next token, should be keyword ELSE
+//    }
+//    //////TODO POP item stack
+//    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_ELSE))    // else
+//        return ERR_SYNTAX;
+//    ///TODO PUSH item stack
+//    GET_TOKEN;
+//    if (!(IS_FUNCTION_BODY || (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END)))
+//        return ERR_SYNTAX;
+//    if (IS_FUNCTION_BODY) { // <state_l> (<body>)
+//        PARSER_RESPONSE = function_body_parser(function_item);  //if it didnt return with error than actual token is TOKEN_END
+//        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+//        GET_TOKEN;  //getting next token, should be END again (end of if else)
+//    }
+//    ///TODO POP item stack
+//    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END))
+//        return ERR_SYNTAX;
+//
+//    return OK;    //end
+//}
 
 /**
  *  <def_var>
@@ -543,6 +538,8 @@ int def_var_parser(tab_item_t *function_item) {
     }
     GET_TOKEN;
     if (token->type == TOKEN_ASSIGN) {
+        int a = 5;
+        printf("%d\n", a);
         /*TODO func. assign*/
         return OK; // todo
     } else if (IS_FUNCTION_BODY) {
@@ -574,10 +571,11 @@ int global_parser() {
     GET_TOKEN;
     if (IS_FUNCTION) {
         inserted_item->data->item_id_type = FUNCTION;
-        return global_function_parser(inserted_item);
+        CALL(global_function_parser(inserted_item));
     } else {
         return ERR_SYNTAX;
     }
+    return OK;
 }
 
 /**
@@ -608,8 +606,7 @@ int global_function_parser(tab_item_t *inserted_item) {
         }
         GET_TOKEN;
     }
-    i--;
-    if ((i % 2) != 0) return ERR_SYNTAX;
+    if ((i > 0) && ((i % 2) == 0)) return ERR_SYNTAX;
     GET_TOKEN;
     if (token->type != TOKEN_DDOT) {
         // mozna potrebujeme vypis
@@ -640,9 +637,7 @@ int global_function_parser(tab_item_t *inserted_item) {
             }
             GET_TOKEN;
         }
-        i--;
-        if ((i % 2) != 0) return ERR_SYNTAX;
-        if (IS_GLOBAL) return global_parser();
+        if ((i % 2) == 0) return ERR_SYNTAX;
         return OK;
     }
 }
@@ -659,7 +654,7 @@ int call_check_parser() {
     GET_TOKEN;
     if (token->type != TOKEN_BRACKET_ROUND_L) return ERR_SYNTAX;
     CALL(call_function_parser(declarative_function));
-    return OK
+    return OK;
 }
 
 /**
@@ -667,20 +662,20 @@ int call_check_parser() {
  * */
 int call_function_parser(tab_item_t *declaration_function) {
     GET_TOKEN;
-    tab_item_t *argument_function;
+    tab_item_t *argument_of_function;
     item_data_stack_t *stack_frame = stack->top;
     int i;      // counter
     for (i = 0; token->type != TOKEN_BRACKET_ROUND_R; i++) {
         if (i % 2 == 0) {
             if (IS_ID) {      // todo mozna bude expr
                 while (stack_frame != NULL) {
-                    argument_function = search_hashtable(stack_frame->table, token->attribute.string->string);
-                    if (argument_function != NULL) break;
+                    argument_of_function = search_hashtable(stack_frame->table, token->attribute.string->string);
+                    if (argument_of_function != NULL) break;
                     stack_frame = stack_frame->previous;
                 }
                 if (stack_frame == NULL) return ERR_SYNTAX;
-                if (argument_function->data->item_data_type                                      \
-                    != declarative_function->data->item_parameters.type_parameters[(int) (i/2)])
+                if (argument_of_function->data->item_data_type                                      \
+                    != declaration_function->data->item_parameters.type_parameters[(int) (i/2)])
                     return ERR_SYNTAX;
             }
         } else {
@@ -693,7 +688,7 @@ int call_function_parser(tab_item_t *declaration_function) {
         else return ERR_SEMANTIC_PARRET;
     }
     i--;
-    if (((i % 2) != 0) || (((int) (i/2)) != (declarative_function->data->item_parameters.count_parameters - 1) ))
+    if (((i % 2) != 0) || (((int) (i/2)) != (declaration_function->data->item_parameters.count_parameters - 1) ))
         return ERR_SYNTAX;
     return OK;
 }

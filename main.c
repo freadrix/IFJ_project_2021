@@ -22,6 +22,8 @@ int main() {
     // }
     // free(token);
 
-    parser();
+    int global_response = parser();
+    if (global_response != 0)
+        fprintf(stderr, "%d\n", global_response);
     return 0;
 }
