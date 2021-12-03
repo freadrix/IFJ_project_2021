@@ -291,9 +291,8 @@ static int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *r
             *type = middle->type;
             return OK;
         }
-    } else {
-        return OK;
     }
+    return OK;
 }
 
 int exp_processing(token_struct *token) {
@@ -313,38 +312,17 @@ int exp_processing(token_struct *token) {
             empty_stack(&stack);
             return ERR_INTERNAL;
         }
-        given_symbol = get_type(&token);
-        char prec_symbol = precedence_tab[get_precedence(stack_term)][get_precedence(given_symbol)];
+        given_symbol = get_type(token);
+        char prec_symbol = precedence_tab[get_precedence(stack_term->elem)][get_precedence(given_symbol)];
 
         if (prec_symbol == '>') {
-
+        
         } else if (prec_symbol == '<') {
 
         } else if (prec_symbol == '=') {
 
-            // tab_item_data_type type;
-
-            // if (token->type == TOKEN_INT) {
-            //     type = TYPE_INTEGER;
-            // } else if (token->type == TOKEN_DOUBLE) {
-            //     type = TYPE_DOUBLE;
-            // } else if (token->type == TOKEN_STRING) {
-            //     type = TYPE_STRING;
-            // } else if (token->type = TOKEN_ID) {
-            //     //TODO find id in symtable and assign his type
-            // } else {
-            //     type = TYPE_UNDEFINED;
-            // }
-
-            // if(!(push_stack(&stack, given_symbol, type))) {
-            //     empty_stack(&stack);
-            //     return ERR_INTERNAL;
-            // }
-
-
-
         } else if (prec_symbol == '#') {
-            if ((stack_term == SIGN) && (given_symbol == SIGN)) {
+            if ((stack_term->elem == SIGN) && (given_symbol == SIGN)) {
                 break;
             } else {
                 empty_stack(&stack);

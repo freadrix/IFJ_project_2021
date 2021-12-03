@@ -1,6 +1,6 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
- * 
+ *
  * @brief Code generation header
  * @author Aleksandr Verevkin (xverev00)
  */
@@ -13,9 +13,33 @@
 
 #include "symtable.h"
 #include "expr_handle.h"
+#include "exp_stack.h"
 #include "scanner.h"
 #include "str.h"
 
+/**
+ * @enum Rules
+ */
+typedef enum {
+
+    E_LT_E,         // E < E
+    E_GT_E,         // E > E
+    E_GEQ_E,        // E >= E
+    E_LEQ_E,        // E <= E
+    E_EQ_E,         // E == E
+    E_NE_E,         // E ~= E
+    E_MINUS_E,      // E - E
+    E_PLUS_E,       // E + E
+    E_MUL_E,        // E * E
+    E_DIV_E,        // E / E
+    E_IDIV_E,       // E // E
+    E_LEN,          // # E
+    E_CONCAT_E,     // E .. E
+
+    ID_RULE,        // id
+    BR_E_BR,        // (E)
+    NO_RULE
+} rules_enum;
 
 /**
  * @brief Initialization of generated code

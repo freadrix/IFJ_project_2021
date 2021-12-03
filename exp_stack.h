@@ -14,6 +14,37 @@
 #include "expr_handle.h"
 
 /**
+ * @enum Available symbols
+ */
+typedef enum {
+
+    LT,         // <
+    GT,         // >
+    GEQ,        // >=
+    LEQ,        // <=
+    EQ,         // ==
+    NE,         // ~=
+    MINUS,      // -
+    PLUS,       // +
+    MUL,        // *
+    DIV,        // /
+    IDIV,       // //
+    LEN,        // #
+    CONCAT,     // ..
+
+    LBR,        // (
+    RBR,        // )
+    ID,         // identifier
+    INT,
+    DOUBLE,
+    STRING,
+
+    SIGN,       // $
+    STOP,
+    EXPR
+} elem_enum;
+
+/**
  * @struct Stack item structure
  */
 typedef struct item_stack_struct {

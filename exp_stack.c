@@ -1,6 +1,6 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
- * 
+ *
  * @brief Stack
  * @author Aleksandr Verevkin (xverev00)
  */
@@ -30,7 +30,7 @@ item_stack_t *stack_top(stack_t *stack) {
 }
 
 item_stack_t *stack_top_term(stack_t *stack) {
-    item_stack_t *iter_item = stack_top(&stack);
+    item_stack_t *iter_item = stack_top(stack);
     while (iter_item) {
         if (iter_item->elem < STOP) {
             return iter_item;
