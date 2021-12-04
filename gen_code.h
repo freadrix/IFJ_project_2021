@@ -54,6 +54,11 @@ bool code_generator_init();
 void code_write_out(FILE *out_file);
 
 /**
+ * @brief Free string with generated code(Call in case of error)
+ */
+void free_generated_code_string();
+
+/**
  * @brief Generation of header of main scope
  * @return true in case of success, false otherwise
  */
@@ -87,6 +92,21 @@ bool code_generate_empty_variables_frame();
 bool code_generate_function_parameter(token_struct token, int param_num);
 
 /**
+ * @brief Save expression result(on GF@%gl_res) on retval(LF@%retval)
+ * Used on build-in functions or functions with single return value
+ * @return true in case of success, false otherwise
+ */
+bool code_generate_save_var_on_retval();
+
+/**
+ * @brief Save expression result(on GF@%gl_res) on retval(LF@%retval_<retval_index>)
+ * Used in user functions with >1 return values
+ * @param retval_index retval index
+ * @return true in case of success, false otherwise
+ */
+bool code_generate_save_multiple_var_on_retval(int retval_index);
+
+/**
  * @brief Generation of jump to function and
  * @param f_name name of return function
  * @return true in case of success, false otherwise
@@ -112,6 +132,20 @@ bool code_generate_function_end(char *f_name);
  * @return true in case of success, false otherwise
  */
 bool code_generate_retval_on_stack();
+
+/**
+ * @brief Define retval for needed index(retval_index): DEFVAR LF@%retval_1(_2,_3,...)
+ * @param retval_index retval index
+ * @return true in case of success, false otherwise
+ */
+bool code_generate_multiple_retval_create(int retval_index);
+
+/**
+ * @brief Push retval for needed index(retval_index) on stack: PUSHS LF@%retval_1(_2,_3,...)
+ * @param retval_index retval index
+ * @return true in case of success, false otherwise
+ */
+bool code_generate_multiple_retval_on_stack(int retval_index);
 
 /**
  * @brief Generation of call of write function

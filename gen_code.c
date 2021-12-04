@@ -342,6 +342,10 @@ void code_write_out(FILE *out_file) {
     string_free(&generated_code);
 }
 
+void free_generated_code_string() {
+    string_free(&generated_code);
+}
+
 bool code_generate_main_start() {
     if(!(add_string_to_string(&generated_code, ("\nLABEL $$main\n"
                                                 "CREATEFRAME\n"
@@ -443,6 +447,24 @@ bool code_generate_function_parameter(token_struct token, int param_num) {
     return true;    
 }
 
+bool code_generate_save_var_on_retval() {
+    if(!(add_string_to_string(&generated_code, ("MOVE LF@%retval GL@%gl_res\n")))) {
+        return false;
+    }
+    return true;  
+}
+
+bool code_generate_save_multiple_var_on_retval(int retval_index) {
+    char index_char[10];
+    sprintf(index_char, "%d", retval_index);
+    if(!(add_string_to_string(&generated_code, ("MOVE LF@%retval_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, (" GL@%gl_res\n")))) {
+        return false;
+    }
+    return true;  
+}
+
 bool code_generate_function_return(char *f_name) {
     if(!(add_string_to_string(&generated_code, ("JUMP $"))) ||
        !(add_string_to_string(&generated_code, (f_name))) ||
@@ -475,6 +497,28 @@ bool code_generate_function_end(char *f_name) {
 
 bool code_generate_retval_on_stack() {
     if(!(add_string_to_string(&generated_code, ("PUSHS TF@%retval\n")))) {
+        return false;
+    }
+    return true;
+}
+
+bool code_generate_multiple_retval_create(int retval_index) {
+    char index_char[10];
+    sprintf(index_char, "%d", retval_index);
+    if(!(add_string_to_string(&generated_code, ("DEFVAR LF@%retval_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+        return false;
+    }
+    return true;
+}
+
+bool code_generate_multiple_retval_on_stack(int retval_index) {
+    char index_char[10];
+    sprintf(index_char, "%d", retval_index);
+    if(!(add_string_to_string(&generated_code, ("PUSHS TF@%retval_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
         return false;
     }
     return true;
@@ -709,7 +753,18 @@ bool code_generate_pop_stack_result() {
 bool code_generate_if_start(int if_index) {
     char index_char[10];
     sprintf(index_char, "%d", if_index);
-    if(!(add_string_to_string(&generated_code, ("JUMPIFNEQ $ENDIF_\n"))) ||
+    if(!(add_string_to_string(&generated_code, ("TYPE GF@%gl_1 GF@%gl_res\n"))) ||
+       !(add_string_to_string(&generated_code, ("JUMPIFEQ $IF_TYPE_START_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, (" GF@%gl_1 string@bool\n"))) ||
+       !(add_string_to_string(&generated_code, ("JUMPIFEQ $IF_TYPE_START_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("MOVE GF@%gl_res bool@true\n"))) ||
+       !(add_string_to_string(&generated_code, (" GF@%gl_1 string@nil\n"))) ||
+       !(add_string_to_string(&generated_code, ("LABEL $IF_TYPE_START_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("\n"))) ||
+       !(add_string_to_string(&generated_code, ("JUMPIFNEQ $ENDIF_"))) ||
        !(add_string_to_string(&generated_code, (index_char))) ||
        !(add_string_to_string(&generated_code, (" GF@%gl_res bool@true\n")))) {
         return false;
@@ -758,7 +813,18 @@ bool code_generate_else_end(int if_index) {
 bool code_generate_while_start(int while_index) {
     char index_char[10];
     sprintf(index_char, "%d", while_index);
-    if(!(add_string_to_string(&generated_code, ("LABEL $WHILESTART_"))) ||
+    if(!(add_string_to_string(&generated_code, ("TYPE GF@%gl_1 GF@%gl_res\n"))) ||
+       !(add_string_to_string(&generated_code, ("JUMPIFEQ $WHILE_TYPE_START_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, (" GF@%gl_1 string@bool\n"))) ||
+       !(add_string_to_string(&generated_code, ("JUMPIFEQ $WHILE_TYPE_START_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("MOVE GF@%gl_res bool@true\n"))) ||
+       !(add_string_to_string(&generated_code, (" GF@%gl_1 string@nil\n"))) ||
+       !(add_string_to_string(&generated_code, ("LABEL $WHILE_TYPE_START_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("\n"))) ||
+       !(add_string_to_string(&generated_code, ("LABEL $WHILESTART_"))) ||
        !(add_string_to_string(&generated_code, (index_char))) ||
        !(add_string_to_string(&generated_code, ("\n")))) {
         return false;
@@ -771,7 +837,7 @@ bool code_generate_while_end(int while_index) {
     sprintf(index_char, "%d", while_index);
     if(!(add_string_to_string(&generated_code, ("JUMPIFEQ $WHILEEND_"))) ||
        !(add_string_to_string(&generated_code, (index_char))) ||
-       !(add_string_to_string(&generated_code, ("\n"))) ||
+       !(add_string_to_string(&generated_code, (" GF@%gl_res bool@true\n"))) ||
        !(add_string_to_string(&generated_code, ("JUMP $WHILESTART_"))) ||
        !(add_string_to_string(&generated_code, (index_char))) ||
        !(add_string_to_string(&generated_code, ("\n"))) ||

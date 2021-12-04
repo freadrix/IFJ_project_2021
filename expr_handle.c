@@ -94,7 +94,7 @@ static elem_enum get_elem(token_struct *tkn) {
 
 static tab_item_data_type get_elem_type(elem_enum elem) {
     if (elem == ID) {
-        return TYPE_INTEGER;
+        return TYPE_INTEGER;    //TODO return id type?Can be int, str, double,undefened
     } else if (elem == INT) {
         return TYPE_INTEGER;
     } else if (elem == DOUBLE) {

@@ -1,0 +1,260 @@
+#test code by Verevkin, testing ifjcode21 here, feel free to use
+#in the start defined built-in functions, code starts at label $$main
+
+.IFJcode21
+DEFVAR GF@%gl_1
+DEFVAR GF@%gl_2
+DEFVAR GF@%gl_3
+DEFVAR GF@%gl_res
+JUMP $$main
+#======================================
+LABEL $chr
+PUSHFRAME
+DEFVAR LF@%retval
+
+JUMPIFNEQ $chr_err_8 nil@nil LF@%0
+EXIT int@8
+LABEL $chr_err_8
+
+TYPE LF@%retval LF@%0
+JUMPIFEQ $chr_err_5 LF@%retval string@int
+EXIT int@5
+LABEL $chr_err_5
+
+DEFVAR LF@nil_range
+GT LF@nil_range LF@%0 int@255
+JUMPIFEQ $chr_nil_ret bool@true LF@nil_range
+LT LF@nil_range LF@%0 int@0
+JUMPIFEQ $chr_nil_ret bool@true LF@nil_range
+
+INT2CHAR LF@%retval LF@%0
+JUMP $chr_ret
+
+LABEL $chr_nil_ret
+MOVE LF@%retval nil@nil
+
+LABEL $chr_ret
+POPFRAME
+RETURN
+#======================================
+LABEL $tointeger
+PUSHFRAME
+DEFVAR LF@%retval
+
+JUMPIFEQ $toint_nil_ret nil@nil LF@%0
+
+TYPE LF@%retval LF@%0
+JUMPIFEQ $toint_err_5 LF@%retval string@float
+EXIT int@5
+LABEL $toint_err_5
+
+FLOAT2INT LF@%retval LF@%0
+JUMP $toint_ret
+
+LABEL $toint_nil_ret
+MOVE LF@%retval nil@nil
+
+LABEL $toint_ret
+POPFRAME
+RETURN
+#======================================
+LABEL $reads
+PUSHFRAME
+DEFVAR LF@%retval
+DEFVAR LF@%reads_type
+
+READ LF@%retval string
+TYPE LF@%reads_type LF@%retval
+JUMPIFNEQ $reads_nil_ret LF@%reads_type string@string
+JUMP $reads_ret
+
+LABEL $reads_nil_ret
+MOVE LF@%retval nil@nil
+
+LABEL $reads_ret
+POPFRAME
+RETURN
+#======================================
+LABEL $readi
+PUSHFRAME
+DEFVAR LF@%retval
+DEFVAR LF@%readi_type
+
+READ LF@%retval int
+TYPE LF@%readi_type LF@%retval
+JUMPIFNEQ $readi_nil_ret LF@%readi_type string@int
+JUMP $readi_ret
+
+LABEL $readi_nil_ret
+MOVE LF@%retval nil@nil
+
+LABEL $readi_ret
+POPFRAME
+RETURN
+#======================================
+LABEL $readn
+PUSHFRAME
+DEFVAR LF@%retval
+DEFVAR LF@%readn_type
+
+READ LF@%retval float
+TYPE LF@%readn_type LF@%retval
+JUMPIFNEQ $readn_nil_ret LF@%readn_type string@float
+JUMP $readn_ret
+
+LABEL $readn_nil_ret
+MOVE LF@%retval nil@nil
+
+LABEL $readn_ret
+POPFRAME
+RETURN
+#======================================
+LABEL $ord
+PUSHFRAME
+DEFVAR LF@%retval
+
+JUMPIFEQ $ord_err_8 nil@nil LF@%0
+JUMPIFEQ $ord_err_8 nil@nil LF@%1
+JUMP $ord_err_8_end
+LABEL $ord_err_8
+EXIT int@8
+LABEL $ord_err_8_end
+
+DEFVAR LF@%type1
+TYPE LF@%type1 LF@%0
+DEFVAR LF@%type2
+TYPE LF@%type2 LF@%1
+JUMPIFNEQ $ord_err_5 string@string LF@%type1
+JUMPIFNEQ $ord_err_5 string@int LF@%type2
+JUMP $ord_err_5_end
+LABEL $ord_err_5
+EXIT int@5
+LABEL $ord_err_5_end
+
+MOVE LF@%retval nil@nil
+DEFVAR LF@%interval
+LT LF@%interval LF@%1 int@1
+JUMPIFEQ $ord_ret bool@true LF@%interval
+
+DEFVAR LF@%length
+STRLEN LF@%length LF@%0
+GT LF@%interval LF@%1 LF@%length
+JUMPIFEQ $ord_ret bool@true LF@%interval
+
+SUB LF@%retval LF@%1 int@1
+STRI2INT LF@%retval LF@%0 LF@%retval
+
+LABEL $ord_ret
+POPFRAME
+RETURN
+#======================================
+LABEL $substr
+PUSHFRAME
+DEFVAR LF@%retval
+
+JUMPIFEQ $substr_err_8 nil@nil LF@%0
+JUMPIFEQ $substr_err_8 nil@nil LF@%1
+JUMPIFEQ $substr_err_8 nil@nil LF@%2
+JUMP $substr_err_8_end
+LABEL $substr_err_8
+EXIT int@8
+LABEL $substr_err_8_end
+
+DEFVAR LF@%type1
+TYPE LF@%type1 LF@%0
+DEFVAR LF@%type2
+TYPE LF@%type2 LF@%1
+DEFVAR LF@%type3
+TYPE LF@%type3 LF@%2
+JUMPIFNEQ $substr_err_5 string@string LF@%type1
+JUMPIFNEQ $substr_err_5 string@int LF@%type2
+JUMPIFNEQ $substr_err_5 string@int LF@%type3
+JUMP $substr_err_5_end
+LABEL $substr_err_5
+EXIT int@5
+LABEL $substr_err_5_end
+
+MOVE LF@%retval string@
+DEFVAR LF@%len_check
+GT LF@%len_check LF@%1 LF@%2
+JUMPIFEQ $substr_ret bool@true LF@%len_check
+
+LT LF@%len_check LF@%1 int@1
+JUMPIFEQ $substr_ret bool@true LF@%len_check
+
+LT LF@%len_check LF@%2 int@1
+JUMPIFEQ $substr_ret bool@true LF@%len_check
+
+DEFVAR LF@%length
+STRLEN LF@%length LF@%0
+
+GT LF@%len_check LF@%1 LF@%length
+JUMPIFEQ $substr_ret bool@true LF@%len_check
+
+GT LF@%len_check LF@%2 LF@%length
+JUMPIFEQ $substr_ret bool@true LF@%len_check
+
+DEFVAR LF@%index
+SUB LF@%index LF@%1 int@1
+DEFVAR LF@%char
+
+LABEL $substr_loop
+GETCHAR LF@%char LF@%0 LF@%index
+CONCAT LF@%retval LF@%retval LF@%char
+ADD LF@%index LF@%index int@1
+JUMPIFNEQ $substr_loop LF@%index LF@%2
+
+LABEL $substr_ret
+POPFRAME
+RETURN
+#======================================
+LABEL $write
+PUSHFRAME
+DEFVAR LF@%write_count
+POPS LF@%write_count
+DEFVAR LF@%write_str
+
+LABEL $write_loop
+POPS LF@%write_str
+WRITE LF@%write_str
+SUB LF@%write_count LF@%write_count int@1
+JUMPIFNEQ $write_loop LF@%write_count int@0
+
+POPFRAME
+RETURN
+#======================================
+
+LABEL $$main
+CREATEFRAME
+PUSHFRAME
+
+DEFVAR LF@y
+MOVE LF@y int@10
+INT2CHAR LF@y LF@y
+
+CREATEFRAME
+DEFVAR TF@%0
+DEFVAR TF@%1
+DEFVAR TF@%2
+DEFVAR TF@%3
+MOVE TF@%0 float@0x1.12p+0
+
+MOVE GF@%gl_res float@0x1.12p+0
+
+TYPE GF@%gl_1 GF@%gl_res
+JUMPIFEQ $IFSTART GF@%gl_1 string@bool
+JUMPIFEQ $IFSTART GF@%gl_1 string@nil
+
+MOVE GF@%gl_res bool@true
+
+LABEL $IFSTART
+
+JUMPIFNEQ $ENDIF_1 GF@%gl_res bool@true
+WRITE string@gens
+WRITE LF@y
+LABEL $ENDIF_1
+WRITE string@gensnot
+WRITE LF@y
+
+POPFRAME
+CLEARS
