@@ -1,10 +1,9 @@
-#test code by Verevkin, testing ifjcode21 here, feel free to use
+#test code by Verevkin, test your ifjcode21 here, feel free to use
 #in the start defined built-in functions, code starts at label $$main
 
 .IFJcode21
 DEFVAR GF@%gl_1
 DEFVAR GF@%gl_2
-DEFVAR GF@%gl_3
 DEFVAR GF@%gl_res
 JUMP $$main
 #======================================
@@ -241,6 +240,8 @@ MOVE TF@%0 float@0x1.12p+0
 
 MOVE GF@%gl_res float@0x1.12p+0
 
+
+
 TYPE GF@%gl_1 GF@%gl_res
 JUMPIFEQ $IFSTART GF@%gl_1 string@bool
 JUMPIFEQ $IFSTART GF@%gl_1 string@nil
@@ -249,12 +250,17 @@ MOVE GF@%gl_res bool@true
 
 LABEL $IFSTART
 
+
 JUMPIFNEQ $ENDIF_1 GF@%gl_res bool@true
-WRITE string@gens
-WRITE LF@y
+
+WRITE string@whilein
+WRITE LF@y  #\n
+
 LABEL $ENDIF_1
-WRITE string@gensnot
-WRITE LF@y
+
+WRITE string@whilepost
+
+WRITE LF@y  #\n
 
 POPFRAME
 CLEARS

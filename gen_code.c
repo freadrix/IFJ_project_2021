@@ -16,21 +16,21 @@ string_struct generated_code;
 
 //built-in reads function
 //read string from user input
-//return input in LF@%retval in case of success, if input type is wrong, return nil
+//return input in LF@%retval_1 in case of success, if input type is wrong, return nil
 bool builtin_reads() {
     if(!(add_string_to_string(&generated_code, (
         "\nLABEL $reads\n"
         "PUSHFRAME\n"
-        "DEFVAR LF@%retval\n"
+        "DEFVAR LF@%retval_1\n"
         "DEFVAR LF@%reads_type\n"
         //scan for string
-        "READ LF@%retval string\n"
-        "TYPE LF@%reads_type LF@%retval\n"
+        "READ LF@%retval_1 string\n"
+        "TYPE LF@%reads_type LF@%retval_1\n"
         "JUMPIFNEQ $reads_nil_ret LF@%reads_type string@string\n"
         "JUMP $reads_ret\n"
         //return nil in case of wrong type
         "LABEL $reads_nil_ret\n"
-        "MOVE LF@%retval nil@nil\n"
+        "MOVE LF@%retval_1 nil@nil\n"
 
         "LABEL $reads_ret\n"
         "POPFRAME\n"
@@ -42,21 +42,21 @@ bool builtin_reads() {
 
 //built-in readi function
 //read integer from user input
-//return input in LF@%retval in case of success, if input type is wrong, return nil
+//return input in LF@%retval_1 in case of success, if input type is wrong, return nil
 bool builtin_readi() {
     if(!(add_string_to_string(&generated_code, (
         "\nLABEL $readi\n"
         "PUSHFRAME\n"
-        "DEFVAR LF@%retval\n"
+        "DEFVAR LF@%retval_1\n"
         "DEFVAR LF@%readi_type\n"
         //scan for integer
-        "READ LF@%retval int\n"
-        "TYPE LF@%readi_type LF@%retval\n"
+        "READ LF@%retval_1 int\n"
+        "TYPE LF@%readi_type LF@%retval_1\n"
         "JUMPIFNEQ $readi_nil_ret LF@%readi_type string@int\n"
         "JUMP $readi_ret\n"
         //return nil in case of wrong type
         "LABEL $readi_nil_ret\n"
-        "MOVE LF@%retval nil@nil\n"
+        "MOVE LF@%retval_1 nil@nil\n"
 
         "LABEL $readi_ret\n"
         "POPFRAME\n"
@@ -68,21 +68,21 @@ bool builtin_readi() {
 
 //built-in readn function
 //read float from user input
-//return input in LF@%retval in case of success, if input type is wrong, return nil
+//return input in LF@%retval_1 in case of success, if input type is wrong, return nil
 bool builtin_readn() {
     if(!(add_string_to_string(&generated_code, (
         "\nLABEL $readn\n"
         "PUSHFRAME\n"
-        "DEFVAR LF@%retval\n"
+        "DEFVAR LF@%retval_1\n"
         "DEFVAR LF@%readn_type\n"
         //scan for float
-        "READ LF@%retval float\n"
-        "TYPE LF@%readn_type LF@%retval\n"
+        "READ LF@%retval_1 float\n"
+        "TYPE LF@%readn_type LF@%retval_1\n"
         "JUMPIFNEQ $readn_nil_ret LF@%readn_type string@float\n"
         "JUMP $readn_ret\n"
         //return nil in case of wrong type
         "LABEL $readn_nil_ret\n"
-        "MOVE LF@%retval nil@nil\n"
+        "MOVE LF@%retval_1 nil@nil\n"
 
         "LABEL $readn_ret\n"
         "POPFRAME\n"
@@ -121,26 +121,26 @@ bool builtin_write() {
 //built-in tointeger function
 //convert float to integer
 //take float in TF@%0 as parameter
-//return integer in LF@%retval, nil if parameter was nil
+//return integer in LF@%retval_1, nil if parameter was nil
 //exit with error 5 if given parameter of wrong type
 bool builtin_tointeger() {
     if(!(add_string_to_string(&generated_code, (
         "\nLABEL $tointeger\n"
         "PUSHFRAME\n"
-        "DEFVAR LF@%retval\n"
+        "DEFVAR LF@%retval_1\n"
         //check if parameter is nil
         "JUMPIFEQ $toint_nil_ret nil@nil LF@%0\n"
         //check if parameter isn'float
-        "TYPE LF@%retval LF@%0\n"
-        "JUMPIFEQ $toint_err_5 LF@%retval string@float\n"
+        "TYPE LF@%retval_1 LF@%0\n"
+        "JUMPIFEQ $toint_err_5 LF@%retval_1 string@float\n"
         "EXIT int@5\n"
         "LABEL $toint_err_5\n"
         //convert float to integer
-        "FLOAT2INT LF@%retval LF@%0\n"
+        "FLOAT2INT LF@%retval_1 LF@%0\n"
         "JUMP $toint_ret\n"
 
         "LABEL $toint_nil_ret\n"
-        "MOVE LF@%retval nil@nil\n"
+        "MOVE LF@%retval_1 nil@nil\n"
 
         "LABEL $toint_ret\n"
         "POPFRAME\n"
@@ -152,14 +152,14 @@ bool builtin_tointeger() {
 
 //built-in substr function
 //found substring, of given string, trough given indexes
-//return substring of given string in LF@%retval, empty string in case of wrong intervals
+//return substring of given string in LF@%retval_1, empty string in case of wrong intervals
 //exit with error 5 if given parameter of wrong type
 //exit with error 8 if given nil in parameter
 bool builtin_substr() {
     if(!(add_string_to_string(&generated_code, (
         "\nLABEL $substr\n"
         "PUSHFRAME\n"
-        "DEFVAR LF@%retval\n"
+        "DEFVAR LF@%retval_1\n"
         //check of one of the parameters is nil
         "JUMPIFEQ $substr_err_8 nil@nil LF@%0\n"
         "JUMPIFEQ $substr_err_8 nil@nil LF@%1\n"
@@ -184,7 +184,7 @@ bool builtin_substr() {
         "LABEL $substr_err_5_end\n"
         //check if given indexes are in the interval of string
         //return empty string if something wrong
-        "MOVE LF@%retval string@\n"
+        "MOVE LF@%retval_1 string@\n"
         "DEFVAR LF@%len_check\n"
         "GT LF@%len_check LF@%1 LF@%2\n"
         "JUMPIFEQ $substr_ret bool@true LF@%len_check\n"
@@ -210,7 +210,7 @@ bool builtin_substr() {
         //concatenate each character trough the loop
         "LABEL $substr_loop\n"
         "GETCHAR LF@%char LF@%0 LF@%index\n"
-        "CONCAT LF@%retval LF@%retval LF@%char\n"
+        "CONCAT LF@%retval_1 LF@%retval_1 LF@%char\n"
         "ADD LF@%index LF@%index int@1\n"
         "JUMPIFNEQ $substr_loop LF@%index LF@%2\n"
 
@@ -224,14 +224,14 @@ bool builtin_substr() {
 
 //built-in chr function
 //convert character of given string to his ascii value
-//return integer in LF@%retval, nil if wrong interval
+//return integer in LF@%retval_1, nil if wrong interval
 //exit with error 5 if given parameter of wrong type
 //exit with error 8 if given nil in parameter
 bool builtin_ord() {
     if(!(add_string_to_string(&generated_code, (
         "\nLABEL $ord\n"
         "PUSHFRAME\n"
-        "DEFVAR LF@%retval\n"
+        "DEFVAR LF@%retval_1\n"
         //check of one of the parameters is nil
         "JUMPIFEQ $ord_err_8 nil@nil LF@%0\n"
         "JUMPIFEQ $ord_err_8 nil@nil LF@%1\n"
@@ -251,7 +251,7 @@ bool builtin_ord() {
         "EXIT int@5\n"
         "LABEL $ord_err_5_end\n"
         //check for if given index is existing in the string
-        "MOVE LF@%retval nil@nil\n"
+        "MOVE LF@%retval_1 nil@nil\n"
         "DEFVAR LF@%interval\n"
         "LT LF@%interval LF@%1 int@1\n"
         "JUMPIFEQ $ord_ret bool@true LF@%interval\n"
@@ -261,8 +261,8 @@ bool builtin_ord() {
         "GT LF@%interval LF@%1 LF@%length\n"
         "JUMPIFEQ $ord_ret bool@true LF@%interval\n"
         //found character in the string and convert it into integer
-        "SUB LF@%retval LF@%1 int@1\n"
-        "STRI2INT LF@%retval LF@%0 LF@%retval\n"
+        "SUB LF@%retval_1 LF@%1 int@1\n"
+        "STRI2INT LF@%retval_1 LF@%0 LF@%retval_1\n"
 
         "LABEL $ord_ret\n"
         "POPFRAME\n"
@@ -275,21 +275,21 @@ bool builtin_ord() {
 //built-in chr function
 //convert number to ascii character
 //take integer in TF@%0 as parameter
-//return character in LF@%retval, nil if wrong interval [0,255]
+//return character in LF@%retval_1, nil if wrong interval [0,255]
 //exit with error 5 if given parameter of wrong type
 //exit with error 8 if given nil in parameter
 bool builtin_chr() {
     if(!(add_string_to_string(&generated_code, (
         "\nLABEL $chr\n"
         "PUSHFRAME\n"
-        "DEFVAR LF@%retval\n"
+        "DEFVAR LF@%retval_1\n"
         //check for nil in parameter
         "JUMPIFNEQ $chr_err_8 nil@nil LF@%0\n"
         "EXIT int@8\n"
         "LABEL $chr_err_8\n"
         //check if given parameter isn't integer
-        "TYPE LF@%retval LF@%0\n"
-        "JUMPIFEQ $chr_err_5 LF@%retval string@int\n"
+        "TYPE LF@%retval_1 LF@%0\n"
+        "JUMPIFEQ $chr_err_5 LF@%retval_1 string@int\n"
         "EXIT int@5\n"
         "LABEL $chr_err_5\n"
         //check if inerval of integer is right
@@ -299,11 +299,11 @@ bool builtin_chr() {
         "LT LF@nil_range LF@%0 int@0\n"
         "JUMPIFEQ $chr_nil_ret bool@true LF@nil_range\n"
         //convert integer to character
-        "INT2CHAR LF@%retval LF@%0\n"
+        "INT2CHAR LF@%retval_1 LF@%0\n"
         "JUMP $chr_ret\n"
 
         "LABEL $chr_nil_ret\n"
-        "MOVE LF@%retval nil@nil\n"
+        "MOVE LF@%retval_1 nil@nil\n"
 
         "LABEL $chr_ret\n"
         "POPFRAME\n"
@@ -313,6 +313,7 @@ bool builtin_chr() {
     return true;
 }
 
+//use at the start of generating code
 bool code_generator_init() {
     //initialize string
     if (!(string_init(&generated_code))) {
@@ -322,7 +323,6 @@ bool code_generator_init() {
     if(!(add_string_to_string(&generated_code, (".IFJcode21\n"
                                                 "DEFVAR GF@%gl_1\n"
                                                 "DEFVAR GF@%gl_2\n"
-                                                "DEFVAR GF@%gl_3\n"
                                                 "DEFVAR GF@%gl_res\n"
                                                 "JUMP $$main\n")))) {
         return false;
@@ -335,6 +335,7 @@ bool code_generator_init() {
     return true;
 }
 
+//use at the end of generating code
 void code_write_out(FILE *out_file) {
     //write out code
     fputs(generated_code.string, out_file);
@@ -342,10 +343,12 @@ void code_write_out(FILE *out_file) {
     string_free(&generated_code);
 }
 
+//use in case of error
 void free_generated_code_string() {
     string_free(&generated_code);
 }
 
+//use after code_generator_init
 bool code_generate_main_start() {
     if(!(add_string_to_string(&generated_code, ("\nLABEL $$main\n"
                                                 "CREATEFRAME\n"
@@ -355,6 +358,7 @@ bool code_generate_main_start() {
     return true;
 }
 
+//use at the end of code generation
 bool code_generate_main_end() {
     if(!(add_string_to_string(&generated_code, ("POPFRAME\n"
                                                 "CLEARS\n")))) {
@@ -387,7 +391,7 @@ static bool code_generate_token_value(token_struct token) {
         return false;
     }
     char term[50];
-    unsigned char ch;
+    char ch;
     if (token.type == TOKEN_ID) {
         if (!(add_string_to_string(&generated_code, ("LF@"))) || 
             !(add_string_to_string(&generated_code, (token.attribute.string->string)))) {
@@ -400,13 +404,13 @@ static bool code_generate_token_value(token_struct token) {
                 return false;
             }
     } else if (token.type == TOKEN_DOUBLE) {
-        sprintf(term, "%g", token.attribute.double_value);
+        sprintf(term, "%a", token.attribute.double_value);
         if (!(add_string_to_string(&generated_code, ("float@"))) || 
             !(add_string_to_string(&generated_code, term))) {
                 return false;
             }
     } else if (token.type == TOKEN_STRING) {
-        for (int i = 0; (ch = (unsigned char) (token.attribute.string->string)[i]) != '\0'; i++) {
+        for (int i = 0; (ch = (token.attribute.string->string)[i]) != '\0'; i++) {
             if (ch == '#' || ch == '\\' || ch < 33 || !(isprint(ch))) {
                 sprintf(term, "%03d", ch);
                 if (!(add_char_to_string(&term_value, ('\\'))) ||
@@ -447,22 +451,15 @@ bool code_generate_function_parameter(token_struct token, int param_num) {
     return true;    
 }
 
-bool code_generate_save_var_on_retval() {
-    if(!(add_string_to_string(&generated_code, ("MOVE LF@%retval GL@%gl_res\n")))) {
-        return false;
-    }
-    return true;  
-}
-
-bool code_generate_save_multiple_var_on_retval(int retval_index) {
+bool code_generate_save_expression_result_on_retval(int retval_index) {
     char index_char[10];
     sprintf(index_char, "%d", retval_index);
     if(!(add_string_to_string(&generated_code, ("MOVE LF@%retval_"))) ||
        !(add_string_to_string(&generated_code, (index_char))) ||
-       !(add_string_to_string(&generated_code, (" GL@%gl_res\n")))) {
+       !(add_string_to_string(&generated_code, (" GF@%gl_res\n")))) {
         return false;
     }
-    return true;  
+    return true;
 }
 
 bool code_generate_function_return(char *f_name) {
@@ -495,14 +492,7 @@ bool code_generate_function_end(char *f_name) {
     return true;
 }
 
-bool code_generate_retval_on_stack() {
-    if(!(add_string_to_string(&generated_code, ("PUSHS TF@%retval\n")))) {
-        return false;
-    }
-    return true;
-}
-
-bool code_generate_multiple_retval_create(int retval_index) {
+bool code_generate_retval_create(int retval_index) {
     char index_char[10];
     sprintf(index_char, "%d", retval_index);
     if(!(add_string_to_string(&generated_code, ("DEFVAR LF@%retval_"))) ||
@@ -513,7 +503,7 @@ bool code_generate_multiple_retval_create(int retval_index) {
     return true;
 }
 
-bool code_generate_multiple_retval_on_stack(int retval_index) {
+bool code_generate_retval_on_stack(int retval_index) {
     char index_char[10];
     sprintf(index_char, "%d", retval_index);
     if(!(add_string_to_string(&generated_code, ("PUSHS TF@%retval_"))) ||
@@ -524,6 +514,8 @@ bool code_generate_multiple_retval_on_stack(int retval_index) {
     return true;
 }
 
+//help function for calling write(...), push strings on stack correctly
+//rest of arguments must be STRINGS!!!
 bool code_generate_write_function(int terms_count, ...) {
     //list of arguments
     va_list valist;
@@ -558,63 +550,9 @@ bool code_generate_write_function(int terms_count, ...) {
     return true;
 }
 
-bool code_generate_length() {
-    if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_3\n"
-                                                "STRLEN GF@%gl_3 GF@%gl_3\n"
-                                                "PUSHS GF@%gl_3\n")))) {
-        return false;
-    }
-    return true;
-}
-
-bool code_generate_concatenation() {
-    if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_3\n"
-                                                "POPS GF@%gl_2\n"
-                                                "CONCAT GF@%gl_1 GF@%gl_2 GF@%gl_3\n"
-                                                "PUSHS GF@%gl_1\n")))) {
-        return false;
-    }
-    return true;
-}
-
 bool code_generate_variable_create(char *var_name) {
     if(!(add_string_to_string(&generated_code, ("DEFVAR LF@"))) ||
        !(add_string_to_string(&generated_code, (var_name))) ||
-       !(add_string_to_string(&generated_code, ("\n")))) {
-        return false;
-    }
-    return true;
-}
-
-//help function to generate empty type values
-bool code_generate_variable_type(tab_item_data_type type) {
-    if (type == TYPE_BOOL) {
-        if (!(add_string_to_string(&generated_code, ("bool@false")))) {
-            return false;
-        }
-    } else if (type == TYPE_INTEGER) {
-        if (!(add_string_to_string(&generated_code, ("int@0")))) {
-            return false;
-        }
-    } else if (type == TYPE_DOUBLE) {
-        if (!(add_string_to_string(&generated_code, ("float@0x0.0p+0")))) {
-            return false;
-        }
-    } else if (type == TYPE_STRING) {
-        if (!(add_string_to_string(&generated_code, ("string@")))) {
-            return false;
-        }
-    } else {
-        return false;
-    }
-    return true;
-}
-
-bool code_generate_variable_define_type(char *var_name, tab_item_data_type type) {
-    if(!(add_string_to_string(&generated_code, ("MOVE LF@"))) ||
-       !(add_string_to_string(&generated_code, (var_name))) ||
-       !(add_string_to_string(&generated_code, (" "))) ||
-       !(code_generate_variable_type(type)) ||
        !(add_string_to_string(&generated_code, ("\n")))) {
         return false;
     }
@@ -641,6 +579,9 @@ bool code_generate_stack_push(token_struct token) {
     return true;
 }
 
+// ======================== FLOAT<->INT CONVERTIONS START ======================== //
+
+//expr handler
 bool code_generate_stack_convert_float_first() {
     if(!(add_string_to_string(&generated_code, ("INT2FLOATS\n")))) {
         return false;
@@ -672,7 +613,9 @@ bool code_generate_stack_convert_int_second() {
     }
     return true;        
 }
+// ======================== FLOAT<->INT CONVERTIONS END ======================== //
 
+//expr handler
 bool code_generate_operations(rules_enum r) {
     if (r == E_LT_E) {
         if(!(add_string_to_string(&generated_code, ("LTS\n")))) {
@@ -736,12 +679,25 @@ bool code_generate_operations(rules_enum r) {
     } else if (r == E_IDIV_E) {
         if(!(add_string_to_string(&generated_code, ("IDIVS\n")))) {
             return false;
-        }           
+        }
+    } else if (r == E_CONCAT_E) {
+        if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_1\n"
+                                                    "STRLEN GF@%gl_1 GF@%gl_1\n"
+                                                    "PUSHS GF@%gl_1\n")))) {
+        return false;
+        }
+    } else if (r = E_LEN) {
+        if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_2\n"
+                                                    "POPS GF@%gl_1\n"
+                                                    "CONCAT GF@%gl_1 GF@%gl_1 GF@%gl_2\n"
+                                                    "PUSHS GF@%gl_1\n")))) {
+        return false;
+        }
     }
-
     return true;
 }
 
+//expr handler
 bool code_generate_pop_stack_result() {
     if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_res\n")))) {
         return false;
@@ -772,17 +728,6 @@ bool code_generate_if_start(int if_index) {
     return true;
 }
 
-bool code_generate_if_end(int if_index) {
-    char index_char[10];
-    sprintf(index_char, "%d", if_index);
-    if(!(add_string_to_string(&generated_code, ("LABEL $ENDIF_"))) ||
-       !(add_string_to_string(&generated_code, (index_char))) ||
-       !(add_string_to_string(&generated_code, ("\n")))) {
-        return false;
-    }
-    return true;
-}
-
 bool code_generate_else(int if_index) {
     char index_char[10];
     sprintf(index_char, "%d", if_index);
@@ -797,7 +742,7 @@ bool code_generate_else(int if_index) {
     return true;    
 }
 
-bool code_generate_else_end(int if_index) {
+bool code_generate_if_end(int if_index) {
     char index_char[10];
     sprintf(index_char, "%d", if_index);
     if(!(add_string_to_string(&generated_code, ("LABEL $ENDELSE_"))) ||
