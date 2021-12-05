@@ -388,7 +388,7 @@ int exp_processing(token_struct *token) { // TODO code generator functions
     }
 
     for (bool end = false; !end;) {
-        //assign variables;
+
         if(!(stack_term = stack_top_term(stack))) {
             empty_stack(stack);
             return ERR_INTERNAL;
