@@ -380,7 +380,7 @@ bool code_generate_empty_variables_frame() {
     if(!(add_string_to_string(&generated_code, ("CREATEFRAME\n")))) {
         return false;
     }
-    return true;    
+    return true;
 }
 
 //help function to find and generate value of given token
@@ -393,19 +393,19 @@ static bool code_generate_token_value(token_struct token) {
     char term[50];
     char ch;
     if (token.type == TOKEN_ID) {
-        if (!(add_string_to_string(&generated_code, ("LF@"))) || 
+        if (!(add_string_to_string(&generated_code, ("LF@"))) ||
             !(add_string_to_string(&generated_code, (token.attribute.string->string)))) {
                 return false;
             }
     } else if (token.type == TOKEN_INT) {
         sprintf(term, "%d", token.attribute.int_value);
-        if (!(add_string_to_string(&generated_code, ("int@"))) || 
+        if (!(add_string_to_string(&generated_code, ("int@"))) ||
             !(add_string_to_string(&generated_code, term))) {
                 return false;
             }
     } else if (token.type == TOKEN_DOUBLE) {
         sprintf(term, "%a", token.attribute.double_value);
-        if (!(add_string_to_string(&generated_code, ("float@"))) || 
+        if (!(add_string_to_string(&generated_code, ("float@"))) ||
             !(add_string_to_string(&generated_code, term))) {
                 return false;
             }
@@ -423,7 +423,7 @@ static bool code_generate_token_value(token_struct token) {
                 }
             }
         }
-        if (!(add_string_to_string(&generated_code, ("string@"))) || 
+        if (!(add_string_to_string(&generated_code, ("string@"))) ||
             !(add_string_to_string(&generated_code, (term_value.string)))) {
                 return false;
             }
@@ -438,7 +438,7 @@ static bool code_generate_token_value(token_struct token) {
 bool code_generate_function_parameter(token_struct token, int param_num) {
     char index[10];
     sprintf(index, "%d", param_num);
-    if(!(add_string_to_string(&generated_code, ("DEFVAR TF@%"))) || 
+    if(!(add_string_to_string(&generated_code, ("DEFVAR TF@%"))) ||
        !(add_string_to_string(&generated_code, (index))) ||
        !(add_string_to_string(&generated_code, ("\n"
                                                 "MOVE TF@%"))) ||
@@ -448,7 +448,7 @@ bool code_generate_function_parameter(token_struct token, int param_num) {
        !(add_string_to_string(&generated_code, ("\n")))) {
         return false;
     }
-    return true;    
+    return true;
 }
 
 bool code_generate_save_expression_result_on_retval(int retval_index) {
@@ -468,7 +468,7 @@ bool code_generate_function_return(char *f_name) {
        !(add_string_to_string(&generated_code, ("_ret\n")))) {
         return false;
     }
-    return true;  
+    return true;
 }
 
 bool code_generate_function_start(char *f_name) {
@@ -595,14 +595,14 @@ bool code_generate_stack_convert_float_second() {
                                                 "PUSHS GF@%gl_1\n")))) {
         return false;
     }
-    return true;    
+    return true;
 }
 
 bool code_generate_stack_convert_int_first() {
     if(!(add_string_to_string(&generated_code, ("FLOAT2INTS\n")))) {
         return false;
     }
-    return true;    
+    return true;
 }
 
 bool code_generate_stack_convert_int_second() {
@@ -611,7 +611,7 @@ bool code_generate_stack_convert_int_second() {
                                                 "PUSHS GF@%gl_1\n")))) {
         return false;
     }
-    return true;        
+    return true;
 }
 // ======================== FLOAT<->INT CONVERTIONS END ======================== //
 
@@ -620,7 +620,7 @@ bool code_generate_operations(rules_enum r) {
     if (r == E_LT_E) {
         if(!(add_string_to_string(&generated_code, ("LTS\n")))) {
             return false;
-        } 
+        }
     } else if (r == E_GT_E) {
         if(!(add_string_to_string(&generated_code, ("GTS\n")))) {
             return false;
@@ -637,7 +637,7 @@ bool code_generate_operations(rules_enum r) {
             "EQS\n"
             "ORS\n")))) {
             return false;
-        } 
+        }
     } else if (r == E_LEQ_E) {
         if(!(add_string_to_string(&generated_code, (
             "POPS GF@%gl_1\n"
@@ -650,7 +650,7 @@ bool code_generate_operations(rules_enum r) {
             "EQS\n"
             "ORS\n")))) {
             return false;
-        } 
+        }
     } else if (r == E_EQ_E) {
         if(!(add_string_to_string(&generated_code, ("EQS\n")))) {
             return false;
@@ -663,19 +663,19 @@ bool code_generate_operations(rules_enum r) {
     } else if (r == E_MINUS_E) {
         if(!(add_string_to_string(&generated_code, ("SUBS\n")))) {
             return false;
-        }        
+        }
     } else if (r == E_PLUS_E) {
         if(!(add_string_to_string(&generated_code, ("ADDS\n")))) {
             return false;
-        }        
+        }
     } else if (r == E_MUL_E) {
         if(!(add_string_to_string(&generated_code, ("MULS\n")))) {
             return false;
-        }        
+        }
     } else if (r == E_DIV_E) {
         if(!(add_string_to_string(&generated_code, ("DIVS\n")))) {
             return false;
-        }        
+        }
     } else if (r == E_IDIV_E) {
         if(!(add_string_to_string(&generated_code, ("IDIVS\n")))) {
             return false;
@@ -686,7 +686,7 @@ bool code_generate_operations(rules_enum r) {
                                                     "PUSHS GF@%gl_1\n")))) {
         return false;
         }
-    } else if (r = E_LEN) {
+    } else if (r == E_LEN) {
         if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_2\n"
                                                     "POPS GF@%gl_1\n"
                                                     "CONCAT GF@%gl_1 GF@%gl_1 GF@%gl_2\n"
@@ -739,7 +739,7 @@ bool code_generate_else(int if_index) {
        !(add_string_to_string(&generated_code, ("\n")))) {
         return false;
     }
-    return true;    
+    return true;
 }
 
 bool code_generate_if_end(int if_index) {
