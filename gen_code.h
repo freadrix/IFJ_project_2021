@@ -92,19 +92,12 @@ bool code_generate_empty_variables_frame();
 bool code_generate_function_parameter(token_struct token, int param_num);
 
 /**
- * @brief Save expression result(on GF@%gl_res) on retval(LF@%retval)
- * Used on build-in functions or functions with single return value
- * @return true in case of success, false otherwise
- */
-bool code_generate_save_var_on_retval();
-
-/**
  * @brief Save expression result(on GF@%gl_res) on retval(LF@%retval_<retval_index>)
  * Used in user functions with >1 return values
  * @param retval_index retval index
  * @return true in case of success, false otherwise
  */
-bool code_generate_save_multiple_var_on_retval(int retval_index);
+bool code_generate_save_expression_result_on_retval(int retval_index);
 
 /**
  * @brief Generation of jump to function and
@@ -128,24 +121,17 @@ bool code_generate_function_start(char *f_name);
 bool code_generate_function_end(char *f_name);
 
 /**
- * @brief Generation of pushing retval from function on TOP OF STACK
+ * @brief Generation of defenition of single retval(DEFVAR retval)
  * @return true in case of success, false otherwise
  */
-bool code_generate_retval_on_stack();
-
-/**
- * @brief Define retval for needed index(retval_index): DEFVAR LF@%retval_1(_2,_3,...)
- * @param retval_index retval index
- * @return true in case of success, false otherwise
- */
-bool code_generate_multiple_retval_create(int retval_index);
+bool code_generate_retval_create(int retval_index);
 
 /**
  * @brief Push retval for needed index(retval_index) on stack: PUSHS LF@%retval_1(_2,_3,...)
  * @param retval_index retval index
  * @return true in case of success, false otherwise
  */
-bool code_generate_multiple_retval_on_stack(int retval_index);
+bool code_generate_retval_on_stack(int retval_index);
 
 /**
  * @brief Generation of call of write function
@@ -155,31 +141,11 @@ bool code_generate_multiple_retval_on_stack(int retval_index);
 bool code_generate_write_function(int terms_count, ...);
 
 /**
- * @brief Generation of length operation
- * @return true in case of success, false otherwise
- */
-bool code_generate_length();
-
-/**
- * @brief Generation of concatenation operation
- * @return true in case of success, false otherwise
- */
-bool code_generate_concatenation();
-
-/**
  * @brief Generation of creation of variable
  * @param var_name name of created variable
  * @return true in case of success, false otherwise
  */
 bool code_generate_variable_create(char *var_name);
-
-/**
- * @brief Generation of defining variable type
- * @param var_name name of defined variable
- * @param type type of defined variable
- * @return true in case of success, false otherwise
- */
-bool code_generate_variable_define_type(char *var_name, tab_item_data_type type);
 
 /**
  * @brief Generation of moving token value on variable
@@ -241,13 +207,6 @@ bool code_generate_pop_stack_result();
 bool code_generate_if_start(int if_index);
 
 /**
- * @brief Generation of IF ending (without ELSE part)
- * @param if_index index of given IF (stored in code_struct->if_label_counter)
- * @return true in case of success, false otherwise
- */
-bool code_generate_if_end(int if_index);
-
-/**
  * @brief Generation of ELSE part
  * @param if_index index of given IF (stored in code_struct->if_label_counter)
  * @return true in case of success, false otherwise
@@ -259,7 +218,7 @@ bool code_generate_else(int if_index);
  * @param if_index index of given IF (stored in code_struct->if_label_counter)
  * @return true in case of success, false otherwise
  */
-bool code_generate_else_end(int if_index);
+bool code_generate_if_end(int if_index);
 
 /**
  * @brief Generation of WHILE header
