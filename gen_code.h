@@ -124,7 +124,7 @@ bool code_generate_function_end(char *f_name);
  * @brief Generation of defenition of single retval(DEFVAR retval)
  * @return true in case of success, false otherwise
  */
-bool code_generate_retval_create();
+bool code_generate_retval_create(int retval_index);
 
 /**
  * @brief Push retval for needed index(retval_index) on stack: PUSHS LF@%retval_1(_2,_3,...)
