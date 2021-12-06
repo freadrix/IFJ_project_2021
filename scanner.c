@@ -18,8 +18,6 @@ int get_token(token_struct *token) {
     int state = STATE_START;
     int c;
     char string_number[3] = { 0 };
-    char hex[3] = { 0 };
-
     token->attribute.string = working_string;
     string_struct string;
     string_struct *str = &string;
@@ -34,9 +32,7 @@ int get_token(token_struct *token) {
         switch(state)
         {
             case (STATE_START):
-                if (c == '\n') {
-                    state = STATE_EOL;
-                } else if (isspace(c)) {
+                if (c == '\n' || isspace(c) || c == '\t') {
                     state = STATE_START;
                 } else if (isalpha(c) || c == '_') {
                     if (!(add_char_to_string(str, c))) {
@@ -146,14 +142,6 @@ int get_token(token_struct *token) {
                     return ERR_LEXER;
                 }
                 break;
-            case (STATE_EOL):
-                if (isspace(c)) {
-                    break;
-                }
-                ungetc(c, stdin);
-                token->type = TOKEN_EOL;
-                string_free(str);
-                return OK;
             case (STATE_ID_OR_KEYWORD):
                 if (c == '_' || isalpha(c) || isdigit(c)) {
                     if (!(add_char_to_string(str, c))) {
@@ -207,7 +195,7 @@ int get_token(token_struct *token) {
                 }
                 break;
             case (STATE_STRING_START):
-                if ((c < 32 && c != 10) || c == EOF) {
+                if ((c < 32 && c != 10) || c == EOF) { // why c != 10 ?? TEST ME PLS
                     string_free(str);
                     return ERR_LEXER;
                 } else if (c == '\\') {
@@ -266,9 +254,8 @@ int get_token(token_struct *token) {
                 } else if (c == '2') {
                     string_number[0] = c;
                     state = STATE_STRING_ESCAPE_TWO;
-                } else if (tolower(c) == 'x') {
-                    state = STATE_STRING_ESCAPE_HEX;
-                } else {
+                }
+				else {
                     string_free(str);
                     return ERR_LEXER;
                 }
@@ -277,7 +264,7 @@ int get_token(token_struct *token) {
                 if (c == '0') {
                     string_number[1] = c;
                     state = STATE_STRING_ESCAPE_ZERO_ZERO;
-                } else if (isdigit(c)) {
+                } else if (isdigit(c) && c != '0') {
                     string_number[1] = c;
                     state = STATE_STRING_ESCAPE_OTHER;
                 } else {
@@ -349,45 +336,6 @@ int get_token(token_struct *token) {
                 } else {
                     string_free(str);
                     return ERR_LEXER;
-                }
-                break;
-            case (STATE_STRING_ESCAPE_HEX):
-                hex[0] = hex[1] = hex[2] = '\0';
-                if (isxdigit(c)) {
-                    hex[0] = (char) c;
-                    c = getchar();
-                    if(isxdigit(c)) {
-                        hex[1] = (char) c;
-                    }
-                }
-                if (strlen(hex) == 2) {
-                    int value;
-                    if (isdigit(hex[0])) {
-                        value = 16 * (hex[0] - '0');
-                    } else if( hex[0] >= 'A' && hex[0] <='F') {
-                        value = 16 * (hex[0] - 'A' + 10);
-                    } else {
-                        value = 16 * (hex[0] - 'a' + 10);
-                    }
-                    if(isdigit(hex[1])) {
-                        value += hex[1] - '0';
-                    } else if( hex[1] >= 'A' && hex[1] <='F') {
-                        value += hex[1] - 'A' + 10;
-                    } else {
-                        value += hex[1] - 'a' + 10;
-                    }
-                    hex[0] = hex[1] = hex[2] = '\0';
-                    if (!(add_char_to_string(str, value))) {
-                        string_free(str);
-                        return ERR_INTERNAL;
-                    }
-                    state = STATE_STRING_START;
-
-                } else {
-                    ungetc(c, stdin);
-                    string_free(str);
-                    return ERR_LEXER;
-
                 }
                 break;
             case (STATE_NUMBER):
@@ -535,7 +483,11 @@ int get_token(token_struct *token) {
                 }
                 break;
             case (STATE_COMMENT_BLOCK_END):
-                if (c == ']') {
+				if (c == EOF) {
+					ungetc(c, stdin);
+					string_free(str);
+					return ERR_LEXER;
+				} else if (c == ']') {
                     state = STATE_START;
                 } else {
                     state = STATE_COMMENT_BLOCK;
