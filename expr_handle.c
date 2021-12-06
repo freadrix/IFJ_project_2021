@@ -45,7 +45,7 @@ char precedence_tab[9][9] = {
 /*   (    */    {'<' ,'<' ,'<' ,'=' ,'<' ,'<' ,'<' ,'<' ,'#' },
 /*    )   */    {'>' ,'>' ,'#' ,'>' ,'#' ,'>' ,'#' ,'>' ,'>' },
 /*   id   */    {'>' ,'>' ,'#' ,'>' ,'#' ,'>' ,'#' ,'>' ,'>' },
-/*   rel  */    {'<' ,'<' ,'<' ,'>' ,'<' ,'#' ,'<' ,'>' ,'>' },
+/*   rel  */    {'<' ,'<' ,'<' ,'>' ,'<' ,'#' ,'<' ,'<' ,'>' },
 /*    #   */    {'>' ,'>' ,'<' ,'>' ,'<' ,'>' ,'>' ,'>' ,'>' },
 /*    ..  */    {'<' ,'<' ,'<' ,'>' ,'<' ,'>' ,'<' ,'>' ,'>' },
 /*    $   */    {'<' ,'<' ,'<' ,'#' ,'<' ,'<' ,'<' ,'<' ,'#' },
@@ -140,15 +140,15 @@ prec_enum get_precedence(elem_enum elem) {
     }
 }
 
-rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_t *right, bool id) {
+rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_t *right, int count_of_elems) {
 
-    if (id) {
+    if (count_of_elems == 1) {
         if ((left->elem == ID) || (left->elem == INT) || (left->elem == DOUBLE) || (left->elem == STRING)) {
             return ID_RULE;
         } else {
             return NO_RULE;
         }
-    } else {
+    } else if (count_of_elems == 3) {
         if ((left->elem == EXPR) && (right->elem == EXPR)) {
             if (middle->elem == PLUS) {
                 return E_PLUS_E;
@@ -172,8 +172,6 @@ rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_t *righ
                 return E_EQ_E;
             } else if (middle->elem == NE) {
                 return E_NE_E;
-            } else if (middle->elem == LEN) {
-                return E_LEN;
             } else if (middle->elem == CONCAT) {
                 return E_CONCAT_E;
             } else {
@@ -184,6 +182,14 @@ rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_t *righ
         } else {
             return NO_RULE;
         }
+    } else if (count_of_elems == 2) {
+        if (left->elem == LEN) {
+            return E_LEN;
+        } else {
+            return NO_RULE;
+        }
+    } else {
+        return NO_RULE;
     }
 }
 
@@ -329,49 +335,62 @@ int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, r
     return OK;
 }
 
-int rule_reduce() {
-    item_stack_t *left = NULL;
-    item_stack_t *middle = NULL;
-    item_stack_t *right = NULL;
-    tab_item_data_type type;
+int reduce() {
+    item_stack_t *left;
+    item_stack_t *middle;
+    item_stack_t *right;
+    left = middle = right = NULL;
+
     rules_enum rule;
     bool end = false;
-    bool id = false;
-    int i = 0;
-
-    for (item_stack_t* tmp = stack_top_term(stack); tmp != NULL; tmp = tmp->nxt) {
-        if (tmp->elem != LT) {
-            end = false;
-            i++;
-        } else {
+    tab_item_data_type output_type;
+    int count_of_elems = 0;
+    //found count of elements until stop sign
+    for (item_stack_t *iter_item = stack_top(stack); iter_item != NULL; iter_item = iter_item->nxt) {
+        if (iter_item->elem == STOP) {
             end = true;
             break;
+        } else {
+            count_of_elems++;
         }
     }
 
-    if (i == 1 && end) {
+    if (count_of_elems == 1 && end) {
+        //printf("REDUCE BY 1\n");
         left = stack->top;
-        id = true;
-        rule = get_rule(left, middle, right, id);
-    } else if (i == 3 && end) {
+        if ((rule = get_rule(left, middle, right, count_of_elems)) == NO_RULE) {
+            return ERR_SYNTAX;
+        }
+    } else if (count_of_elems == 2 && end) {
+        left = stack->top->nxt;
+        middle = stack->top;
+        if ((rule = get_rule(left, middle, right, count_of_elems)) == NO_RULE) {
+            return ERR_SYNTAX;
+        }
+    } else if (count_of_elems == 3 && end) {
+        //printf("REDUCE BY 3\n");
         left = stack->top->nxt->nxt;
         middle = stack->top->nxt;
         right = stack->top;
-        id = false;
-        rule = get_rule(left, middle, right, id);
-    } else {
-        return ERR_SYNTAX;
-    }
-
-    if (rule != NO_RULE) {
-        if ((i = rules_check(left, middle, right, rule, &type)) != OK) {
-            return i;
+        if ((rule = get_rule(left, middle, right, count_of_elems)) == NO_RULE) {
+            return ERR_SYNTAX;
         }
-        // TODO code generator functions
     } else {
         return ERR_SYNTAX;
     }
 
+    int check;
+    if((check = rules_check(left, middle, right, rule, &output_type))) {
+        return check;
+    }
+
+    // TODO GENERATE CODE
+
+    for (int i = 0; i < (count_of_elems + 1); i++) {
+        pop_stack(stack);
+    }
+    push_stack(stack, EXPR, output_type);
+    
     return OK;
 }
 
@@ -387,24 +406,25 @@ int exp_processing(token_struct *token) { // TODO code generator functions
         return ERR_INTERNAL;
     }
 
-    for (bool end = false; !end;) {
+    while (true) {
 
         if(!(stack_term = stack_top_term(stack))) {
             empty_stack(stack);
             return ERR_INTERNAL;
         }
         given_symbol = get_elem(token);
+        //printf("%d\n", given_symbol);
         char prec_symbol = precedence_tab[get_precedence(stack_term->elem)][get_precedence(given_symbol)];
-
+        
+        //reduce prec
         if (prec_symbol == '>') { // TESTME
-            if (rule_reduce()) {
+            if (reduce()) {
                 empty_stack(stack);
                 return ERR_INTERNAL;
             }
-
-            break;
+        //shift prec
         } else if (prec_symbol == '<') { // TESTME PLS
-            if (!(insert_after_top_term(stack, LT, TYPE_UNDEFINED))) {
+            if (!(insert_after_top_term(stack, STOP, TYPE_UNDEFINED))) {
                 empty_stack(stack);
                 return ERR_INTERNAL;
             }
@@ -412,20 +432,18 @@ int exp_processing(token_struct *token) { // TODO code generator functions
                 empty_stack(stack);
                 return ERR_INTERNAL;
             }
-
             GET_TOKEN;
-            break;
+        //equal prec
         } else if (prec_symbol == '=') { // TESTME PLS
             if(!(push_stack(stack, given_symbol, get_elem_type(given_symbol, token)))) {
                 empty_stack(stack);
                 return ERR_INTERNAL;
             }
-
             GET_TOKEN;
-            break;
+        //error prec
         } else if (prec_symbol == '#') { // TESTME PLS
             if ((stack_term->elem == SIGN) && (given_symbol == SIGN)) {
-                end = true;
+                //successful end
                 break;
             } else {
                 empty_stack(stack);

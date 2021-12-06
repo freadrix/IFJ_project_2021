@@ -241,6 +241,33 @@ MOVE TF@%0 float@0x1.12p+0
 MOVE GF@%gl_res float@0x1.12p+0
 
 
+CALL $funl
+
+JUMP $end
+LABEL $funl
+PUSHFRAME
+
+DEFVAR LF@%hi
+
+WRITE string@hello
+POPFRAME
+LABEL $end
+
+
+
+CALL $funl_2
+
+JUMP $end_2
+LABEL $funl_2
+PUSHFRAME
+DEFVAR LF@%hi_2
+
+WRITE string@hello
+POPFRAME
+LABEL $end_2
+
+EXIT int@3
+
 
 TYPE GF@%gl_1 GF@%gl_res
 JUMPIFEQ $IFSTART GF@%gl_1 string@bool

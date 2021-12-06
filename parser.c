@@ -183,7 +183,9 @@ int parser() {
         CLEAN;
         return PARSER_RESPONSE;
     }
-
+    // GET_TOKEN;       Verevkin testing set, you can delete it
+    // printf("%d\n", exp_processing(token));
+    // return 0;
     /// <program>
     GET_TOKEN;
     while (token->type != TOKEN_EOF) {
@@ -273,7 +275,7 @@ int function_parser() {
         if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
     }
     if ((token->type == TOKEN_KEYWORD) && (token->attribute.keyword == KEYWORD_END)) {
-        code_generate_function_end();   /// TODO doplnit function ID
+        //code_generate_function_end();   /// TODO doplnit function ID
         return OK;
     }
     if (IS_FUNCTION_BODY) { /// <state_l> function body
@@ -282,7 +284,7 @@ int function_parser() {
     } else {
         return ERR_SYNTAX;
     }
-    code_generate_function_end(); /// TODO doplnit function ID
+    //code_generate_function_end(); /// TODO doplnit function ID
     return OK;
 }
 
@@ -395,7 +397,7 @@ int function_body_parser(tab_item_t *function_item) {
         } else if (IS_ID) {
             if (!(strcmp(token->attribute.string->string, "write"))) {
                 /*TODO expression*/
-                code_generate_write_function(); ///TODO params write(params), [0] param == pocet parametrov, ostatne params stringy (aj int, num etc values na string!!!!)
+                //code_generate_write_function(); ///TODO params write(params), [0] param == pocet parametrov, ostatne params stringy (aj int, num etc values na string!!!!)
                 return OK;
             }
             PARSER_RESPONSE = id_in_body_parser(function_item);

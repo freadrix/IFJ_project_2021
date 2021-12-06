@@ -17,7 +17,6 @@
  * @enum Available symbols
  */
 typedef enum {
-
     LT,         // <
     GT,         // >
     GEQ,        // >=
@@ -102,7 +101,7 @@ bool pop_stack(stack_t *stack);
  * @param type Type of new element
  * @return true in case of success, else false
  */
-bool push_stack(stack_t *stack, elem_enum elem, tab_item_data_type type);
+bool push_stack(stack_t *stack, elem_enum, tab_item_data_type type);
 
 /**
  * @brief Clear entire stack from the items
@@ -117,6 +116,6 @@ void empty_stack(stack_t *stack);
 * @param type Type of new element
 * @return true in case of success, else false
  */
-bool insert_after_top_term(stack_t *stack, elem_enum elem, tab_item_data_type type);
+bool insert_after_top_term(stack_t *stack, elem_enum, tab_item_data_type type);
 
 #endif

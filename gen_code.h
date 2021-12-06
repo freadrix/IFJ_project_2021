@@ -21,7 +21,6 @@
  * @enum Rules
  */
 typedef enum {
-
     E_LT_E,         // E < E
     E_GT_E,         // E > E
     E_GEQ_E,        // E >= E
