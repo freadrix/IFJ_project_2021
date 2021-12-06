@@ -254,8 +254,7 @@ int get_token(token_struct *token) {
                 } else if (c == '2') {
                     string_number[0] = c;
                     state = STATE_STRING_ESCAPE_TWO;
-                }
-				else {
+                } else {
                     string_free(str);
                     return ERR_LEXER;
                 }
