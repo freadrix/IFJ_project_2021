@@ -60,38 +60,37 @@
 */
 typedef enum {
     TOKEN_EMPTY,            // 0
-//    TOKEN_EOL,              // 1
-    TOKEN_EOF,              // 2
+    TOKEN_EOF,              // 1
 
-    TOKEN_ID,               // 3
-    TOKEN_KEYWORD,          // 4
+    TOKEN_ID,               // 2
+    TOKEN_KEYWORD,          // 3
 
-    TOKEN_INT,              // 5
-    TOKEN_DOUBLE,           // 6
-    TOKEN_STRING,           // 7
+    TOKEN_INT,              // 4
+    TOKEN_DOUBLE,           // 5
+    TOKEN_STRING,           // 6
 
-    TOKEN_EQUAL,            // 8
-    TOKEN_NOT_EQUAL,        // 9
-    TOKEN_PLUS,             // 10
-    TOKEN_MINUS,            // 11
-    TOKEN_MUL,              // 12
-    TOKEN_DIV,              // 13
-    TOKEN_IDIV,             // 14
-    TOKEN_CONCAT,           // 15
-    TOKEN_UNARY_LENGTH,     // 16
+    TOKEN_EQUAL,            // 7
+    TOKEN_NOT_EQUAL,        // 8
+    TOKEN_PLUS,             // 9
+    TOKEN_MINUS,            // 10
+    TOKEN_MUL,              // 11
+    TOKEN_DIV,              // 12
+    TOKEN_IDIV,             // 13
+    TOKEN_CONCAT,           // 14
+    TOKEN_UNARY_LENGTH,     // 15
 
-    TOKEN_ASSIGN,           // 17
-    TOKEN_GREATER,          // 18
-    TOKEN_GREATER_OR_EQ,    // 19
-    TOKEN_LESS,             // 20
-    TOKEN_LESS_OR_EQ,       // 21
+    TOKEN_ASSIGN,           // 16
+    TOKEN_GREATER,          // 17
+    TOKEN_GREATER_OR_EQ,    // 18
+    TOKEN_LESS,             // 19
+    TOKEN_LESS_OR_EQ,       // 20
 
-    TOKEN_DDOT,             // 22
-    TOKEN_COMMA,            // 23
-    TOKEN_BRACKET_SQUARE_R, // 24
-    TOKEN_BRACKET_SQUARE_L, // 25
-    TOKEN_BRACKET_ROUND_R,  // 26
-    TOKEN_BRACKET_ROUND_L   // 27
+    TOKEN_DDOT,             // 21
+    TOKEN_COMMA,            // 22
+    TOKEN_BRACKET_SQUARE_R, // 23
+    TOKEN_BRACKET_SQUARE_L, // 24
+    TOKEN_BRACKET_ROUND_R,  // 25
+    TOKEN_BRACKET_ROUND_L   // 26
 } token_type;
 
 /**
