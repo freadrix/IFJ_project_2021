@@ -14,11 +14,7 @@
 // macro that we use for get new token and check return value
 #define GET_TOKEN                                               \
 SCANNER_RESPONSE = get_token(token);                            \
-if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE;             \
-while (token->type == TOKEN_EOL) {                              \
-    SCANNER_RESPONSE = get_token(token);                        \
-    if(SCANNER_RESPONSE != OK) break;                           \
-} if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE
+if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE
 
 
 stack_t *stack;

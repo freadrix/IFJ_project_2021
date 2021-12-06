@@ -1,6 +1,6 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
- * 
+ *
  * @brief Syntactic and semantic check header
  * @authors Matej Alexej Helc, Anton Medvedev Hulk
  */
@@ -18,10 +18,6 @@
 #define GET_TOKEN                                               \
 SCANNER_RESPONSE = get_token(token);                            \
 if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE;             \
-while (token->type == TOKEN_EOL) {                              \
-    SCANNER_RESPONSE = get_token(token);                        \
-    if(SCANNER_RESPONSE != OK) break;                           \
-}                                                               \
 if(IS_ID || (token->type == TOKEN_STRING))                      \
 printf("%s\n", token->attribute.string->string);                \
 if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE

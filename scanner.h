@@ -40,7 +40,7 @@
 
 // Comments
 #define STATE_COMMENT_START 28        // ∑-EOL, EOF, [              (if [ go to 27)
-#define STATE_COMMENT_BLOCK_START 29  // go back to state 26 if ∑-[
+#define STATE_COMMENT_BLOCK_START 29  // go back to state 28 if ∑-[
 #define STATE_COMMENT_BLOCK 30        // ∑-]                        (if ] go to 31)
 #define STATE_COMMENT_BLOCK_END 31    // go back to state 28 if ∑-]
 
@@ -52,7 +52,6 @@
 #define STATE_NUMBER_EXPONENT_SIGN 36
 #define STATE_NUMBER_EXPONENT_END 37
 
-#define STATE_EOL 38 // End of line
 #define STATE_EOF 39 // End of file
 /* STATES END */
 
@@ -61,7 +60,7 @@
 */
 typedef enum {
     TOKEN_EMPTY,            // 0
-    TOKEN_EOL,              // 1
+//    TOKEN_EOL,              // 1
     TOKEN_EOF,              // 2
 
     TOKEN_ID,               // 3
