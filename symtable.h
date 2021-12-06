@@ -24,12 +24,12 @@
  * @enum Type of data
  */
 typedef enum {
-    TYPE_NULL,
-    TYPE_BOOL,
-    TYPE_INTEGER = TOKEN_INT,
-    TYPE_DOUBLE = TOKEN_DOUBLE,
-    TYPE_STRING = TOKEN_STRING,
-    TYPE_UNDEFINED
+    TYPE_NULL,                      //0
+    TYPE_BOOL,                      //1
+    TYPE_INTEGER = TOKEN_INT,       //5
+    TYPE_DOUBLE = TOKEN_DOUBLE,     //6
+    TYPE_STRING = TOKEN_STRING,     //7
+    TYPE_UNDEFINED                  //8
 }tab_item_data_type;
 
 /**

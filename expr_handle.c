@@ -29,8 +29,8 @@ typedef enum {
 
     T_PLUS_MINUS,     // +-
     T_DIV_MUL_IDIV,   // /*//
-    T_RBR,            // (
-    T_LBR,            // )
+    T_LBR,            // (
+    T_RBR,            // )
     T_ID,             // id, int, str, double
     T_REL,            // relations
     T_LEN,            // #
@@ -362,6 +362,7 @@ int reduce() {
             return ERR_SYNTAX;
         }
     } else if (count_of_elems == 2 && end) {
+        //printf("REDUCE BY 2\n");
         left = stack->top->nxt;
         middle = stack->top;
         if ((rule = get_rule(left, middle, right, count_of_elems)) == NO_RULE) {
@@ -383,6 +384,7 @@ int reduce() {
     if((check = rules_check(left, middle, right, rule, &output_type))) {
         return check;
     }
+    //printf("OUTPUT TYPE == %d\n", output_type);
 
     // TODO GENERATE CODE
 
@@ -405,9 +407,7 @@ int exp_processing(token_struct *token) { // TODO code generator functions
         empty_stack(stack);
         return ERR_INTERNAL;
     }
-
     while (true) {
-
         if(!(stack_term = stack_top_term(stack))) {
             empty_stack(stack);
             return ERR_INTERNAL;
@@ -415,15 +415,16 @@ int exp_processing(token_struct *token) { // TODO code generator functions
         given_symbol = get_elem(token);
         //printf("%d\n", given_symbol);
         char prec_symbol = precedence_tab[get_precedence(stack_term->elem)][get_precedence(given_symbol)];
-        
+
         //reduce prec
-        if (prec_symbol == '>') { // TESTME
-            if (reduce()) {
+        if (prec_symbol == '>') {
+            int output;
+            if ((output = reduce())) {
                 empty_stack(stack);
-                return ERR_INTERNAL;
+                return output;
             }
         //shift prec
-        } else if (prec_symbol == '<') { // TESTME PLS
+        } else if (prec_symbol == '<') {
             if (!(insert_after_top_term(stack, STOP, TYPE_UNDEFINED))) {
                 empty_stack(stack);
                 return ERR_INTERNAL;
@@ -432,16 +433,17 @@ int exp_processing(token_struct *token) { // TODO code generator functions
                 empty_stack(stack);
                 return ERR_INTERNAL;
             }
+            // TODO CODE GENERATE
             GET_TOKEN;
         //equal prec
-        } else if (prec_symbol == '=') { // TESTME PLS
+        } else if (prec_symbol == '=') {
             if(!(push_stack(stack, given_symbol, get_elem_type(given_symbol, token)))) {
                 empty_stack(stack);
                 return ERR_INTERNAL;
             }
             GET_TOKEN;
         //error prec
-        } else if (prec_symbol == '#') { // TESTME PLS
+        } else if (prec_symbol == '#') {
             if ((stack_term->elem == SIGN) && (given_symbol == SIGN)) {
                 //successful end
                 break;
@@ -451,6 +453,6 @@ int exp_processing(token_struct *token) { // TODO code generator functions
             }
         }
     }
-
+    // TODO CODE GENERATE
     return OK;
 }

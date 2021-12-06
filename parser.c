@@ -183,7 +183,7 @@ int parser() {
         CLEAN;
         return PARSER_RESPONSE;
     }
-    // GET_TOKEN;       Verevkin testing set, you can delete it
+    // GET_TOKEN;
     // printf("%d\n", exp_processing(token));
     // return 0;
     /// <program>
