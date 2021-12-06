@@ -159,7 +159,7 @@ bool code_generate_variable_define_value(char *var_name, token_struct token);
  * @param token token to push on top of the stack
  * @return true in case of success, false otherwise
  */
-bool code_generate_stack_push(token_struct token);
+bool code_generate_stack_push(token_struct *token);
 
 /**
  * @brief Generation of convertion of first stack variable from integer to float

@@ -570,9 +570,9 @@ bool code_generate_variable_define_value(char *var_name, token_struct token) {
     return true;
 }
 
-bool code_generate_stack_push(token_struct token) {
+bool code_generate_stack_push(token_struct *token) {
     if(!(add_string_to_string(&generated_code, ("PUSHS "))) ||
-       !(code_generate_token_value(token)) ||
+       !(code_generate_token_value(*token)) ||
        !(add_string_to_string(&generated_code, ("\n")))) {
         return false;
     }
@@ -581,7 +581,6 @@ bool code_generate_stack_push(token_struct token) {
 
 // ======================== FLOAT<->INT CONVERTIONS START ======================== //
 
-//expr handler
 bool code_generate_stack_convert_float_first() {
     if(!(add_string_to_string(&generated_code, ("INT2FLOATS\n")))) {
         return false;
@@ -615,7 +614,6 @@ bool code_generate_stack_convert_int_second() {
 }
 // ======================== FLOAT<->INT CONVERTIONS END ======================== //
 
-//expr handler
 bool code_generate_operations(rules_enum r) {
     if (r == E_LT_E) {
         if(!(add_string_to_string(&generated_code, ("LTS\n")))) {
@@ -697,7 +695,6 @@ bool code_generate_operations(rules_enum r) {
     return true;
 }
 
-//expr handler
 bool code_generate_pop_stack_result() {
     if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_res\n")))) {
         return false;

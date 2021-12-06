@@ -79,7 +79,7 @@ elem_enum get_elem(token_struct *tkn) {
         return LEQ;
     } else if (tkn->type == TOKEN_GREATER_OR_EQ) {
         return GEQ;
-    } else if (tkn->type == TOKEN_EQUAL) {
+    } else if (tkn->type == TOKEN_ASSIGN) {
         return EQ;
     } else if (tkn->type == TOKEN_NOT_EQUAL) {
         return NE;
@@ -99,7 +99,7 @@ elem_enum get_elem(token_struct *tkn) {
 tab_item_data_type get_elem_type(elem_enum elem, token_struct *token) {
 
     tab_item_t *tmp;
-    if (elem == ID) { // FIXME, ??data_stack->top->table??
+    if (elem == ID) { // FIXME, ??data_stack->top->table?? //TODO
         tmp = search_hashtable(data_stack->top->table, token->attribute.string->string);
         if (!tmp) {
             return TYPE_UNDEFINED;
@@ -194,7 +194,7 @@ rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_t *righ
 }
 
 int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, rules_enum rule, tab_item_data_type *type) {
-
+    //check for types
     if ((rule == E_PLUS_E) || (rule == E_MINUS_E) || (rule == E_MUL_E)) {
         if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) ||
             (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)  ||
@@ -336,6 +336,7 @@ int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, r
 }
 
 int reduce() {
+    //reduce > rule
     item_stack_t *left;
     item_stack_t *middle;
     item_stack_t *right;
@@ -356,20 +357,20 @@ int reduce() {
     }
 
     if (count_of_elems == 1 && end) {
-        //printf("REDUCE BY 1\n");
+        // printf("REDUCE BY 1\n");
         left = stack->top;
         if ((rule = get_rule(left, middle, right, count_of_elems)) == NO_RULE) {
             return ERR_SYNTAX;
         }
     } else if (count_of_elems == 2 && end) {
-        //printf("REDUCE BY 2\n");
+        // printf("REDUCE BY 2\n");
         left = stack->top->nxt;
         middle = stack->top;
         if ((rule = get_rule(left, middle, right, count_of_elems)) == NO_RULE) {
             return ERR_SYNTAX;
         }
     } else if (count_of_elems == 3 && end) {
-        //printf("REDUCE BY 3\n");
+        // printf("REDUCE BY 3\n");
         left = stack->top->nxt->nxt;
         middle = stack->top->nxt;
         right = stack->top;
@@ -384,11 +385,13 @@ int reduce() {
     if((check = rules_check(left, middle, right, rule, &output_type))) {
         return check;
     }
-    //printf("OUTPUT TYPE == %d\n", output_type);
+    // printf("OUTPUT TYPE == %d\n", output_type);
 
-    // TODO GENERATE CODE
+    if (!(code_generate_operations(rule))) {
+        return ERR_INTERNAL;
+    }
 
-    for (int i = 0; i < (count_of_elems + 1); i++) {
+    for (int i = 0; i <= count_of_elems; i++) {
         pop_stack(stack);
     }
     push_stack(stack, EXPR, output_type);
@@ -396,7 +399,7 @@ int reduce() {
     return OK;
 }
 
-int exp_processing(token_struct *token) { // TODO code generator functions
+int exp_processing(token_struct *token) {
     //initialize stack
     init_stack(stack);
     //variables for given symbol and terminal on top of the stack
@@ -413,9 +416,9 @@ int exp_processing(token_struct *token) { // TODO code generator functions
             return ERR_INTERNAL;
         }
         given_symbol = get_elem(token);
-        //printf("%d\n", given_symbol);
+        // printf("RIGHT, GIVEN ELEMENT == %d\n", given_symbol);
         char prec_symbol = precedence_tab[get_precedence(stack_term->elem)][get_precedence(given_symbol)];
-
+        //printf("%d %d\n", get_precedence(stack_term->elem), get_precedence(given_symbol));
         //reduce prec
         if (prec_symbol == '>') {
             int output;
@@ -425,6 +428,14 @@ int exp_processing(token_struct *token) { // TODO code generator functions
             }
         //shift prec
         } else if (prec_symbol == '<') {
+            //generate code
+            //push variables on stack for future work with them
+            if ((given_symbol == INT) || (given_symbol == DOUBLE) ||
+                (given_symbol == STRING) || (given_symbol == ID)) {
+                if (!(code_generate_stack_push(token))) {
+                    return ERR_INTERNAL;
+                }
+            }
             if (!(insert_after_top_term(stack, STOP, TYPE_UNDEFINED))) {
                 empty_stack(stack);
                 return ERR_INTERNAL;
@@ -433,7 +444,6 @@ int exp_processing(token_struct *token) { // TODO code generator functions
                 empty_stack(stack);
                 return ERR_INTERNAL;
             }
-            // TODO CODE GENERATE
             GET_TOKEN;
         //equal prec
         } else if (prec_symbol == '=') {
@@ -453,6 +463,40 @@ int exp_processing(token_struct *token) { // TODO code generator functions
             }
         }
     }
-    // TODO CODE GENERATE
+    
+    item_stack_t *final;
+    if ((final = stack_top(stack)) == NULL) {
+        empty_stack(stack);
+        return ERR_INTERNAL;        
+    } else if (final->elem != EXPR) {
+        empty_stack(stack);
+        return ERR_SYNTAX;
+    }
+
+    // TODO ASK if needed type change on the end, ERR_TYPE_INCOMPATABILITY
+    // if (final->type == TYPE_INTEGER) {
+    //     if (!(code_generate_stack_convert_float_first())) {
+    //         empty_stack(stack);
+    //         return ERR_INTERNAL;
+    //     }
+    // } else if (final->type == TYPE_DOUBLE) {
+    //     if (!(code_generate_stack_convert_int_first())) {
+    //         empty_stack(stack);
+    //         return ERR_INTERNAL;
+    //     }
+    // } else {
+    //     if (!(code_generate_pop_stack_result())) {
+    //         empty_stack(stack);
+    //         return ERR_INTERNAL;
+    //     }
+    // }
+    
+    //save result on GF@%gl_res
+    if (!(code_generate_pop_stack_result())) {
+        empty_stack(stack);
+        return ERR_INTERNAL;
+    }
+
+    empty_stack(stack);
     return OK;
 }
