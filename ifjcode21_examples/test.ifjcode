@@ -289,5 +289,12 @@ WRITE string@whilepost
 
 WRITE LF@y  #\n
 
+PUSHS nil@nil
+MOVE GF@%gl_res nil@nil
+PUSHS GF@%gl_res
+EQS
+POPS GF@%gl_res
+write GF@%gl_res
+
 POPFRAME
 CLEARS
