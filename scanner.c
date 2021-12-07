@@ -512,10 +512,10 @@ int get_token(token_struct *token) {
                 return OK;
             case (STATE_EQUAL):
                 if (c == '=') {
-                    token->type = TOKEN_ASSIGN;
+                    token->type = TOKEN_EQUAL;
                 } else {
                     ungetc(c, stdin);
-                    token->type = TOKEN_EQUAL;
+                    token->type = TOKEN_ASSIGN;
                 }
                 string_free(str);
                 return OK;

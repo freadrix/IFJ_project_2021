@@ -75,7 +75,7 @@ elem_enum get_elem(token_struct *tkn) {
         return LEQ;
     } else if (tkn->type == TOKEN_GREATER_OR_EQ) {
         return GEQ;
-    } else if (tkn->type == TOKEN_ASSIGN) {
+    } else if (tkn->type == TOKEN_EQUAL) {
         return EQ;
     } else if (tkn->type == TOKEN_NOT_EQUAL) {
         return NE;
@@ -391,7 +391,7 @@ int reduce() {
         pop_stack(stack);
     }
     push_stack(stack, EXPR, output_type);
-    
+
     return OK;
 }
 
@@ -459,11 +459,11 @@ int exp_processing(token_struct *token) {
             }
         }
     }
-    
+
     item_stack_t *final;
     if ((final = stack_top(stack)) == NULL) {
         empty_stack(stack);
-        return ERR_INTERNAL;        
+        return ERR_INTERNAL;
     } else if (final->elem != EXPR) {
         empty_stack(stack);
         return ERR_SYNTAX;
@@ -486,7 +486,7 @@ int exp_processing(token_struct *token) {
     //         return ERR_INTERNAL;
     //     }
     // }
-    
+
     //save result on GF@%gl_res
     if (!(code_generate_pop_stack_result())) {
         empty_stack(stack);
