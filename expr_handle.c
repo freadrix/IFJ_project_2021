@@ -16,7 +16,7 @@ SCANNER_RESPONSE_EXP = get_token(token);                        \
 if(SCANNER_RESPONSE_EXP != OK) return SCANNER_RESPONSE_EXP
 
 
-stack_t *stack;
+stack_t *expr_stack;
 int SCANNER_RESPONSE_EXP; // idk, but it can not take declaration from parser header
 
 typedef enum {
@@ -344,7 +344,7 @@ int reduce() {
     tab_item_data_type output_type;
     int count_of_elems = 0;
     //found count of elements until stop sign
-    for (item_stack_t *iter_item = stack_top(stack); iter_item != NULL; iter_item = iter_item->nxt) {
+    for (item_stack_t *iter_item = stack_top(expr_stack); iter_item != NULL; iter_item = iter_item->nxt) {
         if (iter_item->elem == STOP) {
             end = true;
             break;
@@ -355,22 +355,22 @@ int reduce() {
 
     if (count_of_elems == 1 && end) {
         // printf("REDUCE BY 1\n");
-        left = stack->top;
+        left = expr_stack->top;
         if ((rule = get_rule(left, middle, right, count_of_elems)) == NO_RULE) {
             return ERR_SYNTAX;
         }
     } else if (count_of_elems == 2 && end) {
         // printf("REDUCE BY 2\n");
-        left = stack->top->nxt;
-        middle = stack->top;
+        left = expr_stack->top->nxt;
+        middle = expr_stack->top;
         if ((rule = get_rule(left, middle, right, count_of_elems)) == NO_RULE) {
             return ERR_SYNTAX;
         }
     } else if (count_of_elems == 3 && end) {
         // printf("REDUCE BY 3\n");
-        left = stack->top->nxt->nxt;
-        middle = stack->top->nxt;
-        right = stack->top;
+        left = expr_stack->top->nxt->nxt;
+        middle = expr_stack->top->nxt;
+        right = expr_stack->top;
         if ((rule = get_rule(left, middle, right, count_of_elems)) == NO_RULE) {
             return ERR_SYNTAX;
         }
@@ -389,28 +389,28 @@ int reduce() {
     }
 
     for (int i = 0; i <= count_of_elems; i++) {
-        pop_stack(stack);
+        pop_stack(expr_stack);
     }
-    push_stack(stack, EXPR, output_type);
+    push_stack(expr_stack, EXPR, output_type);
 
     return OK;
 }
 
 int exp_processing(token_struct *token, data_stack_t *data_stack) {
-    //initialize stack
-    init_stack(stack);
-    //variables for given symbol and terminal on top of the stack
+    //initialize expr_stack
+    init_stack(expr_stack);
+    //variables for given symbol and terminal on top of the expr_stack
     elem_enum given_symbol;
     item_stack_t *stack_term;
     bool next_expr_detect = false;
-    //push $ on top of the initialized stack
-    if(!(push_stack(stack, SIGN, TYPE_UNDEFINED))) {
-        empty_stack(stack);
+    //push $ on top of the initialized expr_stack
+    if(!(push_stack(expr_stack, SIGN, TYPE_UNDEFINED))) {
+        empty_stack(expr_stack);
         return ERR_INTERNAL;
     }
     while (true) {
-        if(!(stack_term = stack_top_term(stack))) {
-            empty_stack(stack);
+        if(!(stack_term = stack_top_term(expr_stack))) {
+            empty_stack(expr_stack);
             return ERR_INTERNAL;
         }
         given_symbol = get_elem(token);
@@ -429,32 +429,32 @@ int exp_processing(token_struct *token, data_stack_t *data_stack) {
         if (prec_symbol == '>') {
             int output;
             if ((output = reduce())) {
-                empty_stack(stack);
+                empty_stack(expr_stack);
                 return output;
             }
         //shift prec
         } else if (prec_symbol == '<') {
             //generate code
-            //push variables on stack for future work with them
+            //push variables on expr_stack for future work with them
             if ((given_symbol == INT) || (given_symbol == DOUBLE) ||
                 (given_symbol == STRING) || (given_symbol == ID)) {
                 if (!(code_generate_stack_push(token))) {
                     return ERR_INTERNAL;
                 }
             }
-            if (!(insert_after_top_term(stack, STOP, TYPE_UNDEFINED))) {
-                empty_stack(stack);
+            if (!(insert_after_top_term(expr_stack, STOP, TYPE_UNDEFINED))) {
+                empty_stack(expr_stack);
                 return ERR_INTERNAL;
             }
-            if(!(push_stack(stack, given_symbol, get_elem_type(given_symbol, token, data_stack)))) {
-                empty_stack(stack);
+            if(!(push_stack(expr_stack, given_symbol, get_elem_type(given_symbol, token, data_stack)))) {
+                empty_stack(expr_stack);
                 return ERR_INTERNAL;
             }
             GET_TOKEN;
         //equal prec
         } else if (prec_symbol == '=') {
-            if(!(push_stack(stack, given_symbol, get_elem_type(given_symbol, token, data_stack)))) {
-                empty_stack(stack);
+            if(!(push_stack(expr_stack, given_symbol, get_elem_type(given_symbol, token, data_stack)))) {
+                empty_stack(expr_stack);
                 return ERR_INTERNAL;
             }
             GET_TOKEN;
@@ -464,45 +464,45 @@ int exp_processing(token_struct *token, data_stack_t *data_stack) {
                 //successful end
                 break;
             } else {
-                empty_stack(stack);
+                empty_stack(expr_stack);
                 return ERR_SYNTAX;
             }
         }
     }
 
     item_stack_t *final;
-    if ((final = stack_top(stack)) == NULL) {
-        empty_stack(stack);
+    if ((final = stack_top(expr_stack)) == NULL) {
+        empty_stack(expr_stack);
         return ERR_INTERNAL;
     } else if (final->elem != EXPR) {
-        empty_stack(stack);
+        empty_stack(expr_stack);
         return ERR_SYNTAX;
     }
 
     // TODO ASK if needed type change on the end, ERR_TYPE_INCOMPATABILITY
     // if (final->type == TYPE_INTEGER) {
     //     if (!(code_generate_stack_convert_float_first())) {
-    //         empty_stack(stack);
+    //         empty_stack(expr_stack);
     //         return ERR_INTERNAL;
     //     }
     // } else if (final->type == TYPE_DOUBLE) {
     //     if (!(code_generate_stack_convert_int_first())) {
-    //         empty_stack(stack);
+    //         empty_stack(expr_stack);
     //         return ERR_INTERNAL;
     //     }
     // } else {
     //     if (!(code_generate_pop_stack_result())) {
-    //         empty_stack(stack);
+    //         empty_stack(expr_stack);
     //         return ERR_INTERNAL;
     //     }
     // }
 
     //save result on GF@%gl_res
     if (!(code_generate_pop_stack_result())) {
-        empty_stack(stack);
+        empty_stack(expr_stack);
         return ERR_INTERNAL;
     }
 
-    empty_stack(stack);
+    empty_stack(expr_stack);
     return OK;
 }
