@@ -222,6 +222,8 @@ int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, r
             return ERR_SEMANTIC_EXP;
         } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
             return ERR_SEMANTIC_DEF;
+        } else if (right->is_zero) {
+            return ERR_DIV_ZERO;
         } else {
             if (left->type == TYPE_INTEGER) {
                 if (!(code_generate_stack_convert_float_second())) {
@@ -243,6 +245,8 @@ int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, r
             return ERR_SEMANTIC_EXP;
         } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
             return ERR_SEMANTIC_DEF;
+        } else if (right->is_zero) {
+            return ERR_DIV_ZERO;
         } else {
             if (left->type == TYPE_DOUBLE) {
                 if (!(code_generate_stack_convert_int_second())) {
@@ -387,11 +391,16 @@ int reduce() {
     if (!(code_generate_operations(rule))) {
         return ERR_INTERNAL;
     }
+    //check if variable was zero
+    bool is_zero = false;
+    if (rule == ID_RULE && left->is_zero) {
+        is_zero = true;
+    }
 
     for (int i = 0; i <= count_of_elems; i++) {
         pop_stack(stack);
     }
-    push_stack(stack, EXPR, output_type);
+    push_stack(stack, EXPR, output_type, is_zero);
 
     return OK;
 }
@@ -402,9 +411,10 @@ int exp_processing(token_struct *token, data_stack_t *data_stack) {
     //variables for given symbol and terminal on top of the stack
     elem_enum given_symbol;
     item_stack_t *stack_term;
+    bool is_zero;
     bool next_expr_detect = false;
     //push $ on top of the initialized stack
-    if(!(push_stack(stack, SIGN, TYPE_UNDEFINED))) {
+    if(!(push_stack(stack, SIGN, TYPE_UNDEFINED, false))) {
         empty_stack(stack);
         return ERR_INTERNAL;
     }
@@ -424,7 +434,6 @@ int exp_processing(token_struct *token, data_stack_t *data_stack) {
         }
         // printf("GIVEN ELEMENT == %d\n", given_symbol);
         char prec_symbol = precedence_tab[get_precedence(stack_term->elem)][get_precedence(given_symbol)];
-        //printf("%d %d\n", get_precedence(stack_term->elem), get_precedence(given_symbol));
         //reduce prec
         if (prec_symbol == '>') {
             int output;
@@ -446,14 +455,28 @@ int exp_processing(token_struct *token, data_stack_t *data_stack) {
                 empty_stack(stack);
                 return ERR_INTERNAL;
             }
-            if(!(push_stack(stack, given_symbol, get_elem_type(given_symbol, token, data_stack)))) {
+            if ((given_symbol == INT) && (token->attribute.int_value == 0)) {
+                is_zero = true;
+            } else if ((given_symbol == DOUBLE) && (token->attribute.double_value == 0.0)) {
+                is_zero = true;
+            } else {
+                is_zero = false;
+            }
+            if(!(push_stack(stack, given_symbol, get_elem_type(given_symbol, token, data_stack), is_zero))) {
                 empty_stack(stack);
                 return ERR_INTERNAL;
             }
             GET_TOKEN;
         //equal prec
         } else if (prec_symbol == '=') {
-            if(!(push_stack(stack, given_symbol, get_elem_type(given_symbol, token, data_stack)))) {
+            if ((given_symbol == INT) && (token->attribute.int_value == 0)) {
+                is_zero = true;
+            } else if ((given_symbol == DOUBLE) && (token->attribute.double_value == 0.0)) {
+                is_zero = true;
+            } else {
+                is_zero = false;
+            }
+            if(!(push_stack(stack, given_symbol, get_elem_type(given_symbol, token, data_stack), is_zero))) {
                 empty_stack(stack);
                 return ERR_INTERNAL;
             }

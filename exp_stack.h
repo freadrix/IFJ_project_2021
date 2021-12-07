@@ -50,6 +50,7 @@ typedef struct item_stack_struct {
 
     tab_item_data_type type;
     elem_enum elem;
+    bool is_zero;
     struct item_stack_struct *nxt;
 } item_stack_t;
 
@@ -101,7 +102,7 @@ bool pop_stack(stack_t *stack);
  * @param type Type of new element
  * @return true in case of success, else false
  */
-bool push_stack(stack_t *stack, elem_enum, tab_item_data_type type);
+bool push_stack(stack_t *stack, elem_enum, tab_item_data_type type, bool is_zero);
 
 /**
  * @brief Clear entire stack from the items

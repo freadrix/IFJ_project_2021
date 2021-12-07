@@ -52,13 +52,14 @@ bool pop_stack(stack_t *stack) {
     }
 }
 
-bool push_stack(stack_t *stack, elem_enum elem, tab_item_data_type type) {
+bool push_stack(stack_t *stack, elem_enum elem, tab_item_data_type type, bool is_zero) {
     //push item on the top of stack
     item_stack_t *item = malloc(sizeof(item_stack_t));
     if (!(item)) {
         return false;
     } else {
         item->nxt = stack->top;
+        item->is_zero = is_zero;
         item->elem = elem;
         item->type = type;
         stack->top = item;
@@ -86,7 +87,7 @@ bool insert_after_top_term(stack_t *stack, elem_enum elem, tab_item_data_type ty
             } else {
                 new->elem = elem;
                 new->type = type;
-
+                new->is_zero = false;
                 if (!previous) {
                     new->nxt = stack->top;
                     stack->top = new;

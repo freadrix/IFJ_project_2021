@@ -181,7 +181,7 @@ int parser() {
         return PARSER_RESPONSE;
     }
     // GET_TOKEN;                   // testing expr
-    // printf("%d\n", exp_processing(token));
+    // printf("%d\n", exp_processing(token, stack));
     // return 0;
     /// <program>
     GET_TOKEN;
