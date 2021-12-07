@@ -155,6 +155,13 @@ bool code_generate_variable_create(char *var_name);
 bool code_generate_variable_define_value(char *var_name, token_struct token);
 
 /**
+ * @brief Generation of moving expression answer on variable
+ * @param var_name name of variable to save expression on
+ * @return true in case of success, false otherwise
+ */
+bool code_generate_variable_save_expression(char *var_name);
+
+/**
  * @brief Generation of pushing token value on the top of the stack
  * @param token token to push on top of the stack
  * @return true in case of success, false otherwise

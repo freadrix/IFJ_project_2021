@@ -570,6 +570,15 @@ bool code_generate_variable_define_value(char *var_name, token_struct token) {
     return true;
 }
 
+bool code_generate_variable_save_expression(char *var_name) {
+    if(!(add_string_to_string(&generated_code, ("MOVE LF@"))) ||
+       !(add_string_to_string(&generated_code, (var_name))) ||
+       !(add_string_to_string(&generated_code, (" GF@%gl_res\n")))) {
+        return false;
+    }
+    return true;
+}
+
 bool code_generate_stack_push(token_struct *token) {
     if(!(add_string_to_string(&generated_code, ("PUSHS "))) ||
        !(code_generate_token_value(*token)) ||
