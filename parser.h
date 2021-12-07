@@ -113,6 +113,11 @@ int global_parser();
 int global_function_parser(tab_item_t *item);
 
 /**
+ * @return true if token id is global func otherwise else
+ * */
+bool is_function();
+
+/**
  * @brief check if there is '(' after function ID
  * @return return code which is in error.h
  * */

@@ -9,17 +9,15 @@
 
 #include "expr_handle.h"
 #include "symtable.h"
-#include "data_stack.h"
 
 // macro that we use for get new token and check return value
 #define GET_TOKEN                                               \
-SCANNER_RESPONSE = get_token(token);                            \
-if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE
+SCANNER_RESPONSE_EXP = get_token(token);                        \
+if(SCANNER_RESPONSE_EXP != OK) return SCANNER_RESPONSE_EXP
 
 
 stack_t *stack;
-data_stack_t *data_stack;
-int SCANNER_RESPONSE; // idk, but it can not take declaration from parser header
+int SCANNER_RESPONSE_EXP; // idk, but it can not take declaration from parser header
 
 typedef enum {
 
@@ -75,7 +73,7 @@ elem_enum get_elem(token_struct *tkn) {
         return LEQ;
     } else if (tkn->type == TOKEN_GREATER_OR_EQ) {
         return GEQ;
-    } else if (tkn->type == TOKEN_ASSIGN) {
+    } else if (tkn->type == TOKEN_EQUAL) {
         return EQ;
     } else if (tkn->type == TOKEN_NOT_EQUAL) {
         return NE;
@@ -92,16 +90,19 @@ elem_enum get_elem(token_struct *tkn) {
     }
 }
 
-tab_item_data_type get_elem_type(elem_enum elem, token_struct *token) {
-
-    tab_item_t *tmp;
-    if (elem == ID) { // FIXME, ??data_stack->top->table?? //TODO
-        tmp = search_hashtable(data_stack->top->table, token->attribute.string->string);
-        if (!tmp) {
-            return TYPE_UNDEFINED;
-        } else {
-            return tmp->data->item_data_type;
+tab_item_data_type get_elem_type(elem_enum elem, token_struct *token, data_stack_t *data_stack) {
+    item_data_stack_t *global_frame = get_global_frame_stack(data_stack);
+    item_data_stack_t *frame = data_stack->top;
+    if (elem == ID) {
+        tab_item_t *item;
+        while (frame != global_frame) {
+            item = search_hashtable(frame->table, token->attribute.string->string);
+            if (item != NULL) break;
+            frame = frame->previous;
         }
+        if (item == NULL) exit(ERR_SEMANTIC_DEF);
+        if (item->data->defined == false) return TYPE_NULL;
+        return item->data->item_data_type;
     } else if (elem == INT) {
         return TYPE_INTEGER;
     } else if (elem == DOUBLE) {
@@ -391,11 +392,11 @@ int reduce() {
         pop_stack(stack);
     }
     push_stack(stack, EXPR, output_type);
-    
+
     return OK;
 }
 
-int exp_processing(token_struct *token) {
+int exp_processing(token_struct *token, data_stack_t *data_stack) {
     //initialize stack
     init_stack(stack);
     //variables for given symbol and terminal on top of the stack
@@ -445,14 +446,14 @@ int exp_processing(token_struct *token) {
                 empty_stack(stack);
                 return ERR_INTERNAL;
             }
-            if(!(push_stack(stack, given_symbol, get_elem_type(given_symbol, token)))) {
+            if(!(push_stack(stack, given_symbol, get_elem_type(given_symbol, token, data_stack)))) {
                 empty_stack(stack);
                 return ERR_INTERNAL;
             }
             GET_TOKEN;
         //equal prec
         } else if (prec_symbol == '=') {
-            if(!(push_stack(stack, given_symbol, get_elem_type(given_symbol, token)))) {
+            if(!(push_stack(stack, given_symbol, get_elem_type(given_symbol, token, data_stack)))) {
                 empty_stack(stack);
                 return ERR_INTERNAL;
             }
@@ -468,11 +469,11 @@ int exp_processing(token_struct *token) {
             }
         }
     }
-    
+
     item_stack_t *final;
     if ((final = stack_top(stack)) == NULL) {
         empty_stack(stack);
-        return ERR_INTERNAL;        
+        return ERR_INTERNAL;
     } else if (final->elem != EXPR) {
         empty_stack(stack);
         return ERR_SYNTAX;
@@ -495,7 +496,7 @@ int exp_processing(token_struct *token) {
     //         return ERR_INTERNAL;
     //     }
     // }
-    
+
     //save result on GF@%gl_res
     if (!(code_generate_pop_stack_result())) {
         empty_stack(stack);
