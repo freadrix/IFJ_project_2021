@@ -15,101 +15,103 @@
     printf("%s\n", token->attribute.string->string);
  * */
 // macro that we use for get new token and check return value
-#define GET_TOKEN                                               \
-SCANNER_RESPONSE = get_token(token);                            \
-if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE;             \
-if(IS_ID || (token->type == TOKEN_STRING))                      \
-printf("%s\n", token->attribute.string->string);                \
+#define GET_TOKEN                                                               \
+SCANNER_RESPONSE = get_token(token);                                            \
+if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE;                             \
+if(IS_ID || (token->type == TOKEN_STRING))                                      \
+printf("%s\n", token->attribute.string->string);                                \
 if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE
 
 // macro that we use for insert new item to table
-#define INSERT_ITEM(_NAME)                                      \
-tab_item_t *(_NAME) =                                           \
-insert_element_hashtable(stack->top->table,                     \
-token->attribute.string->string);                               \
+#define INSERT_ITEM(_NAME)                                                      \
+tab_item_t *(_NAME) =                                                           \
+insert_element_hashtable(stack->top->table,                                     \
+token->attribute.string->string);                                               \
 if (inserted_item == NULL) return ERR_INTERNAL
 
 // macro that we use for searching item in table
-#define SEARCH_ITEM(_NAME, _TABLE, _STRING)                     \
-tab_item_t *(_NAME) = search_hashtable((_TABLE), (_STRING));    \
-bool is_there = false;                                          \
+#define SEARCH_ITEM(_NAME, _TABLE, _STRING)                                     \
+tab_item_t *(_NAME) = search_hashtable((_TABLE), (_STRING));                    \
+bool is_there = false;                                                          \
 if ((_NAME) != NULL) is_there = true
 
 // macro that we use for check if token string is build-in func string
-#define IS_BUILT_IN_FUNCTION                                    \
-IS_ID                                                   &&      \
-((!strcmp(token->attribute.string->string, "readi"))    ||      \
-(!strcmp(token->attribute.string->string, "reads"))     ||      \
-(!strcmp(token->attribute.string->string, "readn"))     ||      \
-(!strcmp(token->attribute.string->string, "substr"))    ||      \
-(!strcmp(token->attribute.string->string, "tointeger")) ||      \
-(!strcmp(token->attribute.string->string, "ord"))       ||      \
-(!strcmp(token->attribute.string->string, "chr"))       ||      \
+#define IS_BUILT_IN_FUNCTION                                                    \
+IS_ID                                                   &&                      \
+((!strcmp(token->attribute.string->string, "readi"))    ||                      \
+(!strcmp(token->attribute.string->string, "reads"))     ||                      \
+(!strcmp(token->attribute.string->string, "readn"))     ||                      \
+(!strcmp(token->attribute.string->string, "substr"))    ||                      \
+(!strcmp(token->attribute.string->string, "tointeger")) ||                      \
+(!strcmp(token->attribute.string->string, "ord"))       ||                      \
+(!strcmp(token->attribute.string->string, "chr"))       ||                      \
 (!strcmp(token->attribute.string->string, "write")))
 
 // macro that we use for check if token can be part of function body
-#define IS_FUNCTION_BODY                                        \
-IS_ID                                                   ||      \
-((token->type == TOKEN_KEYWORD)                         &&      \
-((token->attribute.keyword == KEYWORD_IF)               ||      \
-(token->attribute.keyword == KEYWORD_WHILE)             ||      \
-(token->attribute.keyword == KEYWORD_LOCAL)             ||      \
+#define IS_FUNCTION_BODY                                                        \
+IS_ID                                                   ||                      \
+((token->type == TOKEN_KEYWORD)                         &&                      \
+((token->attribute.keyword == KEYWORD_IF)               ||                      \
+(token->attribute.keyword == KEYWORD_WHILE)             ||                      \
+(token->attribute.keyword == KEYWORD_LOCAL)             ||                      \
 (token->attribute.keyword == KEYWORD_RETURN)))
 
 // macro we use for call function which automatically check return value
-#define CALL(_FUNCTION)                                         \
-PARSER_RESPONSE = (_FUNCTION);                                  \
+#define CALL(_FUNCTION)                                                         \
+PARSER_RESPONSE = (_FUNCTION);                                                  \
 if (PARSER_RESPONSE != OK) return PARSER_RESPONSE
 
 // macro that we use for check if keyword is function
-#define IS_FUNCTION                                             \
-((token->type == TOKEN_KEYWORD) &&                              \
+#define IS_FUNCTION                                                             \
+((token->type == TOKEN_KEYWORD) &&                                              \
 (token->attribute.keyword == KEYWORD_FUNCTION))
 
 // macro that we use for check if keyword of token is type
-#define IS_TYPE                                                 \
-(token->type == TOKEN_KEYWORD)                          &&      \
-((token->attribute.keyword == KEYWORD_INTEGER)          ||      \
-(token->attribute.keyword == KEYWORD_NUMBER)            ||      \
-(token->attribute.keyword == KEYWORD_STRING)            ||      \
+#define IS_TYPE                                                                 \
+(token->type == TOKEN_KEYWORD)                          &&                      \
+((token->attribute.keyword == KEYWORD_INTEGER)          ||                      \
+(token->attribute.keyword == KEYWORD_NUMBER)            ||                      \
+(token->attribute.keyword == KEYWORD_STRING)            ||                      \
 (token->attribute.keyword == KEYWORD_NIL))
 
 // macro that we use for check if token is ID
 #define IS_ID (token->type == TOKEN_ID)
 
 // macro that we use for check if there is valid expression after keyword return
-#define IS_VALID                                                \
-(IS_ID                                                  ||      \
-(token->type == TOKEN_INT)                              ||      \
-(token->type == TOKEN_DOUBLE)                           ||      \
+#define IS_VALID                                                                \
+(IS_ID                                                  ||                      \
+(token->type == TOKEN_INT)                              ||                      \
+(token->type == TOKEN_DOUBLE)                           ||                      \
 (token->type == TOKEN_STRING))
 
 
 // macro we need for allocate memory
-#define ALLOC                                                   \
-token = (token_struct *)malloc(sizeof(token_struct));           \
-stack = (data_stack_t *)malloc(sizeof(data_stack_t));           \
-init_data_stack(stack);                                         \
-if (!(string_init(&string))) return ERR_INTERNAL;               \
+#define ALLOC                                                                   \
+token = (token_struct *)malloc(sizeof(token_struct));                           \
+stack = (data_stack_t *)malloc(sizeof(data_stack_t));                           \
+expression_type = (tab_item_data_type)malloc(sizeof(tab_item_data_type));       \
+init_data_stack(stack);                                                         \
+if (!(string_init(&string))) return ERR_INTERNAL;                               \
 define_working_str(&string)
 
 // macro we need for memory free
-#define CLEAN                                                   \
-string_free(&string);                                           \
-empty_data_stack(stack);                                        \
-free(token);                                                    \
+#define CLEAN                                                                   \
+string_free(&string);                                                           \
+empty_data_stack(stack);                                                        \
+free(token);                                                                    \
 free(stack)
 
 // macro we need for check if keyword is global
-#define IS_GLOBAL                                               \
-((token->type == TOKEN_KEYWORD) &&                              \
+#define IS_GLOBAL                                                               \
+((token->type == TOKEN_KEYWORD) &&                                              \
 (token->attribute.keyword == KEYWORD_GLOBAL))
 
-int SCANNER_RESPONSE;       // for return value from get_token()
-int PARSER_RESPONSE;        // for return value from parser functions
-token_struct *token;        // token
-data_stack_t *stack;        // stack
-string_struct string;       // string
+int SCANNER_RESPONSE;                   // for return value from get_token()
+int PARSER_RESPONSE;                    // for return value from parser functions
+token_struct *token;                    // token
+data_stack_t *stack;                    // stack
+string_struct string;                   // string
+tab_item_data_type expression_type;    // expression type
 /*-----------------*/
 
 /** Pravidlá
@@ -595,13 +597,15 @@ int def_var_parser(tab_item_t *function_item) {
     }
     printf("test1\n");
     GET_TOKEN;
-    if (token->type == TOKEN_EQUAL) {  /// must be assi
+    if (token->type == TOKEN_ASSIGN) {  /// must be assi
         printf("test2\n");
         GET_TOKEN;
         if (is_function()) {
             CALL(call_check_parser());
         } else {
-            // todo expr
+            printf("test3\n");
+            CALL(exp_processing(token, stack, &expression_type));
+            printf("%d\n",  PARSER_RESPONSE);
         }
         return OK; // todo
     } else if (IS_FUNCTION_BODY) {
@@ -731,34 +735,42 @@ int call_check_parser() {
  * */
 int call_function_parser(tab_item_t *declaration_function) {
     GET_TOKEN;
-    tab_item_t *argument_of_function;
-    item_data_stack_t *stack_frame = stack->top;
+//    tab_item_t *argument_of_function;
+//    item_data_stack_t *stack_frame = stack->top;
     int i;      // counter
     for (i = 0; token->type != TOKEN_BRACKET_ROUND_R; i++) {
         if (i % 2 == 0) {
             if (IS_VALID) {
-                if (IS_ID) {      // todo mozna bude expr
-                    while (stack_frame != NULL) {
-                        argument_of_function = search_hashtable(stack_frame->table, token->attribute.string->string);
-                        if (argument_of_function != NULL) break;
-                        stack_frame = stack_frame->previous;
-                    }
-                    if (stack_frame == NULL) return ERR_SYNTAX;
-                    if (argument_of_function->data->item_data_type                                      \
-                        != declaration_function->data->item_parameters.type_parameters[(int) (i / 2)])
-                        return ERR_SYNTAX;
-                } else {
-                    if (token->type == TOKEN_INT) {
-                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_INTEGER)
-                            return ERR_SEMANTIC_PARRET;
-                    } else if (token->type == TOKEN_DOUBLE) {
-                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_DOUBLE)
-                            return ERR_SEMANTIC_PARRET;
-                    } else if (token->type == TOKEN_STRING) {
-                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_STRING)
-                            return ERR_SEMANTIC_PARRET;
-                    }
-                }
+                printf("%d- token type\n", token->type);
+                CALL(exp_processing(token, stack, &expression_type));
+                printf("%d - vysledek vyrazu\n",PARSER_RESPONSE);
+                printf("%d %d\n",declaration_function->data->item_parameters.type_parameters[(int) (i/2)], expression_type);
+                if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != expression_type)
+                    return ERR_SEMANTIC_PARRET;
+                continue;
+                //
+//                if (IS_ID) {      // todo mozna bude expr
+//                    while (stack_frame != NULL) {
+//                        argument_of_function = search_hashtable(stack_frame->table, token->attribute.string->string);
+//                        if (argument_of_function != NULL) break;
+//                        stack_frame = stack_frame->previous;
+//                    }
+//                    if (stack_frame == NULL) return ERR_SYNTAX;
+//                    if (argument_of_function->data->item_data_type
+//                        != declaration_function->data->item_parameters.type_parameters[(int) (i / 2)])
+//                        return ERR_SYNTAX;
+//                } else {
+//                    if (token->type == TOKEN_INT) {
+//                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_INTEGER)
+//                            return ERR_SEMANTIC_PARRET;
+//                    } else if (token->type == TOKEN_DOUBLE) {
+//                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_DOUBLE)
+//                            return ERR_SEMANTIC_PARRET;
+//                    } else if (token->type == TOKEN_STRING) {
+//                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_STRING)
+//                            return ERR_SEMANTIC_PARRET;
+//                    }
+//                }
             } else {
                 return ERR_SYNTAX;
             }

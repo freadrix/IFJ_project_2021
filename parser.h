@@ -15,6 +15,7 @@
 #include "symtable.h"
 //#include "exp_stack.h"
 #include "data_stack.h"
+#include "expr_handle.h"
 #include "error.h"
 #include "gen_code.h"
 
