@@ -173,6 +173,7 @@ int parser() {
     // allocate all we need to work with
     ALLOC;
 
+    /// require "ifj21"
     PARSER_RESPONSE = start_program_parser();
     printf("%d\n", PARSER_RESPONSE);
     if (PARSER_RESPONSE != OK){
@@ -214,7 +215,7 @@ int parser() {
         GET_TOKEN;
     }
 
-    code_generate_main_end();
+//    code_generate_main_end();
     //code_write_out(stdout);   //TODO where we wanna call this function? parser.c / main.c?
     CLEAN;
     return OK;
@@ -224,21 +225,16 @@ int parser() {
  * <header>     -> require "ifj21" <program>
  */
 int start_program_parser() {
-    // TODO musi zacinat require jako prvnim radkem
     GET_TOKEN;
-    while (token->type != TOKEN_EOF) {
-        if (token->attribute.keyword == KEYWORD_REQUIRE) {
-            GET_TOKEN;
-            if ((token->type == TOKEN_STRING) && (!strcmp(token->attribute.string->string, "ifj21"))) {
-                if (!push_data_item(stack)) return ERR_INTERNAL;
-                code_generator_init();
-                code_generate_main_start();
-                return OK;
-            }
-        }
+    if ((token->type == TOKEN_KEYWORD) && (token->attribute.keyword == KEYWORD_REQUIRE)) {
         GET_TOKEN;
-    }
-    return ERR_SYNTAX;   //File is empty or there wasn't require keyword
+        if ((token->type == TOKEN_STRING) && (!strcmp(token->attribute.string->string, "ifj21"))) {
+            if (!push_data_item(stack)) return ERR_INTERNAL;
+//            code_generator_init();
+//            code_generate_main_start();
+            return OK;
+        } else return ERR_SYNTAX;
+    } else return ERR_SYNTAX;
 }
 
 /**
@@ -250,28 +246,33 @@ int function_parser() {
         if (IS_BUILT_IN_FUNCTION) return ERR_SEMANTIC_DEF;
         SEARCH_ITEM(function_item, stack->top->table, token->attribute.string->string);
         if (is_there) { /// checking if there is already defined function with same ad
-            if (function_item->data->defined) {
+            if (function_item->data->defined)
                 return ERR_SEMANTIC_DEF;
-            } else {    /// function is only declared, not defined yet
+            else
                 function_item->data->defined = true;
-            }
         } else {
             INSERT_ITEM(inserted_item);
             inserted_item->data->item_id_type = FUNCTION;
+            inserted_item->data->defined = true;
         }
     } else return ERR_SYNTAX;
     SEARCH_ITEM(function_item, stack->top->table, token->attribute.string->string);
     if (!is_there) return ERR_SYNTAX;
-    code_generate_function_start(token->attribute.string->string);  /// generating function header (label, pushframe)
-    PARSER_RESPONSE = function_params_parser(function_item);    /// ( <params> )
-    if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+//    code_generate_function_start(token->attribute.string->string);  /// generating function header (label, pushframe)
+    // check params fully work
+    CALL(function_params_parser(function_item));            /// ( <params> )
+    printf("%d\n", PARSER_RESPONSE);
+
     GET_TOKEN;
     if (token->type == TOKEN_DDOT) {    /// if there is ':' than we expect getting ret. values
-        PARSER_RESPONSE = function_rets_parser(function_item);  /// <data_type> <ret>
-        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
-    }
+//        if (function_item->data->item_returns.count_returns == 0) return ERR_SEMANTIC_PARRET;
+        CALL(function_rets_parser(function_item)); /// <data_type> <ret>
+        printf("%d\n", PARSER_RESPONSE);
+    } else if (function_item->data->item_returns.count_returns != 0) return ERR_SEMANTIC_PARRET;
+
     if ((token->type == TOKEN_KEYWORD) && (token->attribute.keyword == KEYWORD_END)) {
-        //code_generate_function_end();   /// TODO doplnit function ID
+
+//        code_generate_function_end();   /// TODO doplnit function ID, a dopsat to
         return OK;
     }
     if (IS_FUNCTION_BODY) { /// <state_l> function body
@@ -280,19 +281,19 @@ int function_parser() {
     } else {
         return ERR_SYNTAX;
     }
-    //code_generate_function_end(); /// TODO doplnit function ID
+//    code_generate_function_end(); /// TODO doplnit function ID
     return OK;
 }
 
 /**
  * ( <params> )
  * */
-// TODO zamyslet nad tim jak budou pushovat elementy zasobniku
 int function_params_parser(tab_item_t *function_item) {
     GET_TOKEN;  /// '('
     if (token->type != TOKEN_BRACKET_ROUND_L) return ERR_SYNTAX;
     GET_TOKEN;  /// should be ID
     if(!push_data_item(stack)) return ERR_INTERNAL;
+    int count_declare_parameters = function_item->data->item_parameters.count_parameters;
     int i;
     for (i = 0; token->type != TOKEN_BRACKET_ROUND_R; ++i) {
         if ((i % 2) == 0) { /// there have to be ID when i is even (0,2,4 ...) possition
@@ -305,16 +306,36 @@ int function_params_parser(tab_item_t *function_item) {
                 GET_TOKEN;  /// should be data type
                 if (IS_TYPE) {
                     if (token->attribute.keyword == KEYWORD_INTEGER) {
-                        if (!insert_parameter_item(function_item, TYPE_INTEGER)) return ERR_SYNTAX;
+                        if (count_declare_parameters == 0) {
+                            if (!insert_parameter_item(function_item, TYPE_INTEGER)) return ERR_SYNTAX;
+                        } else {
+                            if (function_item->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_INTEGER)
+                                return ERR_SEMANTIC_PARRET;
+                        }
                         inserted_item->data->item_data_type = TYPE_INTEGER;
                     } else if (token->attribute.keyword == KEYWORD_NUMBER) {
-                        if (!insert_parameter_item(function_item, TYPE_DOUBLE)) return ERR_SYNTAX;
+                        if (count_declare_parameters == 0) {
+                            if (!insert_parameter_item(function_item, TYPE_DOUBLE)) return ERR_SYNTAX;
+                        } else {
+                            if (function_item->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_DOUBLE)
+                                return ERR_SEMANTIC_PARRET;
+                        }
                         inserted_item->data->item_data_type = TYPE_DOUBLE;
                     } else if (token->attribute.keyword == KEYWORD_STRING) {
-                        if (!insert_parameter_item(function_item, TYPE_STRING)) return ERR_SYNTAX;
+                        if (count_declare_parameters == 0) {
+                            if (!insert_parameter_item(function_item, TYPE_STRING)) return ERR_SYNTAX;
+                        } else {
+                            if (function_item->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_STRING)
+                                return ERR_SEMANTIC_PARRET;
+                        }
                         inserted_item->data->item_data_type = TYPE_STRING;
                     } else if (token->attribute.keyword == KEYWORD_NIL) {  // TODO need to read pdf, maybe we'll need
-                        if (!insert_parameter_item(function_item, TYPE_NULL)) return ERR_SYNTAX;
+                        if (count_declare_parameters == 0) {
+                            if (!insert_parameter_item(function_item, TYPE_NULL)) return ERR_SYNTAX;
+                        } else {
+                            if (function_item->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_NULL)
+                                return ERR_SEMANTIC_PARRET;
+                        }
                         inserted_item->data->item_data_type = TYPE_NULL;
                     }
                 } else {
@@ -328,8 +349,9 @@ int function_params_parser(tab_item_t *function_item) {
         }
         GET_TOKEN;
     }
-    if (i == 0) return OK;
-    if ((i % 2) == 0) return ERR_SYNTAX;
+    if ((i > 0) && ((i % 2) == 0)) return ERR_SYNTAX;
+    if ((count_declare_parameters != 0) && ((count_declare_parameters - 1) != (int) (i/2)))
+        return ERR_SEMANTIC_PARRET;
     return OK;
 }
 
@@ -339,22 +361,43 @@ int function_params_parser(tab_item_t *function_item) {
 int function_rets_parser(tab_item_t *function_item) {
     GET_TOKEN;  /// should be some keyword data type
     if(!IS_TYPE) return ERR_SYNTAX;
+    int count_declare_returns = function_item->data->item_returns.count_returns;
     int i;
     for (i = 0; ((token->type == TOKEN_COMMA) || (IS_TYPE)); ++i) {
         if ((i % 2) == 0) {
             if (IS_TYPE) {
                 if (token->attribute.keyword == KEYWORD_INTEGER) {
-                    if (!insert_return_item(function_item, TYPE_INTEGER)) return ERR_SYNTAX;
-                    code_generate_retval_create(i/2+1);
+                    if (count_declare_returns == 0) {
+                        if (!insert_return_item(function_item, TYPE_INTEGER)) return ERR_SYNTAX;
+                    } else {
+                        if (function_item->data->item_returns.type_returns[(int) (i/2)] != TYPE_INTEGER)
+                            return ERR_SEMANTIC_PARRET;
+                    }
+//                    code_generate_retval_create(i/2+1);
                 } else if (token->attribute.keyword == KEYWORD_NUMBER) {
-                    if (!insert_return_item(function_item, TYPE_DOUBLE)) return ERR_SYNTAX;
-                    code_generate_retval_create(i/2+1);
+                    if (count_declare_returns == 0) {
+                        if (!insert_return_item(function_item, TYPE_DOUBLE)) return ERR_SYNTAX;
+                    } else {
+                        if (function_item->data->item_returns.type_returns[(int) (i/2)] != TYPE_DOUBLE)
+                            return ERR_SEMANTIC_PARRET;
+                    }
+//                    code_generate_retval_create(i/2+1);
                 } else if (token->attribute.keyword == KEYWORD_STRING) {
-                    if (!insert_return_item(function_item, TYPE_STRING)) return ERR_SYNTAX;
-                    code_generate_retval_create(i/2+1);
+                    if (count_declare_returns == 0) {
+                        if (!insert_return_item(function_item, TYPE_STRING)) return ERR_SYNTAX;
+                    } else {
+                        if (function_item->data->item_returns.type_returns[(int) (i/2)] != TYPE_STRING)
+                            return ERR_SEMANTIC_PARRET;
+                    }
+//                    code_generate_retval_create(i/2+1);
                 } else {
-                    if (!insert_return_item(function_item, TYPE_NULL)) return ERR_SYNTAX;
-                    code_generate_retval_create(i/2+1);
+                    if (count_declare_returns == 0) {
+                        if (!insert_return_item(function_item, TYPE_NULL)) return ERR_SYNTAX;
+                    } else {
+                        if (function_item->data->item_returns.type_returns[(int) (i/2)] != TYPE_NULL)
+                            return ERR_SEMANTIC_PARRET;
+                    }
+//                    code_generate_retval_create(i/2+1);
                 }
             } else {
                 return ERR_SYNTAX;
@@ -365,6 +408,8 @@ int function_rets_parser(tab_item_t *function_item) {
         GET_TOKEN;
     }
     if ((i % 2) == 0) return ERR_SYNTAX;
+    if ((count_declare_returns != 0) && ((count_declare_returns - 1) != (int) (i/2)))
+        return ERR_SEMANTIC_PARRET;
     return OK;
 }
 
@@ -393,7 +438,8 @@ int function_body_parser(tab_item_t *function_item) {
         } else if (IS_ID) {
             if (!(strcmp(token->attribute.string->string, "write"))) {
                 /*TODO expression*/
-                //code_generate_write_function(); ///TODO params write(params), [0] param == pocet parametrov, ostatne params stringy (aj int, num etc values na string!!!!)
+
+//                code_generate_write_function(); ///TODO params write(params), [0] param == pocet parametrov, ostatne params stringy (aj int, num etc values na string!!!!)
                 return OK;
             }
             PARSER_RESPONSE = id_in_body_parser(function_item);
@@ -530,7 +576,7 @@ int def_var_parser(tab_item_t *function_item) {
     if (is_there) return ERR_SEMANTIC_DEF;   // TODO can exist variable with same name as function? NO!
     INSERT_ITEM(inserted_item);
     inserted_item->data->item_id_type = VARIABLE;
-    code_generate_variable_create(token->attribute.string->string); ///CODEGEN variable
+//    code_generate_variable_create(token->attribute.string->string); ///CODEGEN variable
     GET_TOKEN; /// :
     if (token->type != TOKEN_DDOT) return ERR_SYNTAX;
     GET_TOKEN;  /// data type
@@ -620,7 +666,7 @@ int global_function_parser(tab_item_t *inserted_item) {
     GET_TOKEN;
     if (token->type != TOKEN_DDOT) {
         // mozna potrebujeme vypis
-        if (IS_FUNCTION || (token->type == TOKEN_ID)) {
+        if (IS_FUNCTION || (token->type == TOKEN_ID) || IS_GLOBAL) {
             return OK;
         } else {
             return ERR_SYNTAX;
@@ -653,10 +699,17 @@ int global_function_parser(tab_item_t *inserted_item) {
 }
 
 /**
+ * help func for work in expression
+ * */
+bool is_function() {
+    item_data_stack_t *global_frame = get_global_frame_stack(stack);
+    SEARCH_ITEM(declarative_function, global_frame->table, token->attribute.string->string);
+    return is_there;
+}
+
+/**
  * <call>    -> id ( <expressions> )
  * */
- // TODO NE kontroluje parametry
- // TODO na zacatku bude token leve zavorky
  // TODO code_gen
 int call_check_parser() {
     item_data_stack_t *global_frame = get_global_frame_stack(stack);
@@ -678,16 +731,31 @@ int call_function_parser(tab_item_t *declaration_function) {
     int i;      // counter
     for (i = 0; token->type != TOKEN_BRACKET_ROUND_R; i++) {
         if (i % 2 == 0) {
-            if (IS_ID) {      // todo mozna bude expr
-                while (stack_frame != NULL) {
-                    argument_of_function = search_hashtable(stack_frame->table, token->attribute.string->string);
-                    if (argument_of_function != NULL) break;
-                    stack_frame = stack_frame->previous;
+            if (IS_VALID) {
+                if (IS_ID) {      // todo mozna bude expr
+                    while (stack_frame != NULL) {
+                        argument_of_function = search_hashtable(stack_frame->table, token->attribute.string->string);
+                        if (argument_of_function != NULL) break;
+                        stack_frame = stack_frame->previous;
+                    }
+                    if (stack_frame == NULL) return ERR_SYNTAX;
+                    if (argument_of_function->data->item_data_type                                      \
+                        != declaration_function->data->item_parameters.type_parameters[(int) (i / 2)])
+                        return ERR_SYNTAX;
+                } else {
+                    if (token->type == TOKEN_INT) {
+                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_INTEGER)
+                            return ERR_SEMANTIC_PARRET;
+                    } else if (token->type == TOKEN_DOUBLE) {
+                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_DOUBLE)
+                            return ERR_SEMANTIC_PARRET;
+                    } else if (token->type == TOKEN_STRING) {
+                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_STRING)
+                            return ERR_SEMANTIC_PARRET;
+                    }
                 }
-                if (stack_frame == NULL) return ERR_SYNTAX;
-                if (argument_of_function->data->item_data_type                                      \
-                    != declaration_function->data->item_parameters.type_parameters[(int) (i/2)])
-                    return ERR_SYNTAX;
+            } else {
+                return ERR_SYNTAX;
             }
         } else {
             if (token->type != TOKEN_COMMA) return ERR_SYNTAX;
