@@ -10,6 +10,7 @@
 
 #include "exp_stack.h"
 #include "symtable.h"
+#include "data_stack.h"
 #include "scanner.h"
 #include "error.h"
 #include "gen_code.h"
@@ -67,6 +68,6 @@
 //     NO_RULE
 // } rules_enum;
 
-int exp_processing(token_struct *token);
+int exp_processing(token_struct *token, data_stack_t *data_stack);
 
 #endif

@@ -4,6 +4,7 @@ global foo : function (integer , string) : integer
 foo (5, "HELLO")
 function foo (i : integer, s : string) : integer
     local num1 : integer = i + 2
+    num1 = num1 + 2
     local num2 : integer = #s
     num1 = (num2 + 2) // 2
     if (num1 + num2) > 3 then
@@ -68,3 +69,8 @@ end
 ✝    <expressions>   -> ord ( expression, expression )                /// string, integer : integer
 ✝    <expressions>   -> chr ( expression )                            /// integer : string
  */
+
+
+
+
+22 "sdada" 2.43
