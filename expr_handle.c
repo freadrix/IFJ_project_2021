@@ -401,6 +401,7 @@ int exp_processing(token_struct *token) {
     //variables for given symbol and terminal on top of the stack
     elem_enum given_symbol;
     item_stack_t *stack_term;
+    bool next_expr_detect = false;
     //push $ on top of the initialized stack
     if(!(push_stack(stack, SIGN, TYPE_UNDEFINED))) {
         empty_stack(stack);
@@ -412,7 +413,15 @@ int exp_processing(token_struct *token) {
             return ERR_INTERNAL;
         }
         given_symbol = get_elem(token);
-        // printf("RIGHT, GIVEN ELEMENT == %d\n", given_symbol);
+        //if there is id right after the expression. without any operators, that means start of new defining
+        if ((stack_term->elem == ID || stack_term->elem == INT || 
+             stack_term->elem == STRING || stack_term->elem == DOUBLE) && given_symbol == ID) {
+                 next_expr_detect = true;
+        }
+        if (next_expr_detect) {
+            given_symbol = SIGN;
+        }
+        // printf("GIVEN ELEMENT == %d\n", given_symbol);
         char prec_symbol = precedence_tab[get_precedence(stack_term->elem)][get_precedence(given_symbol)];
         //printf("%d %d\n", get_precedence(stack_term->elem), get_precedence(given_symbol));
         //reduce prec
