@@ -53,7 +53,8 @@ IS_ID                                                   ||      \
 ((token->type == TOKEN_KEYWORD)                         &&      \
 ((token->attribute.keyword == KEYWORD_IF)               ||      \
 (token->attribute.keyword == KEYWORD_WHILE)             ||      \
-(token->attribute.keyword == KEYWORD_LOCAL)))
+(token->attribute.keyword == KEYWORD_LOCAL)             ||      \
+(token->attribute.keyword == KEYWORD_RETURN)))
 
 // macro we use for call function which automatically check return value
 #define CALL(_FUNCTION)                                         \
@@ -104,7 +105,6 @@ free(stack)
 ((token->type == TOKEN_KEYWORD) &&                              \
 (token->attribute.keyword == KEYWORD_GLOBAL))
 
-/* Global variables*/
 int SCANNER_RESPONSE;       // for return value from get_token()
 int PARSER_RESPONSE;        // for return value from parser functions
 token_struct *token;        // token
@@ -421,8 +421,8 @@ int function_body_parser(tab_item_t *function_item) {
     while (!((token->type == TOKEN_KEYWORD) && (token->attribute.keyword == KEYWORD_END))) {
         if (token->type == TOKEN_KEYWORD) {
             if (token->attribute.keyword == KEYWORD_LOCAL) {
-                PARSER_RESPONSE = def_var_parser(function_item);
-                if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+                CALL(def_var_parser(function_item));
+                printf("%d - response from variable declaration\n", PARSER_RESPONSE);
             } else if (token->attribute.keyword == KEYWORD_IF) {
 //                PARSER_RESPONSE = if_parser(function_item);
                 if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
@@ -569,11 +569,11 @@ int return_parser(tab_item_t *function_item) {
  *  <def_var>
  * */
 int def_var_parser(tab_item_t *function_item) {
-    printf("%s", function_item->key);
+    printf("%s - string for use function_item in def var\n", function_item->key);
     GET_TOKEN;  ///should be ID
     if (!IS_ID) return ERR_SYNTAX;
     SEARCH_ITEM(searched_item, stack->top->table, token->attribute.string->string);
-    if (is_there) return ERR_SEMANTIC_DEF;   // TODO can exist variable with same name as function? NO!
+    if (is_there || is_function()) return ERR_SEMANTIC_DEF;
     INSERT_ITEM(inserted_item);
     inserted_item->data->item_id_type = VARIABLE;
 //    code_generate_variable_create(token->attribute.string->string); ///CODEGEN variable
@@ -593,11 +593,16 @@ int def_var_parser(tab_item_t *function_item) {
     } else {
         return ERR_SYNTAX;
     }
+    printf("test1\n");
     GET_TOKEN;
-    if (token->type == TOKEN_ASSIGN) {
-        int a = 5;
-        printf("%d\n", a);
-        /*TODO func. assign*/
+    if (token->type == TOKEN_EQUAL) {  /// must be assi
+        printf("test2\n");
+        GET_TOKEN;
+        if (is_function()) {
+            CALL(call_check_parser());
+        } else {
+            // todo expr
+        }
         return OK; // todo
     } else if (IS_FUNCTION_BODY) {
         return OK;
