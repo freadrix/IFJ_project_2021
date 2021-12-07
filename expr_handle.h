@@ -68,6 +68,6 @@
 //     NO_RULE
 // } rules_enum;
 
-int exp_processing(token_struct *token, data_stack_t *data_stack);
+int exp_processing(token_struct *token, data_stack_t *data_stack, tab_item_data_type *expression_type);
 
 #endif

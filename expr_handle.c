@@ -405,9 +405,10 @@ int reduce() {
     return OK;
 }
 
-int exp_processing(token_struct *token, data_stack_t *data_stack) {
+int exp_processing(token_struct *token, data_stack_t *data_stack, tab_item_data_type *expression_type) {
     //initialize expr_stack
     expr_stack = (stack_t *)malloc(sizeof(stack_t));
+    if (!expr_stack) exit(ERR_INTERNAL);
     init_stack(expr_stack);
     //variables for given symbol and terminal on top of the expr_stack
     elem_enum given_symbol;
@@ -502,7 +503,7 @@ int exp_processing(token_struct *token, data_stack_t *data_stack) {
         empty_stack(expr_stack);
         return ERR_SYNTAX;
     }
-
+    *expression_type = final->type;
     // TODO ASK if needed type change on the end, ERR_TYPE_INCOMPATABILITY
     // if (final->type == TYPE_INTEGER) {
     //     if (!(code_generate_stack_convert_float_first())) {
