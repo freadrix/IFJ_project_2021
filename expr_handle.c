@@ -305,13 +305,17 @@ int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, r
             return OK;
         }
     } else if (rule == E_LEN) {
-        if (middle->type != TYPE_STRING) {
+        if (middle->type == TYPE_UNDEFINED) {
+            return ERR_SEMANTIC_DEF;
+        } else if (middle->type != TYPE_STRING) {
             return ERR_SEMANTIC_EXP;
         } else {
             *type = TYPE_INTEGER;
         }
     } else if (rule == E_CONCAT_E) {
-        if ((left->type != TYPE_STRING) || (right->type != TYPE_STRING)) {
+        if (left->type == TYPE_UNDEFINED || right->type == TYPE_UNDEFINED) {
+            return ERR_SEMANTIC_DEF;
+        } else if ((left->type != TYPE_STRING) || (right->type != TYPE_STRING)) {
             return ERR_SEMANTIC_EXP;
         } else {
             *type = TYPE_STRING;
