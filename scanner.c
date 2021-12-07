@@ -9,8 +9,7 @@
 
 string_struct *working_string;
 
-void define_working_str(string_struct *s)
-{
+void define_working_str(string_struct *s) {
 	working_string = s;
 }
 
@@ -195,7 +194,7 @@ int get_token(token_struct *token) {
                 }
                 break;
             case (STATE_STRING_START):
-                if ((c < 32 && c != 10) || c == EOF) { // why c != 10 ?? TEST ME PLS
+                if ((c < 32 && c != 10 && c != 13) || c == EOF) {
                     string_free(str);
                     return ERR_LEXER;
                 } else if (c == '\\') {
@@ -263,7 +262,7 @@ int get_token(token_struct *token) {
                 if (c == '0') {
                     string_number[1] = c;
                     state = STATE_STRING_ESCAPE_ZERO_ZERO;
-                } else if (isdigit(c) && c != '0') {
+                } else if (isdigit(c)) {
                     string_number[1] = c;
                     state = STATE_STRING_ESCAPE_OTHER;
                 } else {
@@ -293,7 +292,7 @@ int get_token(token_struct *token) {
                 }
                 break;
             case (STATE_STRING_ESCAPE_ZERO_ZERO):
-                if (isdigit(c)) {
+                if (isdigit(c) && c != '0') {
                     string_number[2] = c;
                     int value = atoi(string_number);
                     c = value;
