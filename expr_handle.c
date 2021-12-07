@@ -2,7 +2,7 @@
  * Implementace překladače imperativního jazyka IFJ21.
  *
  * @brief Expression handling
- * @author Aleksandr Verevkin (xverev00)
+ * @authors Aleksandr Verevkin (xverev00), Ivan Tsiareshkin (xtsiar00), Anton Medvedev (xmedve04)
  */
 
 #include <stdio.h>
@@ -100,8 +100,12 @@ tab_item_data_type get_elem_type(elem_enum elem, token_struct *token, data_stack
             if (item != NULL) break;
             frame = frame->previous;
         }
-        if (item == NULL) exit(ERR_SEMANTIC_DEF);
-        if (item->data->defined == false) return TYPE_NULL;
+        if (item == NULL) {
+            exit(ERR_SEMANTIC_DEF);
+        }
+        if (item->data->defined == false) {
+            return TYPE_NULL;
+        }
         return item->data->item_data_type;
     } else if (elem == INT) {
         return TYPE_INTEGER;
@@ -516,11 +520,6 @@ int exp_processing(token_struct *token, data_stack_t *data_stack, tab_item_data_
     //     }
     // } else if (final->type == TYPE_DOUBLE) {
     //     if (!(code_generate_stack_convert_int_first())) {
-    //         empty_stack(expr_stack);
-    //         return ERR_INTERNAL;
-    //     }
-    // } else {
-    //     if (!(code_generate_pop_stack_result())) {
     //         empty_stack(expr_stack);
     //         return ERR_INTERNAL;
     //     }

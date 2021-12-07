@@ -1,5 +1,6 @@
-# author Anton Medvedev (xmedve04)
-# version 0.01
+ # Implementace překladače imperativního jazyka IFJ21.
+ # Makefile
+ # Anton Medvedev (xmedve04)
 
 CFLAGS = -std=c99 -g -Wall -pedantic -lm -Wextra -Werror
 CC = gcc
