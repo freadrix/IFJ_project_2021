@@ -407,6 +407,7 @@ int reduce() {
 
 int exp_processing(token_struct *token, data_stack_t *data_stack) {
     //initialize expr_stack
+    expr_stack = (stack_t *)malloc(sizeof(stack_t));
     init_stack(expr_stack);
     //variables for given symbol and terminal on top of the expr_stack
     elem_enum given_symbol;

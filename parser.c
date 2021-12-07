@@ -595,13 +595,15 @@ int def_var_parser(tab_item_t *function_item) {
     }
     printf("test1\n");
     GET_TOKEN;
-    if (token->type == TOKEN_EQUAL) {  /// must be assi
+    if (token->type == TOKEN_ASSIGN) {  /// must be assi
         printf("test2\n");
         GET_TOKEN;
         if (is_function()) {
             CALL(call_check_parser());
         } else {
-            // todo expr
+            printf("test3\n");
+            CALL(exp_processing(token, stack));
+            printf("%d\n",  PARSER_RESPONSE);
         }
         return OK; // todo
     } else if (IS_FUNCTION_BODY) {
