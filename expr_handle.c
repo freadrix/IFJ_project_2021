@@ -15,9 +15,7 @@
 SCANNER_RESPONSE_EXP = get_token(token);                        \
 if(SCANNER_RESPONSE_EXP != OK) return SCANNER_RESPONSE_EXP
 
-
 stack_t *expr_stack;
-int SCANNER_RESPONSE_EXP; // idk, but it can not take declaration from parser header
 
 typedef enum {
 
@@ -85,6 +83,8 @@ elem_enum get_elem(token_struct *tkn) {
         return LBR;
     } else if (tkn->type == TOKEN_BRACKET_ROUND_R) {
         return RBR;
+    } else if (tkn->attribute.keyword == KEYWORD_NIL) {
+        return NIL;
     } else {
         return SIGN;
     }
@@ -116,6 +116,8 @@ tab_item_data_type get_elem_type(elem_enum elem, token_struct *token, data_stack
         return TYPE_DOUBLE;
     } else if (elem == STRING) {
         return TYPE_STRING;
+    } else if (elem == NIL) {
+        return TYPE_NULL;
     } else {
         return TYPE_UNDEFINED;
     }
@@ -131,7 +133,7 @@ prec_enum get_precedence(elem_enum elem) {
         return T_LBR;
     } else if (elem == RBR) {
         return T_RBR;
-    } else if ((elem == ID) || (elem == INT) || (elem == STRING) || (elem == DOUBLE)) {
+    } else if ((elem == ID) || (elem == INT) || (elem == STRING) || (elem == DOUBLE) || (elem == NIL)) {
         return T_ID;
     } else if ((elem == LT) || (elem == GT) || (elem == LEQ) || (elem == GEQ) || (elem == EQ) || (elem == NE)) {
         return T_REL;
@@ -147,7 +149,7 @@ prec_enum get_precedence(elem_enum elem) {
 rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_t *right, int count_of_elems) {
     //get rule for stack top terminal
     if (count_of_elems == 1) {
-        if ((left->elem == ID) || (left->elem == INT) || (left->elem == DOUBLE) || (left->elem == STRING)) {
+        if ((left->elem == ID) || (left->elem == INT) || (left->elem == DOUBLE) || (left->elem == STRING) || (left->elem == NIL)) {
             return ID_RULE;
         } else {
             return NO_RULE;
@@ -424,6 +426,7 @@ int exp_processing(token_struct *token, data_stack_t *data_stack, tab_item_data_
     item_stack_t *stack_term;
     bool is_zero;
     bool next_expr_detect = false;
+    int SCANNER_RESPONSE_EXP;
     //push $ on top of the initialized stack
     if(!(push_stack(expr_stack, SIGN, TYPE_UNDEFINED, false))) {
         empty_stack(expr_stack);

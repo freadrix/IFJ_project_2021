@@ -18,7 +18,7 @@
 #include "str.h"
 
 /**
- * @enum Rules
+ * @enum Rules, used to generate correctly stack operations in the output code
  */
 typedef enum {
     E_LT_E,         // E < E

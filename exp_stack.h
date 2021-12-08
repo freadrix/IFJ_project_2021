@@ -14,7 +14,7 @@
 #include "expr_handle.h"
 
 /**
- * @enum Available symbols
+ * @enum Stack symbols, used for expression handling on expression stack
  */
 typedef enum {
     LT,         // <
@@ -37,6 +37,7 @@ typedef enum {
     INT,
     DOUBLE,
     STRING,
+    NIL,
 
     SIGN,       // $
     STOP,

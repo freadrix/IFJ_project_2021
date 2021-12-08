@@ -5,6 +5,7 @@
 DEFVAR GF@%gl_1
 DEFVAR GF@%gl_2
 DEFVAR GF@%gl_res
+MOVE GF@%gl_res nil@nil
 JUMP $$main
 #======================================
 LABEL $chr
@@ -233,65 +234,11 @@ INT2CHAR LF@y LF@y
 
 CREATEFRAME
 DEFVAR TF@%0
-DEFVAR TF@%1
-DEFVAR TF@%2
-DEFVAR TF@%3
-MOVE TF@%0 float@0x1.12p+0
+MOVE TF@%0 string@ge
 
-MOVE GF@%gl_res float@0x1.12p+0
-
-
-CALL $funl
-
-JUMP $end
-LABEL $funl
-PUSHFRAME
-
-DEFVAR LF@%hi
-
-WRITE string@hello
-POPFRAME
-LABEL $end
-
-
-
-CALL $funl_2
-
-JUMP $end_2
-LABEL $funl_2
-PUSHFRAME
-DEFVAR LF@%hi_2
-
-WRITE string@hello
-POPFRAME
-LABEL $end_2
-
-EXIT int@3
-
-
-TYPE GF@%gl_1 GF@%gl_res
-JUMPIFEQ $IFSTART GF@%gl_1 string@bool
-JUMPIFEQ $IFSTART GF@%gl_1 string@nil
-
-MOVE GF@%gl_res bool@true
-
-LABEL $IFSTART
-
-
-JUMPIFNEQ $ENDIF_1 GF@%gl_res bool@true
-
-WRITE string@whilein
-WRITE LF@y  #\n
-
-LABEL $ENDIF_1
-
-WRITE string@whilepost
-
-WRITE LF@y  #\n
 
 PUSHS nil@nil
-MOVE GF@%gl_res nil@nil
-PUSHS GF@%gl_res
+PUSHS TF@%0
 EQS
 POPS GF@%gl_res
 write GF@%gl_res
