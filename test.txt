@@ -3,7 +3,7 @@ require "ifj21"
 global foo : function (integer , string) : integer
 foo (5, "HELLO")
 function foo (i : integer, s : string) : integer
-    local num1 : integer = 7 + 2 - 1
+    local num1 : integer = i + 2 - 1
     num1 = num1 + 2
     a,b,c = foo
     local num2 : integer = #s

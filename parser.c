@@ -303,6 +303,7 @@ int function_params_parser(tab_item_t *function_item) {
                 if (IS_BUILT_IN_FUNCTION) return ERR_SEMANTIC_DEF;  /// check if its not build in function
                 INSERT_ITEM(inserted_item); /// insert param to table
                 inserted_item->data->item_id_type = VARIABLE;
+                inserted_item->data->defined = true;
                 GET_TOKEN;  /// should be :
                 if (token->type != TOKEN_DDOT) return ERR_SYNTAX;
                 GET_TOKEN;  /// should be data type
