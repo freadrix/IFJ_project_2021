@@ -126,6 +126,14 @@ bool code_generate_function_end(char *f_name);
 bool code_generate_retval_create(int retval_index);
 
 /**
+ * @brief Generation of parameter saving
+ * @param variable variable name
+ * @param param_index index name
+ * @return true in case of success, false otherwise
+ */
+bool code_generate_save_param(char *var_name, int param_index);
+
+/**
  * @brief Push retval for needed index(retval_index) on stack: PUSHS LF@%retval_1(_2,_3,...)
  * @param retval_index retval index
  * @return true in case of success, false otherwise

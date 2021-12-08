@@ -476,8 +476,21 @@ bool code_generate_function_return(char *f_name) {
     return true;
 }
 
+bool code_generate_save_param(char *var_name, int param_index) {
+    char index_char[10];
+    sprintf(index_char, "%d", param_index);
+    if(!(add_string_to_string(&generated_code, ("MOVE LF@"))) ||
+       !(add_string_to_string(&generated_code, (var_name))) ||
+       !(add_string_to_string(&generated_code, (" LF@%"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+        return false;
+    }
+    return true;
+}
+
 bool code_generate_function_start(char *f_name) {
-    if(!(add_string_to_string(&generated_code, ("LABLE $"))) ||
+    if(!(add_string_to_string(&generated_code, ("\nLABLE $"))) ||
        !(add_string_to_string(&generated_code, (f_name))) ||
        !(add_string_to_string(&generated_code, ("\n"
                                                 "PUSHFRAME\n")))) {

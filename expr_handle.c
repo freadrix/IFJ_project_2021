@@ -516,24 +516,6 @@ int exp_processing(token_struct *token, data_stack_t *data_stack, tab_item_data_
         return ERR_SYNTAX;
     }
     *expression_type = final->type;
-    // TODO ASK if needed type change on the end, ERR_TYPE_INCOMPATABILITY
-    // if (final->type == TYPE_INTEGER) {
-    //     if (!(code_generate_stack_convert_float_first())) {
-    //         empty_stack(expr_stack);
-    //         return ERR_INTERNAL;
-    //     }
-    // } else if (final->type == TYPE_DOUBLE) {
-    //     if (!(code_generate_stack_convert_int_first())) {
-    //         empty_stack(expr_stack);
-    //         return ERR_INTERNAL;
-    //     }
-    // }
-
-    //save result on GF@%gl_res
-    if (!(code_generate_pop_stack_result())) {
-        empty_stack(expr_stack);
-        return ERR_INTERNAL;
-    }
 
     empty_stack(expr_stack);
     return OK;

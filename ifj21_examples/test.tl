@@ -1,2 +1,5 @@
 require "ifj21"
-(nil == "Hello") then
+function g(s : integer, a : string)
+end
+
+g(2, "sdfsdf")
