@@ -773,26 +773,22 @@ int id_in_body_parser(tab_item_t *function_item) {
                         GET_TOKEN; /// TODO MUSI TADY BYT NEXT TOKEN?
                     } else {
                         CALL(exp_processing(token, stack, &expression_type));
-                        // printf("%d\n",  PARSER_RESPONSE);
+                        if ((item->data->item_data_type == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
+                        if (!(code_generate_stack_convert_float_first())) {
+                            return ERR_INTERNAL;
+                        }
+                        expression_type = TYPE_DOUBLE;
+                        }
+                        if (!(code_generate_pop_stack_result())) {
+                            return ERR_INTERNAL;
+                        }
+                        if (!(code_generate_variable_save_expression(item->key))) {
+                            return ERR_INTERNAL;
+                        }
+
                         if (item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
-                        // printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
+                            if (item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
                     }
-//                    CALL(exp_processing(token, stack, &expression_type));
-//
-//                    if ((item->data->item_data_type == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
-//                        if (!(code_generate_stack_convert_float_first())) {
-//                            return ERR_INTERNAL;
-//                        }
-//                        expression_type = TYPE_DOUBLE;
-//                    }
-//                    if (!(code_generate_pop_stack_result())) {
-//                        return ERR_INTERNAL;
-//                    }
-//                    if (!(code_generate_variable_save_expression(item->key))) {
-//                        return ERR_INTERNAL;
-//                    }
-//
-//                    if (item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
                 }
             } else {
             //    // printf("test3 hodnota a symbol\n");
