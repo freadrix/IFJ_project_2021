@@ -84,12 +84,11 @@ if (PARSER_RESPONSE != OK) return PARSER_RESPONSE
 (token->type == TOKEN_DOUBLE)                           ||                      \
 (token->type == TOKEN_STRING))
 
-
+//expression_type = (tab_item_data_type)malloc(sizeof(tab_item_data_type));
 // macro we need for allocate memory
 #define ALLOC                                                                   \
 token = (token_struct *)malloc(sizeof(token_struct));                           \
 stack = (data_stack_t *)malloc(sizeof(data_stack_t));                           \
-expression_type = (tab_item_data_type)malloc(sizeof(tab_item_data_type));       \
 init_data_stack(stack);                                                         \
 if (!(string_init(&string))) return ERR_INTERNAL;                               \
 define_working_str(&string)
@@ -440,6 +439,7 @@ int function_body_parser(tab_item_t *function_item) {
             if (token->attribute.keyword == KEYWORD_LOCAL) {
                 CALL(def_var_parser(function_item));
                 printf("%d - response from variable declaration\n", PARSER_RESPONSE);
+                continue;
             } else if (token->attribute.keyword == KEYWORD_IF) {
 //                PARSER_RESPONSE = if_parser(function_item);
                 if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
@@ -452,15 +452,18 @@ int function_body_parser(tab_item_t *function_item) {
             } else {
                 return ERR_SYNTAX;
             }
-        } else if (IS_ID) {
+        }
+        if (IS_ID) {
             if (!(strcmp(token->attribute.string->string, "write"))) {
                 /*TODO expression*/
-
 //                code_generate_write_function(); ///TODO params write(params), [0] param == pocet parametrov, ostatne params stringy (aj int, num etc values na string!!!!)
                 return OK;
+            } else {
+                printf("spracovam id\n");
+                CALL(id_in_body_parser(function_item));
+                printf("%d\n", PARSER_RESPONSE);
+                continue;
             }
-            CALL(id_in_body_parser(function_item));
-            printf("%d\n", PARSER_RESPONSE);
         } else {
             return ERR_SYNTAX;
         }
@@ -620,28 +623,32 @@ int def_var_parser(tab_item_t *function_item) {
     if (token->type == TOKEN_ASSIGN) {  /// must be assi
         printf("test2\n");
         GET_TOKEN;
-        printf("test2\n");
-        if (IS_VALID) {
-            if (IS_ID) {
-                if (is_function()) {
-                    printf("test31\n");
-                    CALL(call_check_parser());
-                    if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
-                } else {
-                    printf("test3 id\n");
-                    CALL(exp_processing(token, stack, &expression_type));
-                    printf("%d\n",  PARSER_RESPONSE);
-                    if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
-                }
+        printf("%d typ tokenu na zacatku vyrazu\n", token->type);
+        if (IS_ID) {
+            if (is_function()) {
+                item_data_stack_t *global_frame = get_global_frame_stack(stack);
+                tab_item_t *function = search_hashtable(global_frame->table, token->attribute.string->string);
+                if (function->data->item_returns.count_returns == 0) return ERR_SEMANTIC_PARRET;
+                if (inserted_item->data->item_data_type != function->data->item_returns.type_returns[0])
+                    return ERR_SEMANTIC_ASSIGNMENT;
+                printf("test31\n");
+                CALL(call_check_parser());
+//                if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
             } else {
-                printf("test3 hodnota\n");
+                printf("test3 id\n");
                 CALL(exp_processing(token, stack, &expression_type));
                 printf("%d\n",  PARSER_RESPONSE);
                 if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
+                printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
             }
         } else {
-            return ERR_SYNTAX;
+            printf("test3 hodnota a symbol\n");
+            CALL(exp_processing(token, stack, &expression_type));
+            printf("%d\n",  PARSER_RESPONSE);
+            if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
+            printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
         }
+        inserted_item->data->defined = true;
         return OK; // todo
     } else if (IS_FUNCTION_BODY) {
         return OK;
@@ -652,10 +659,53 @@ int def_var_parser(tab_item_t *function_item) {
 
 int id_in_body_parser(tab_item_t *function_item) {
     printf("%s", function_item->key);
-//    item_data_stack_t *global_frame = get_global_frame_stack(stack);
-//    token_struct *id_token = token;
-    // TODO add rule if i want to add id , id, id, = foo()
-    GET_TOKEN;
+    if (is_function()) {
+        CALL(call_check_parser());
+        printf("%d -  response from call func in id in func body\n", PARSER_RESPONSE);
+    } else {
+        item_data_stack_t *global_frame = get_global_frame_stack(stack);
+        item_data_stack_t *frame = stack->top;
+        tab_item_t *item;
+        while (frame != global_frame) {
+            item = search_hashtable(frame->table, token->attribute.string->string);
+            if (item != NULL) break;
+            frame = frame->previous;
+        }
+        //if item dont exist, error undefined
+        if (item == NULL) return ERR_SEMANTIC_DEF;
+        GET_TOKEN;
+        if (token->type == TOKEN_ASSIGN) {  /// must be assi
+            printf("dostal jsem assign\n");
+            GET_TOKEN;
+            printf("%d typ tokenu na zacatku vyrazu\n", token->type);
+            if (IS_ID) {
+                if (is_function()) { // TODO MOZNE PRIRADIT NEKOLIK HODNOT
+                    tab_item_t *function = search_hashtable(global_frame->table, token->attribute.string->string);
+                    if (function->data->item_returns.count_returns == 0) return ERR_SEMANTIC_PARRET;
+                    if (item->data->item_data_type != function->data->item_returns.type_returns[0])
+                        return ERR_SEMANTIC_ASSIGNMENT;
+                    printf("test31\n");
+                    CALL(call_check_parser());
+                } else {
+                    printf("test3 id\n");
+                    CALL(exp_processing(token, stack, &expression_type));
+                    printf("%d\n",  PARSER_RESPONSE);
+                    if (item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
+                    printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
+                }
+            } else {
+                printf("test3 hodnota a symbol\n");
+                CALL(exp_processing(token, stack, &expression_type));
+                printf("%d\n",  PARSER_RESPONSE);
+                if (item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
+                printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
+            }
+            item->data->defined = true;
+            return OK; // todo
+        } else {
+            return ERR_SYNTAX;
+        }
+    }
     return OK;
 }
 

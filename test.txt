@@ -4,9 +4,8 @@ global foo : function (integer , string) : integer
 foo (5, "HELLO")
 function foo (i : integer, s : string) : integer
     local num1 : integer = i + 2 - 1
-    num1 = num1 + 2
-    a,b,c = foo
     local num2 : integer = #s
+    num1 = num1 + 2
     num1 = (num2 + 2) // 2
     if (num1 + num2) > 3 then
         local if_num : number = 3.14
