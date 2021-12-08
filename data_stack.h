@@ -1,7 +1,7 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
  *
- * @brief data stack header
+ * @brief Data stack header
  * @author Anton Medvedev (xmedve04)
  * */
 

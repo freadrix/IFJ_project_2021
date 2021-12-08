@@ -2,7 +2,7 @@
  * Implementace překladače imperativního jazyka IFJ21.
  *
  * @brief Hash table operations
- * @authors Aleksandr Verevkin (xverev00) Anton Medvedev (xmedve04)
+ * @authors Aleksandr Verevkin (xverev00), Anton Medvedev (xmedve04)
  */
 
 #include <stdio.h>
@@ -11,7 +11,6 @@
 
 #include "symtable.h"
 
-// Don't understand yet
 static unsigned get_hash(const char *str) {
     //generator of hash
     unsigned h = 0;
@@ -30,7 +29,7 @@ void init_hashtable(table_t *tab) {
         (*tab)[i] = NULL;
     }
 }
-// !strcmp(iter_item->key, key)
+
 tab_item_t *search_hashtable(table_t *tab, char *key) {
     //search in the hash table for specific item
     if (tab != NULL && key != NULL) {

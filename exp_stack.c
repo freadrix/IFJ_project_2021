@@ -26,10 +26,12 @@ bool is_empty_stack(stack_t *stack) {
 }
 
 item_stack_t *stack_top(stack_t *stack) {
+    //return pointer on stack top item
     return stack->top;
 }
 
 item_stack_t *stack_top_term(stack_t *stack) {
+    //return stack top terminal
     item_stack_t *iter_item = stack_top(stack);
     while (iter_item) {
         if (iter_item->elem < STOP) {
@@ -78,7 +80,6 @@ void empty_stack(stack_t *stack) {
 bool insert_after_top_term(stack_t *stack, elem_enum elem, tab_item_data_type type) {
     item_stack_t *tmp = stack_top(stack);
     item_stack_t *previous = NULL;
-
     while (tmp != NULL) {
         if (tmp->elem < STOP) {
             item_stack_t *new = malloc(sizeof(item_stack_t));
@@ -95,7 +96,6 @@ bool insert_after_top_term(stack_t *stack, elem_enum elem, tab_item_data_type ty
                     new->nxt = previous->nxt;
                     previous->nxt = new;
                 }
-
                 return true;
             }
         }

@@ -46,7 +46,7 @@ char precedence_tab[9][9] = {
 };
 
 elem_enum get_elem(token_struct *tkn) {
-
+    //assign element by its token type
     if (tkn->type == TOKEN_PLUS) {
         return PLUS;
     } else if (tkn->type == TOKEN_MINUS) {
@@ -93,6 +93,7 @@ elem_enum get_elem(token_struct *tkn) {
 tab_item_data_type get_elem_type(elem_enum elem, token_struct *token, data_stack_t *data_stack) {
     item_data_stack_t *global_frame = get_global_frame_stack(data_stack);
     item_data_stack_t *frame = data_stack->top;
+    //if element id, find it in data stack
     if (elem == ID) {
         tab_item_t *item;
         while (frame != global_frame) {
@@ -100,9 +101,11 @@ tab_item_data_type get_elem_type(elem_enum elem, token_struct *token, data_stack
             if (item != NULL) break;
             frame = frame->previous;
         }
+        //if item dont exist, error undefined
         if (item == NULL) {
             exit(ERR_SEMANTIC_DEF);
         }
+        //if item not defined, return type nil
         if (item->data->defined == false) {
             return TYPE_NULL;
         }
@@ -119,7 +122,7 @@ tab_item_data_type get_elem_type(elem_enum elem, token_struct *token, data_stack
 }
 
 prec_enum get_precedence(elem_enum elem) {
-
+    //get precedence of the symbol, according to its precedence position
     if ((elem == PLUS) || (elem == MINUS)) {
         return T_PLUS_MINUS;
     } else if ((elem == DIV) || (elem == MUL) || (elem == IDIV)) {
@@ -142,7 +145,7 @@ prec_enum get_precedence(elem_enum elem) {
 }
 
 rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_t *right, int count_of_elems) {
-
+    //get rule for stack top terminal
     if (count_of_elems == 1) {
         if ((left->elem == ID) || (left->elem == INT) || (left->elem == DOUBLE) || (left->elem == STRING)) {
             return ID_RULE;
@@ -195,7 +198,7 @@ rules_enum get_rule(item_stack_t *left, item_stack_t *middle, item_stack_t *righ
 }
 
 int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, rules_enum rule, tab_item_data_type *type) {
-    //check for types
+    //check for types in the applying rules
     if ((rule == E_PLUS_E) || (rule == E_MINUS_E) || (rule == E_MUL_E)) {
         if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) ||
             (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)  ||
@@ -364,22 +367,21 @@ int reduce() {
             count_of_elems++;
         }
     }
-
     if (count_of_elems == 1 && end) {
-        // printf("REDUCE BY 1\n");
+        //reduce by 1 element
         left = expr_stack->top;
         if ((rule = get_rule(left, middle, right, count_of_elems)) == NO_RULE) {
             return ERR_SYNTAX;
         }
     } else if (count_of_elems == 2 && end) {
-        // printf("REDUCE BY 2\n");
+        //reduce by 2 elements
         left = expr_stack->top->nxt;
         middle = expr_stack->top;
         if ((rule = get_rule(left, middle, right, count_of_elems)) == NO_RULE) {
             return ERR_SYNTAX;
         }
     } else if (count_of_elems == 3 && end) {
-        // printf("REDUCE BY 3\n");
+        //reduce by 3 elements
         left = expr_stack->top->nxt->nxt;
         middle = expr_stack->top->nxt;
         right = expr_stack->top;
@@ -394,12 +396,11 @@ int reduce() {
     if((check = rules_check(left, middle, right, rule, &output_type))) {
         return check;
     }
-    // printf("OUTPUT TYPE == %d\n", output_type);
 
     if (!(code_generate_operations(rule))) {
         return ERR_INTERNAL;
     }
-    //check if variable was zero
+    //check if id was zero
     bool is_zero = false;
     if (rule == ID_RULE && left->is_zero) {
         is_zero = true;

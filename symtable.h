@@ -2,7 +2,7 @@
  * Implementace překladače imperativního jazyka IFJ21.
  * 
  * @brief Hash table operations header
- * @author Aleksandr Verevkin (xverev00)
+ * @authors Aleksandr Verevkin (xverev00), Anton Medvedev (xmedve04)
  */
 
 #ifndef _SYMTABLE_H_
@@ -76,7 +76,7 @@ typedef struct table_item_data {
     tab_item_returns item_returns;
     tab_item_parameters item_parameters;
     bool defined;
-    tab_item_value item_value;   // mozna nePOTREBUJEME
+    tab_item_value item_value;
 }tab_item_data_t;
 
 /**

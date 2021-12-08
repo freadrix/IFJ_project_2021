@@ -1,7 +1,7 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
  *
- * @brief data stack
+ * @brief Data stack
  * @author Anton Medvedev (xmedve04)
  * */
 
@@ -11,10 +11,12 @@
 
 
 void init_data_stack(data_stack_t *stack) {
+    //stack initialization
     stack->top = NULL;
 }
 
 bool data_stack_is_empty(data_stack_t *stack) {
+    //check if stack is empty
     return (stack->top == NULL ? true : false);
 }
 
@@ -27,6 +29,7 @@ item_data_stack_t *get_global_frame_stack(data_stack_t *stack) {
 }
 
 bool push_data_item(data_stack_t *stack) {
+    //push new item on stack
     item_data_stack_t *item = malloc(sizeof(item_data_stack_t));
     if (!(item)) return false;
     item->previous = stack->top;
@@ -39,6 +42,7 @@ bool push_data_item(data_stack_t *stack) {
 }
 
 bool pop_data_item(data_stack_t *stack) {
+    //pop item from the top of the stack
     if (stack->top == NULL) return false;
     item_data_stack_t *item = stack->top;
     delete_all_hashtable(item->table);
@@ -52,6 +56,7 @@ bool pop_data_item(data_stack_t *stack) {
 }
 
 void empty_data_stack(data_stack_t *stack) {
+    //clear data stack
     bool tmp = true;
     while (tmp) {
         tmp = pop_data_item(stack);

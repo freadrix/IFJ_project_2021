@@ -118,7 +118,6 @@ typedef enum {
 * @struct Token possible attributes
 */
 typedef union {
-
     int int_value;
     double double_value;
     string_struct *string;

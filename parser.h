@@ -1,8 +1,8 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
  * 
- * @brief Syntactic and semantic check
- * @author Matej Alexej Helc
+ * @brief Syntactic and semantic check header
+ * @authors Matej Alexej Helc (xhelcm00), Anton Medvedev (xmedve04)
  */
 
 #ifndef _PARSER_H_

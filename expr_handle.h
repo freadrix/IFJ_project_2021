@@ -68,6 +68,13 @@
 //     NO_RULE
 // } rules_enum;
 
+/**
+ * @brief Main expression processing function
+ * @param token Start token of the expression
+ * @param data_stack Pointer on stack with variables
+ * @param expression_type Final expression type
+ * @return OK(0) in case of correctly writed expression, else one of the errors
+ */
 int exp_processing(token_struct *token, data_stack_t *data_stack, tab_item_data_type *expression_type);
 
 #endif

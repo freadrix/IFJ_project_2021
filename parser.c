@@ -1,8 +1,8 @@
 /**
  * Implementace překladače imperativního jazyka IFJ21.
  *
- * @brief Syntactic and semantic check header
- * @authors Matej Alexej Helc, Anton Medvedev Hulk
+ * @brief Syntactic and semantic check
+ * @authors Matej Alexej Helc (xhelcm00), Anton Medvedev (xmedve04)
  */
 
 #include <stdio.h>
@@ -89,7 +89,7 @@ if (PARSER_RESPONSE != OK) return PARSER_RESPONSE
 #define ALLOC                                                                   \
 token = (token_struct *)malloc(sizeof(token_struct));                           \
 stack = (data_stack_t *)malloc(sizeof(data_stack_t));                           \
-expression_type = malloc(sizeof(tab_item_data_type));                           \
+expression_type = (tab_item_data_type)malloc(sizeof(tab_item_data_type));                           \
 init_data_stack(stack);                                                         \
 if (!(string_init(&string))) return ERR_INTERNAL;                               \
 define_working_str(&string)

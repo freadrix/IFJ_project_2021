@@ -622,7 +622,7 @@ bool code_generate_stack_convert_int_second() {
     return true;
 }
 // ======================== FLOAT<->INT CONVERTIONS END ======================== //
-
+//stack operations, used in expression handling
 bool code_generate_operations(rules_enum r) {
     if (r == E_LT_E) {
         if(!(add_string_to_string(&generated_code, ("LTS\n")))) {

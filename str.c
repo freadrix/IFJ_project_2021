@@ -2,12 +2,13 @@
  * Implementace překladače imperativního jazyka IFJ21.
  *
  * @brief String operations
- * @author Ivan Tsiareshkin (xtsiar00)
+ * @author Ivan Tsiareshkin (xtsiar00), Aleksandr Verevkin (xverev00)
  */
 
 #include "str.h"
 
 int string_init(string_struct *str) {
+    //initialize space for new string
     str->string = (char*) malloc(STRING_CONST_LENGHT * sizeof(char));
     if (!str->string) {
         return STR_ERR;
@@ -20,17 +21,20 @@ int string_init(string_struct *str) {
 }
 
 void string_free(string_struct *str) {
+    //free space of allocated string
     if (str != NULL) {
         free(str->string);
     }
 }
 
 void string_clear(string_struct *str) {
+    //empty string
     str->length = 0;
     str->string[str->length] = '\0';
 }
 
 int re_lenght(string_struct *str) {
+    //reallocate space for addition to string
     int new_length = str->length + STRING_CONST_LENGHT;
     str->string = (char*) realloc(str->string, new_length * sizeof(char));
     if (!str->string ) {
@@ -42,6 +46,7 @@ int re_lenght(string_struct *str) {
 }
 
 int string_copy(string_struct *str_to_copy, string_struct *copy_here) {
+    //correctly copy from src string to dest string
 	int len_copy = str_to_copy->length;
 	if (len_copy >= copy_here->alloc_length) {
         int len_plus_esc = len_copy + 1;
@@ -57,6 +62,7 @@ int string_copy(string_struct *str_to_copy, string_struct *copy_here) {
 }
 
 int add_char_to_string(string_struct *str, int c) {
+    //add single character into string
     if (str->length + 1 >= str->alloc_length) {
         if(!re_lenght(str)) {
             string_clear(str);
@@ -71,6 +77,7 @@ int add_char_to_string(string_struct *str, int c) {
 }
 
 int add_string_to_string(string_struct *str, const char *str_to_add) {
+    //add string to string, primary used in code generation
     int added_str_length = (int) strlen(str_to_add);
     if ((str->length + 1 + added_str_length) >= str->alloc_length) {
 		int new_length = str->length + 1 + added_str_length;
