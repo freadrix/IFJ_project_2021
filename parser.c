@@ -110,7 +110,7 @@ token_struct *token;                    // token
 data_stack_t *stack;                    // stack
 string_struct string;                   // string
 tab_item_data_type expression_type;    // expression type
-int for_counter;
+int if_counter;
 int while_counter;
 /*-----------------*/
 
@@ -174,7 +174,7 @@ int while_counter;
 int parser() {
     // allocate all we need to work with
     ALLOC;
-    for_counter = 0;
+    if_counter = 0;
     while_counter = 0;
 
     /// require "ifj21"
