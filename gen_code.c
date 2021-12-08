@@ -351,6 +351,7 @@ void free_generated_code_string() {
 
 //use after code_generator_init
 bool code_generate_main_start() {
+    printf("--------MAIN START--------");
     if(!(add_string_to_string(&generated_code, ("\nLABEL $$main\n"
                                                 "CREATEFRAME\n"
                                                 "PUSHFRAME\n")))) {
@@ -361,6 +362,7 @@ bool code_generate_main_start() {
 
 //use at the end of code generation
 bool code_generate_main_end() {
+    printf("--------MAIN END---------");
     if(!(add_string_to_string(&generated_code, ("POPFRAME\n"
                                                 "CLEARS\n")))) {
         return false;
@@ -369,6 +371,7 @@ bool code_generate_main_end() {
 }
 
 bool code_generate_function_call(char *f_name) {
+    printf("--------FUCN CALL--------");
     if(!(add_string_to_string(&generated_code, ("CALL $"))) ||
        !(add_string_to_string(&generated_code, (f_name))) ||
        !(add_string_to_string(&generated_code, ("\n")))) {
@@ -378,6 +381,7 @@ bool code_generate_function_call(char *f_name) {
 }
 
 bool code_generate_empty_variables_frame() {
+    printf("------EMPTY VAR FRAME------");
     if(!(add_string_to_string(&generated_code, ("CREATEFRAME\n")))) {
         return false;
     }
@@ -388,6 +392,7 @@ bool code_generate_empty_variables_frame() {
 static bool code_generate_token_value(token_struct token) {
     string_struct term_value;
     //initialize string
+    printf("-------TOKEN VALUE--------");
     if (!(string_init(&term_value))) {
         return false;
     }
@@ -441,6 +446,7 @@ static bool code_generate_token_value(token_struct token) {
 }
 
 bool code_generate_function_parameter(token_struct token, int param_num) {
+    printf("-------FUCN PARAM--------");
     char index[10];
     sprintf(index, "%d", param_num);
     if(!(add_string_to_string(&generated_code, ("DEFVAR TF@%"))) ||
@@ -457,6 +463,7 @@ bool code_generate_function_parameter(token_struct token, int param_num) {
 }
 
 bool code_generate_save_expression_result_on_retval(int retval_index) {
+    printf("--SAVE EXPR RES ON RETVAL--");
     char index_char[10];
     sprintf(index_char, "%d", retval_index);
     if(!(add_string_to_string(&generated_code, ("MOVE LF@%retval_"))) ||
@@ -468,6 +475,7 @@ bool code_generate_save_expression_result_on_retval(int retval_index) {
 }
 
 bool code_generate_function_return(char *f_name) {
+    printf("------FUCN RET-------");
     if(!(add_string_to_string(&generated_code, ("JUMP $"))) ||
        !(add_string_to_string(&generated_code, (f_name))) ||
        !(add_string_to_string(&generated_code, ("_ret\n")))) {
@@ -477,6 +485,7 @@ bool code_generate_function_return(char *f_name) {
 }
 
 bool code_generate_save_param(char *var_name, int param_index) {
+    printf("-----SAVE PARAM------");
     char index_char[10];
     sprintf(index_char, "%d", param_index);
     if(!(add_string_to_string(&generated_code, ("MOVE LF@"))) ||
@@ -490,6 +499,7 @@ bool code_generate_save_param(char *var_name, int param_index) {
 }
 
 bool code_generate_function_start(char *f_name) {
+    printf("-----FUNC START-----");
     if(!(add_string_to_string(&generated_code, ("\nLABLE $"))) ||
        !(add_string_to_string(&generated_code, (f_name))) ||
        !(add_string_to_string(&generated_code, ("\n"
@@ -500,6 +510,7 @@ bool code_generate_function_start(char *f_name) {
 }
 
 bool code_generate_function_end(char *f_name) {
+    printf("------FUNC END------");
     if(!(add_string_to_string(&generated_code, ("LABLE $"))) ||
        !(add_string_to_string(&generated_code, (f_name))) ||
        !(add_string_to_string(&generated_code, ("_ret\n"
@@ -511,6 +522,7 @@ bool code_generate_function_end(char *f_name) {
 }
 
 bool code_generate_retval_create(int retval_index) {
+    printf("------RETVAL CREATE------");
     char index_char[10];
     sprintf(index_char, "%d", retval_index);
     if(!(add_string_to_string(&generated_code, ("DEFVAR LF@%retval_"))) ||
@@ -525,6 +537,7 @@ bool code_generate_retval_create(int retval_index) {
 }
 
 bool code_generate_retval_on_stack(int retval_index) {
+    printf("------RETVAL ON STACK------");
     char index_char[10];
     sprintf(index_char, "%d", retval_index);
     if(!(add_string_to_string(&generated_code, ("PUSHS TF@%retval_"))) ||
@@ -538,6 +551,7 @@ bool code_generate_retval_on_stack(int retval_index) {
 //help function for calling write(...), push strings on stack correctly
 //rest of arguments must be STRINGS!!!
 bool code_generate_write_function(int terms_count, ...) {
+    printf("------WRITE FUNC------");
     //list of arguments
     va_list valist;
     va_start(valist, terms_count);
@@ -572,6 +586,7 @@ bool code_generate_write_function(int terms_count, ...) {
 }
 
 bool code_generate_variable_create(char *var_name) {
+    printf("------VAR CREATE------");
     if(!(add_string_to_string(&generated_code, ("DEFVAR LF@"))) ||
        !(add_string_to_string(&generated_code, (var_name))) ||
        !(add_string_to_string(&generated_code, ("\n"))) ||
@@ -584,6 +599,7 @@ bool code_generate_variable_create(char *var_name) {
 }
 
 bool code_generate_variable_define_value(char *var_name, token_struct token) {
+    printf("------DEF VALUE------");
     if(!(add_string_to_string(&generated_code, ("MOVE LF@"))) ||
        !(add_string_to_string(&generated_code, (var_name))) ||
        !(add_string_to_string(&generated_code, (" "))) ||
@@ -595,6 +611,7 @@ bool code_generate_variable_define_value(char *var_name, token_struct token) {
 }
 
 bool code_generate_variable_save_expression(char *var_name) {
+    printf("-----VAR SAVE EXPR-----");
     if(!(add_string_to_string(&generated_code, ("MOVE LF@"))) ||
        !(add_string_to_string(&generated_code, (var_name))) ||
        !(add_string_to_string(&generated_code, (" GF@%gl_res\n")))) {
@@ -604,6 +621,7 @@ bool code_generate_variable_save_expression(char *var_name) {
 }
 
 bool code_generate_stack_push(token_struct *token) {
+    printf("-----PUSH-----");
     if(!(add_string_to_string(&generated_code, ("PUSHS "))) ||
        !(code_generate_token_value(*token)) ||
        !(add_string_to_string(&generated_code, ("\n")))) {
@@ -615,6 +633,7 @@ bool code_generate_stack_push(token_struct *token) {
 // ======================== FLOAT<->INT CONVERTIONS START ======================== //
 
 bool code_generate_stack_convert_float_first() {
+    printf("-----FLOAT FIRST------");
     if(!(add_string_to_string(&generated_code, ("INT2FLOATS\n")))) {
         return false;
     }
@@ -622,6 +641,7 @@ bool code_generate_stack_convert_float_first() {
 }
 
 bool code_generate_stack_convert_float_second() {
+    printf("-----FLOAT SEC------");
     if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_1\n"
                                                 "INT2FLOATS\n"
                                                 "PUSHS GF@%gl_1\n")))) {
@@ -631,6 +651,7 @@ bool code_generate_stack_convert_float_second() {
 }
 
 bool code_generate_stack_convert_int_first() {
+    printf("-----INT FIRST------");
     if(!(add_string_to_string(&generated_code, ("FLOAT2INTS\n")))) {
         return false;
     }
@@ -638,6 +659,7 @@ bool code_generate_stack_convert_int_first() {
 }
 
 bool code_generate_stack_convert_int_second() {
+    printf("-----INT SEC------");
     if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_1\n"
                                                 "FLOAT2INTS\n"
                                                 "PUSHS GF@%gl_1\n")))) {
@@ -648,6 +670,7 @@ bool code_generate_stack_convert_int_second() {
 // ======================== FLOAT<->INT CONVERTIONS END ======================== //
 //stack operations, used in expression handling
 bool code_generate_operations(rules_enum r) {
+    printf("---GEN OPERATIONS----");
     if (r == E_LT_E) {
         if(!(add_string_to_string(&generated_code, ("LTS\n")))) {
             return false;
@@ -729,6 +752,7 @@ bool code_generate_operations(rules_enum r) {
 }
 
 bool code_generate_pop_stack_result() {
+    printf("---POP STACK----");
     if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_res\n")))) {
         return false;
     }
@@ -737,6 +761,7 @@ bool code_generate_pop_stack_result() {
 
 // ======================== IF ELSE START ======================== //
 bool code_generate_if_start(int if_index) {
+    printf("-----IF START----");
     char index_char[10];
     sprintf(index_char, "%d", if_index);
     if(!(add_string_to_string(&generated_code, ("TYPE GF@%gl_1 GF@%gl_res\n"))) ||
@@ -759,6 +784,7 @@ bool code_generate_if_start(int if_index) {
 }
 
 bool code_generate_else(int if_index) {
+    printf("-------ELSE-------");
     char index_char[10];
     sprintf(index_char, "%d", if_index);
     if(!(add_string_to_string(&generated_code, ("JUMP $ENDELSE_"))) ||
@@ -773,6 +799,7 @@ bool code_generate_else(int if_index) {
 }
 
 bool code_generate_if_end(int if_index) {
+    printf("-----IF END-----");
     char index_char[10];
     sprintf(index_char, "%d", if_index);
     if(!(add_string_to_string(&generated_code, ("LABEL $ENDELSE_"))) ||
@@ -786,6 +813,7 @@ bool code_generate_if_end(int if_index) {
 
 // ======================== WHILE START ======================== //
 bool code_generate_while_start(int while_index) {
+    printf("-----WHILE START-----");
     char index_char[10];
     sprintf(index_char, "%d", while_index);
     if(!(add_string_to_string(&generated_code, ("TYPE GF@%gl_1 GF@%gl_res\n"))) ||
@@ -808,6 +836,7 @@ bool code_generate_while_start(int while_index) {
 }
 
 bool code_generate_while_end(int while_index) {
+    printf("-----WHILE END-----");
     char index_char[10];
     sprintf(index_char, "%d", while_index);
     if(!(add_string_to_string(&generated_code, ("JUMPIFEQ $WHILEEND_"))) ||
