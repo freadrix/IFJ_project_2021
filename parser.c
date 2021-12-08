@@ -283,8 +283,7 @@ int function_parser() {
         return OK;
     }
     if (IS_FUNCTION_BODY) { /// <state_l> function body
-        PARSER_RESPONSE = function_body_parser(function_item);
-        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+        CALL(function_body_parser(function_item));
     } else {
         return ERR_SYNTAX;
     }
@@ -437,22 +436,30 @@ int function_rets_parser(tab_item_t *function_item) {
  * */
 int function_body_parser(tab_item_t *function_item) {
     /// function (while/if) body
-    while (!((token->type == TOKEN_KEYWORD) && (token->attribute.keyword == KEYWORD_END))) {
+    while (!((token->type == TOKEN_KEYWORD) &&                        \
+            ((token->attribute.keyword == KEYWORD_END) || (token->attribute.keyword == KEYWORD_ELSE)))) {
         if (token->type == TOKEN_KEYWORD) {
             if (token->attribute.keyword == KEYWORD_LOCAL) {
                 CALL(def_var_parser(function_item));
                 printf("%d - response from variable declaration\n", PARSER_RESPONSE);
                 continue;
             } else if (token->attribute.keyword == KEYWORD_IF) {
-                //TODO IF
-                if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+                printf("i'm near if\n");
+                CALL(if_parser(function_item));
+                printf("%d - response from if func\n", PARSER_RESPONSE);
+                GET_TOKEN;  // PROTOZE IF KONCI NA END A PAK NASTANE CHYBA POTREBUJEME NACIST DALSI TOKEN
+                continue;
             } else if (token->attribute.keyword == KEYWORD_WHILE) {
-//                PARSER_RESPONSE = while_parser(function_item);
-                if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+                CALL(while_parser(function_item));
+                printf("%d - response from while\n", PARSER_RESPONSE);
+                GET_TOKEN;  // PROTOZE IF KONCI NA END A PAK NASTANE CHYBA POTREBUJEME NACIST DALSI TOKEN
+                continue;
             } else if (token->attribute.keyword == KEYWORD_RETURN) {
-                PARSER_RESPONSE = return_parser(function_item);
-                if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+                CALL(return_parser(function_item));
+                printf("%d - response from return\n", PARSER_RESPONSE);
+                continue;
             } else {
+                printf("i will be dead soon\n");
                 return ERR_SYNTAX;
             }
         }
@@ -463,7 +470,7 @@ int function_body_parser(tab_item_t *function_item) {
                 return OK;
             } else {
                 CALL(id_in_body_parser(function_item));
-                printf("%d\n", PARSER_RESPONSE);
+                printf("%d - vysledek prirazeni\n", PARSER_RESPONSE);
                 continue;
             }
         } else {
@@ -481,119 +488,107 @@ int return_parser(tab_item_t *function_item) {
     /// current token == keyword return
     GET_TOKEN;  /// this token should be some expression
     int i;
-    for (i = 0; IS_VALID || token->type == TOKEN_COMMA ||                            \
-    (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_NIL); ++i) {
+    for (i = 0; token->type != TOKEN_KEYWORD; ++i) {
         if ((i % 2) == 0) {
-//            PARSER_RESPONSE = expresion_parser();   TODO Expression handler
-             if (token->type == TOKEN_INT) {
-                if (function_item->data->item_returns.type_returns[i/2] != TYPE_INTEGER) {
-                    return ERR_SEMANTIC_PARRET;
+            if (IS_ID) {
+                if (is_function()) {
+                    return ERR_SYNTAX;
                 } else {
-                    function_item->data->item_value.int_value = token->attribute.int_value;
+                    CALL(exp_processing(token, stack, &expression_type));
+                    printf("%d RESPONSE FROM EXPR\n", PARSER_RESPONSE);
+                    if (function_item->data->item_returns.type_returns[(int) (i / 2)] != expression_type)
+                        return ERR_SEMANTIC_PARRET;
+                    printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
                 }
-             }
-             if (token->type == TOKEN_DOUBLE) {
-                 if (function_item->data->item_returns.type_returns[i/2] != TYPE_DOUBLE) {
-                     return ERR_SEMANTIC_PARRET;
-                 } else {
-                     function_item->data->item_value.double_value = token->attribute.double_value;
-                 }
-             }
-             if (token->type == TOKEN_STRING) {
-                 if (function_item->data->item_returns.type_returns[i/2] != TYPE_STRING) {
-                     return ERR_SEMANTIC_PARRET;
-                 } else {
-                     function_item->data->item_value.string_value = token->attribute.string->string;
-                 }
-             }
-             if (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_NIL) {
-                 /*TODO ???*/
-             }
-             return ERR_SYNTAX;
+            } else {
+                printf("test3 hodnota a symbol\n");
+                CALL(exp_processing(token, stack, &expression_type));
+                printf("%d RESPONSE FROM EXPR\n", PARSER_RESPONSE);
+                if (function_item->data->item_returns.type_returns[(int) (i / 2)] != expression_type)
+                    return ERR_SEMANTIC_PARRET;
+                printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
+            }
+            continue;
         } else {
             if (token->type != TOKEN_COMMA) return ERR_SYNTAX;
         }
         GET_TOKEN;
     }
-    i--;
-    if (((int) (i/2)) != (function_item->data->item_parameters.count_parameters - 1)) { ///checking if we got right ammount
-        return ERR_SEMANTIC_PARRET;
-    } else {
+    if ((i == 0) && (function_item->data->item_returns.count_returns == 0)) {
         return OK;
+    } else {
+        if ((i > 0) && (i % 2 == 1) && (((int) (i/2)) == function_item->data->item_returns.count_returns - 1)) {
+            return OK;
+        }
+        if ((i > 1) && (i % 2 == 0)) {
+            return ERR_SYNTAX;
+        } else {
+            return ERR_SEMANTIC_PARRET;
+        }
     }
 }
 
 /**
  * while <conditions> do <state_l> end
  */
-//int while_parser(tab_item_t *function_item) {
-//    //TODO Add while cycle (depends on Expr_handle output)
-//    //actual token == KEYWORD_WHILE
-//    //TODO call Expression_handler  //<conditions>
-//    //GET_TOKEN;    want token DO
-//    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_DO))  //do
-//        return ERR_SYNTAX;
-//     if (!push_data_item(stack)) return ERR_INTERNAL;
-//    GET_TOKEN;
-//    ///TODO PUSH item stack
-//    if (!(IS_FUNCTION_BODY || (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END)))
-//        return ERR_SYNTAX;
-//    if (IS_FUNCTION_BODY) { // <state_l> (<body>)
-//        PARSER_RESPONSE = function_body_parser(function_item);  //if it didnt return with error than actual token is TOKEN_END
-//        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
-//        GET_TOKEN;  //getting next token, should be END again (end of while cycle)
-//    }
-//    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END))
-//        return ERR_SYNTAX;
-//    ///TODO POP stack
-//
-//    return OK;    //end
-//}
+int while_parser(tab_item_t *function_item) {
+    printf("i'm inside while !!!!!!!!!!!!!\n");
+    GET_TOKEN;
+    if (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_DO) return ERR_SYNTAX;
+    if (is_function()) return ERR_SYNTAX;
+    CALL(exp_processing(token, stack, &expression_type));
+    printf("%d - response from expression\n",  PARSER_RESPONSE);
+    printf("%d - typ tokenu na konci vyrazu\n", token->type);
+    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_DO)) return ERR_SYNTAX;
+    if (!push_data_item(stack)) return ERR_INTERNAL;
+    GET_TOKEN;
+    CALL(function_body_parser(function_item));
+    printf("%d - response from body\n",  PARSER_RESPONSE);
+    printf("%d - typ tokenu na konci vyrazu\n", token->type);
+    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END)) return ERR_SYNTAX;
+    if (!pop_data_item(stack)) return ERR_INTERNAL;
+    return OK;
+}
 
 /**
  * if <conditions> then <state_l> else <stale_l> end
  */
-//int if_parser(tab_item_t *function_item) {
-//    //actual token == KEYWORD_IF
-//    //TODO call Expression_handler  //<conditions>
-//    //GET_TOKEN;    want token from IS_FUNCTION_BODY or keyword THEN
-//    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_THEN))    // then
-//        return ERR_SYNTAX;
-//    GET_TOKEN;
-//    ///TODO PUSH item stack
-//    if (!(IS_FUNCTION_BODY || (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_ELSE)))
-//        return ERR_SYNTAX;
-//    if (IS_FUNCTION_BODY) { // <state_l> (<body>)
-//        PARSER_RESPONSE = function_body_parser(function_item);  //if it didnt return with error than actual token is TOKEN_END
-//        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
-//        GET_TOKEN;  //getting next token, should be keyword ELSE
-//    }
-//    //////TODO POP item stack
-//    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_ELSE))    // else
-//        return ERR_SYNTAX;
-//    ///TODO PUSH item stack
-//    GET_TOKEN;
-//    if (!(IS_FUNCTION_BODY || (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END)))
-//        return ERR_SYNTAX;
-//    if (IS_FUNCTION_BODY) { // <state_l> (<body>)
-//        PARSER_RESPONSE = function_body_parser(function_item);  //if it didnt return with error than actual token is TOKEN_END
-//        if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
-//        GET_TOKEN;  //getting next token, should be END again (end of if else)
-//    }
-//    ///TODO POP item stack
-//    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END))
-//        return ERR_SYNTAX;
-//
-//    return OK;    //end
-//}
+int if_parser(tab_item_t *function_item) {
+    printf("i'm inside if!!!!!!!!!!!!!\n");
+    //actual token == KEYWORD_IF
+    //TODO call Expression_handler  //<conditions>
+    GET_TOKEN;    //want token from IS_FUNCTION_BODY or keyword THEN
+    if ((token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_THEN))    // then
+        return ERR_SYNTAX;
+    if (is_function()) return ERR_SYNTAX;
+    CALL(exp_processing(token, stack, &expression_type));
+    printf("%d - response from expression\n",  PARSER_RESPONSE);
+    printf("%d - typ tokenu na konci vyrazu\n", token->type);
+    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_THEN))
+        return ERR_SYNTAX;
+    if (!push_data_item(stack)) return ERR_INTERNAL;
+    GET_TOKEN;
+    CALL(function_body_parser(function_item));
+    printf("%d - response from body\n",  PARSER_RESPONSE);
+    printf("%d - typ tokenu na konci vyrazu\n", token->type);
+    if (!pop_data_item(stack)) return ERR_INTERNAL;
+    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_ELSE)) return ERR_SYNTAX;
+    printf("i'm inside else++++++++++++++\n");
+    if (!push_data_item(stack)) return ERR_INTERNAL;
+    GET_TOKEN;
+    CALL(function_body_parser(function_item));
+    printf("%d - response from body\n",  PARSER_RESPONSE);
+    printf("%d - typ tokenu na konci vyrazu\n", token->type);
+    if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END)) return ERR_SYNTAX;
+    if (!pop_data_item(stack)) return ERR_INTERNAL;
+    return OK;
+}
 
 /**
  *  <def_var>
  * */
 int def_var_parser(tab_item_t *function_item) {
     printf("%s - string for use function_item in def var\n", function_item->key);
-    tab_item_t *parameter_item = search_hashtable(stack->top->table, "i");
-    printf("%d %d\n", parameter_item->data->item_id_type, parameter_item->data->item_data_type);
     GET_TOKEN;  ///should be ID
     if (!IS_ID) return ERR_SYNTAX;
     SEARCH_ITEM(searched_item, stack->top->table, token->attribute.string->string);
@@ -683,7 +678,7 @@ int def_var_parser(tab_item_t *function_item) {
 }
 
 int id_in_body_parser(tab_item_t *function_item) {
-    printf("%s\n", function_item->key);
+    printf("%s - aktualni funkce\n", function_item->key);
     if (is_function()) {
         CALL(call_check_parser());
         printf("%d -  response from call func in id in func body\n", PARSER_RESPONSE);
@@ -710,9 +705,25 @@ int id_in_body_parser(tab_item_t *function_item) {
                     if (function->data->item_returns.count_returns == 0) return ERR_SEMANTIC_PARRET;
                     if (item->data->item_data_type != function->data->item_returns.type_returns[0])
                         return ERR_SEMANTIC_ASSIGNMENT;
-                    printf("test31\n");
                     CALL(call_check_parser());
-                } else {
+                } else {    // TODO musi byt kontrola na vestavene funkce
+                    if ((IS_BUILT_IN_FUNCTION) && (strcmp(token->attribute.string->string, "write") != 0)) {
+                        if (!strcmp(token->attribute.string->string, "readi")) {
+
+                        } else if (!strcmp(token->attribute.string->string, "readn")) {
+
+                        } else if (!strcmp(token->attribute.string->string, "reads")) {
+
+                        } else if (!strcmp(token->attribute.string->string, "readi")) {
+
+                        } else if (!strcmp(token->attribute.string->string, "readi")) {
+
+                        } else if (!strcmp(token->attribute.string->string, "readi")) {
+
+                        } else if (!strcmp(token->attribute.string->string, "readi")) {
+
+                        }
+                    }
                     CALL(exp_processing(token, stack, &expression_type));
 
                     if ((item->data->item_data_type == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
