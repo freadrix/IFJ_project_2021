@@ -668,7 +668,6 @@ int def_var_parser(tab_item_t *function_item) {
     if (!(code_generate_variable_create(inserted_item->key))) {
         return ERR_INTERNAL;
     }
-    //printf("test1\n");
     GET_TOKEN;   /// todo konrola typu num < int muze int < num nemuze
     if (token->type == TOKEN_ASSIGN) {  /// must be assi
         //printf("test2\n");
@@ -683,6 +682,9 @@ int def_var_parser(tab_item_t *function_item) {
                     return ERR_SEMANTIC_ASSIGNMENT;
                 //printf("test31\n");
                 CALL(call_check_parser());
+                if(!(code_generate_retval_on_var(inserted_item->key, 1))) { //TODO if return multiple, change 1
+                    return ERR_INTERNAL;
+                }
 //                if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
             } else {
                 // TODO convert final type int->double
