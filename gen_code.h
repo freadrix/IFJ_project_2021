@@ -140,6 +140,8 @@ bool code_generate_save_param(char *var_name, int param_index);
  */
 bool code_generate_retval_on_stack(int retval_index);
 
+bool code_generate_retval_on_var(char *var_name, int retval_index);
+
 /**
  * @brief Generation of call of write function
  * @param term_count count of passed parameters
