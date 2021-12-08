@@ -477,7 +477,7 @@ bool code_generate_function_return(char *f_name) {
 }
 
 bool code_generate_function_start(char *f_name) {
-    if(!(add_string_to_string(&generated_code, ("LABLE $"))) ||
+    if(!(add_string_to_string(&generated_code, ("\nLABLE $"))) ||
        !(add_string_to_string(&generated_code, (f_name))) ||
        !(add_string_to_string(&generated_code, ("\n"
                                                 "PUSHFRAME\n")))) {

@@ -232,8 +232,9 @@ int start_program_parser() {
         GET_TOKEN;
         if ((token->type == TOKEN_STRING) && (!strcmp(token->attribute.string->string, "ifj21"))) {
             if (!push_data_item(stack)) return ERR_INTERNAL;
-//            code_generator_init();
-//            code_generate_main_start();
+            if (!(code_generator_init()) || !(code_generate_main_start())) {
+                return ERR_INTERNAL;
+            }
             return OK;
         } else return ERR_SYNTAX;
     } else return ERR_SYNTAX;
@@ -260,7 +261,10 @@ int function_parser() {
     } else return ERR_SYNTAX;
     SEARCH_ITEM(function_item, stack->top->table, token->attribute.string->string);
     if (!is_there) return ERR_SYNTAX;
-//    code_generate_function_start(token->attribute.string->string);  /// generating function header (label, pushframe)
+    /// generating function header (label, pushframe)
+    if (!(code_generate_function_start(token->attribute.string->string))) { 
+        return ERR_INTERNAL;
+    }
     // check params fully work
     CALL(function_params_parser(function_item));            /// ( <params> )
     printf("%d\n", PARSER_RESPONSE);
@@ -274,7 +278,9 @@ int function_parser() {
 
     if ((token->type == TOKEN_KEYWORD) && (token->attribute.keyword == KEYWORD_END)) {
 
-//        code_generate_function_end();   /// TODO doplnit function ID, a dopsat to
+        if (!(code_generate_function_end(function_item->key))) {
+            return ERR_INTERNAL;
+        }
         return OK;
     }
     if (IS_FUNCTION_BODY) { /// <state_l> function body
@@ -376,7 +382,9 @@ int function_rets_parser(tab_item_t *function_item) {
                         if (function_item->data->item_returns.type_returns[(int) (i/2)] != TYPE_INTEGER)
                             return ERR_SEMANTIC_PARRET;
                     }
-//                    code_generate_retval_create(i/2+1);
+                    if (!(code_generate_retval_create(i/2+1))) {
+                        return ERR_INTERNAL;
+                    }
                 } else if (token->attribute.keyword == KEYWORD_NUMBER) {
                     if (count_declare_returns == 0) {
                         if (!insert_return_item(function_item, TYPE_DOUBLE)) return ERR_SYNTAX;
@@ -384,7 +392,9 @@ int function_rets_parser(tab_item_t *function_item) {
                         if (function_item->data->item_returns.type_returns[(int) (i/2)] != TYPE_DOUBLE)
                             return ERR_SEMANTIC_PARRET;
                     }
-//                    code_generate_retval_create(i/2+1);
+                    if (!(code_generate_retval_create(i/2+1))) {
+                        return ERR_INTERNAL;
+                    }
                 } else if (token->attribute.keyword == KEYWORD_STRING) {
                     if (count_declare_returns == 0) {
                         if (!insert_return_item(function_item, TYPE_STRING)) return ERR_SYNTAX;
@@ -392,7 +402,9 @@ int function_rets_parser(tab_item_t *function_item) {
                         if (function_item->data->item_returns.type_returns[(int) (i/2)] != TYPE_STRING)
                             return ERR_SEMANTIC_PARRET;
                     }
-//                    code_generate_retval_create(i/2+1);
+                    if (!(code_generate_retval_create(i/2+1))) {
+                        return ERR_INTERNAL;
+                    }
                 } else {
                     if (count_declare_returns == 0) {
                         if (!insert_return_item(function_item, TYPE_NULL)) return ERR_SYNTAX;
@@ -400,7 +412,9 @@ int function_rets_parser(tab_item_t *function_item) {
                         if (function_item->data->item_returns.type_returns[(int) (i/2)] != TYPE_NULL)
                             return ERR_SEMANTIC_PARRET;
                     }
-//                    code_generate_retval_create(i/2+1);
+                    if (!(code_generate_retval_create(i/2+1))) {
+                        return ERR_INTERNAL;
+                    }
                 }
             } else {
                 return ERR_SYNTAX;
@@ -581,7 +595,6 @@ int def_var_parser(tab_item_t *function_item) {
     if (is_there || is_function()) return ERR_SEMANTIC_DEF;
     INSERT_ITEM(inserted_item);
     inserted_item->data->item_id_type = VARIABLE;
-//    code_generate_variable_create(token->attribute.string->string); ///CODEGEN variable
     GET_TOKEN; /// :
     if (token->type != TOKEN_DDOT) return ERR_SYNTAX;
     GET_TOKEN;  /// data type
@@ -597,6 +610,10 @@ int def_var_parser(tab_item_t *function_item) {
         }
     } else {
         return ERR_SYNTAX;
+    }
+    ///generate variable
+    if (!(code_generate_variable_create(token->attribute.string->string))) {
+        return ERR_INTERNAL;
     }
     printf("test1\n");
     GET_TOKEN;   /// todo konrola typu num < int muze int < num nemuze
@@ -737,7 +754,6 @@ bool is_function() {
 /**
  * <call>    -> id ( <expressions> )
  * */
- // TODO code_gen
 int call_check_parser() {
     item_data_stack_t *global_frame = get_global_frame_stack(stack);
     SEARCH_ITEM(declarative_function, global_frame->table, token->attribute.string->string);
@@ -781,6 +797,9 @@ int call_function_parser(tab_item_t *declaration_function) {
                             return ERR_SEMANTIC_PARRET;
                     }
                 }
+                if (!(code_generate_function_parameter(*token, i/2 + 1))) {
+                    return ERR_INTERNAL;
+                }
             } else {
                 return ERR_SYNTAX;
             }
@@ -796,5 +815,8 @@ int call_function_parser(tab_item_t *declaration_function) {
     i--;
     if (((i % 2) != 0) || (((int) (i/2)) != (declaration_function->data->item_parameters.count_parameters - 1) ))
         return ERR_SYNTAX;
+    if (!(code_generate_function_call(declaration_function->key))) {
+        return ERR_INTERNAL;
+    }
     return OK;
 }
