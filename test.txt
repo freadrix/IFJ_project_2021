@@ -7,13 +7,14 @@ function foo (i : integer, s : string) : integer
     local num2 : integer = #s
     num1 = num1 + 2
     num1 = (num2 + 2) // 2
-    if (num1 + num2) > 3 then
+ --[[   if (num1 + num2) > 3 then
         local if_num : number = 3.14
     else
         while num1 ~= nil do
             num1 = nil
         end
     end
+ ]]
     return num2 - num1
 end
 

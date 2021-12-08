@@ -349,6 +349,9 @@ int function_params_parser(tab_item_t *function_item) {
                 } else {
                     return ERR_SYNTAX;
                 }
+                if (!(code_generate_save_param(inserted_item->key, i / 2 + 1))) {
+                    return ERR_INTERNAL;
+                }
             } else {
                 return ERR_SYNTAX;
             }
@@ -615,7 +618,7 @@ int def_var_parser(tab_item_t *function_item) {
         return ERR_SYNTAX;
     }
     ///generate variable
-    if (!(code_generate_variable_create(token->attribute.string->string))) {
+    if (!(code_generate_variable_create(inserted_item->key))) {
         return ERR_INTERNAL;
     }
     printf("test1\n");
@@ -635,15 +638,38 @@ int def_var_parser(tab_item_t *function_item) {
                 CALL(call_check_parser());
 //                if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
             } else {
-                printf("test3 id\n");
+                // TODO convert final type int->double
                 CALL(exp_processing(token, stack, &expression_type));
-                printf("%d\n",  PARSER_RESPONSE);
+                if ((inserted_item->data->item_data_type == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
+                    if (!(code_generate_stack_convert_float_first())) {
+                        return ERR_INTERNAL;
+                    }
+                    expression_type = TYPE_DOUBLE;
+                }
+                if (!(code_generate_pop_stack_result())) {
+                    return ERR_INTERNAL;
+                }
+                if (!(code_generate_variable_save_expression(inserted_item->key))) {
+                    return ERR_INTERNAL;
+                }
                 if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
                 printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
             }
         } else {
-            printf("test3 hodnota a symbol\n");
+            // TODO convert final type int->double
             CALL(exp_processing(token, stack, &expression_type));
+            if ((inserted_item->data->item_data_type == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
+                if (!(code_generate_stack_convert_float_first())) {
+                    return ERR_INTERNAL;
+                }
+                expression_type = TYPE_DOUBLE;
+            }
+            if (!(code_generate_pop_stack_result())) {
+                return ERR_INTERNAL;
+            }
+            if (!(code_generate_variable_save_expression(inserted_item->key))) {
+                return ERR_INTERNAL;
+            }
             printf("%d\n",  PARSER_RESPONSE);
             if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
             printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
@@ -658,6 +684,7 @@ int def_var_parser(tab_item_t *function_item) {
 }
 
 int id_in_body_parser(tab_item_t *function_item) {
+    //TODO
     printf("%s", function_item->key);
     if (is_function()) {
         CALL(call_check_parser());
