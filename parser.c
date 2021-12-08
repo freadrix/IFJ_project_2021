@@ -1139,13 +1139,8 @@ int write_func_parser() {
     int i;
     for (i = 0; token->type != TOKEN_BRACKET_ROUND_R; ++i) {
         if (i % 2 == 0) {
-            if (IS_ID) {
+            if (IS_VALID) {
                 SEARCH_VARIABLE_IN_ALL_TABLES(id_in_buildin_functions);
-                if (id_in_buildin_functions->data->item_data_type != TYPE_INTEGER){
-                    return ERR_SEMANTIC_PARRET;
-                }
-            } else if (token->type == TOKEN_INT) {
-
             } else {
                 return ERR_SEMANTIC_PARRET;
             }
@@ -1153,6 +1148,7 @@ int write_func_parser() {
             if (token->type != TOKEN_COMMA) return ERR_SYNTAX;
         }
     }
-
+    if ((i > 0) && (i % 2 == 0)) return ERR_SYNTAX;
+    if(!code_generate_write_function((int) (i/2))) return ERR_INTERNAL;
     return OK;
 }
