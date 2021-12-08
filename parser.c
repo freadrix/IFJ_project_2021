@@ -317,6 +317,9 @@ int function_params_parser(tab_item_t *function_item) {
     if(!push_data_item(stack)) return ERR_INTERNAL;
     int count_declare_parameters = function_item->data->item_parameters.count_parameters;
     int i;
+    if(!(code_generate_empty_variables_frame())) {
+        return ERR_INTERNAL;
+    }
     for (i = 0; token->type != TOKEN_BRACKET_ROUND_R; ++i) {
         if ((i % 2) == 0) { /// there have to be ID when i is even (0,2,4 ...) possition
             if (IS_ID) {
@@ -363,6 +366,9 @@ int function_params_parser(tab_item_t *function_item) {
                     }
                 } else {
                     return ERR_SYNTAX;
+                }
+                if (!(code_generate_variable_create(inserted_item->key))) {
+                    return ERR_INTERNAL;
                 }
                 if (!(code_generate_save_param(inserted_item->key, i / 2 + 1))) {
                     return ERR_INTERNAL;
@@ -774,10 +780,10 @@ int id_in_body_parser(tab_item_t *function_item) {
                     } else {
                         CALL(exp_processing(token, stack, &expression_type));
                         if ((item->data->item_data_type == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
-                        if (!(code_generate_stack_convert_float_first())) {
-                            return ERR_INTERNAL;
-                        }
-                        expression_type = TYPE_DOUBLE;
+                            if (!(code_generate_stack_convert_float_first())) {
+                                return ERR_INTERNAL;
+                            }
+                            expression_type = TYPE_DOUBLE;
                         }
                         if (!(code_generate_pop_stack_result())) {
                             return ERR_INTERNAL;
@@ -785,7 +791,6 @@ int id_in_body_parser(tab_item_t *function_item) {
                         if (!(code_generate_variable_save_expression(item->key))) {
                             return ERR_INTERNAL;
                         }
-
                         if (item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
                             if (item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
                     }
