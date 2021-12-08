@@ -1,10 +1,10 @@
 --komentar
 require "ifj21"
-global foo : function (integer , string)
-foo (5, "HELLO")
-function foo (i : integer, s : string)
+global foo : function (integer) : integer
+foo (5)
+function foo (i : integer) : integer
     local num1 : integer = i + 2 - 1
-    local num2 : integer = #s
+    local num2 : integer = 3
     num1 = num1 + 2
     num1 = (num2 + 2) // 2
     if (num1 + num2) > 3 then
@@ -15,5 +15,9 @@ function foo (i : integer, s : string)
     while num1 == 2 do
         local while_num : number = 3.14
     end
---    return num2 - num1, "strings"
+    return num2 - num1
+end
+function main()
+local a : integer
+a = foo(6)
 end

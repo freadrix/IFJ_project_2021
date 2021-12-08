@@ -220,7 +220,7 @@ int parser() {
     }
 
     code_generate_main_end();
-    code_write_out(stdout);   //TODO where we wanna call this function? parser.c / main.c?
+    code_write_out(stdout);
     CLEAN;
     return OK;
 }
@@ -251,7 +251,7 @@ int function_parser() {
         if (IS_BUILT_IN_FUNCTION) return ERR_SEMANTIC_DEF;
         SEARCH_ITEM(function_item, stack->top->table, token->attribute.string->string);
         if (is_there) { /// checking if there is already defined function with same ad
-            if (function_item->data->defined)
+            if (function_item->data->defined) //TODO
                 return ERR_SEMANTIC_DEF;
             else
                 function_item->data->defined = true;
@@ -290,7 +290,9 @@ int function_parser() {
     } else {
         return ERR_SYNTAX;
     }
-//    code_generate_function_end(); /// TODO doplnit function ID
+    if (!(code_generate_function_end(function_item->key))) {
+        return ERR_INTERNAL;
+    }
     return OK;
 }
 
@@ -498,7 +500,18 @@ int return_parser(tab_item_t *function_item) {
                     return ERR_SYNTAX;
                 } else {
                     CALL(exp_processing(token, stack, &expression_type));
-                    //printf("%d RESPONSE FROM EXPR\n", PARSER_RESPONSE);
+                    if ((function_item->data->item_returns.type_returns[(int) (i / 2)] == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
+                        if (!(code_generate_stack_convert_float_first())) {
+                            return ERR_INTERNAL;
+                        }
+                        expression_type = TYPE_DOUBLE;
+                    }
+                    if (!(code_generate_pop_stack_result())) {
+                        return ERR_INTERNAL;
+                    }
+                    if (!(code_generate_save_expression_result_on_retval(i / 2 + 1))) {
+                        return ERR_INTERNAL;
+                    }
                     if (function_item->data->item_returns.type_returns[(int) (i / 2)] != expression_type)
                         return ERR_SEMANTIC_PARRET;
                     //printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
@@ -506,7 +519,18 @@ int return_parser(tab_item_t *function_item) {
             } else {
                 //printf("test3 hodnota a symbol\n");
                 CALL(exp_processing(token, stack, &expression_type));
-                //printf("%d RESPONSE FROM EXPR\n", PARSER_RESPONSE);
+                if ((function_item->data->item_returns.type_returns[(int) (i / 2)] == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
+                    if (!(code_generate_stack_convert_float_first())) {
+                        return ERR_INTERNAL;
+                    }
+                    expression_type = TYPE_DOUBLE;
+                }
+                if (!(code_generate_pop_stack_result())) {
+                    return ERR_INTERNAL;
+                }
+                if (!(code_generate_save_expression_result_on_retval(i / 2 + 1))) {
+                    return ERR_INTERNAL;
+                }
                 if (function_item->data->item_returns.type_returns[(int) (i / 2)] != expression_type)
                     return ERR_SEMANTIC_PARRET;
                 //printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
@@ -516,6 +540,9 @@ int return_parser(tab_item_t *function_item) {
             if (token->type != TOKEN_COMMA) return ERR_SYNTAX;
         }
         GET_TOKEN;
+    }
+    if (!(code_generate_function_return(function_item->key))) {
+        return ERR_INTERNAL;
     }
     if ((i == 0) && (function_item->data->item_returns.count_returns == 0)) {
         return OK;
