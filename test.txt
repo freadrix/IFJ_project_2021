@@ -1,7 +1,7 @@
 --komentar
 require "ifj21"
 global foo : function (integer , string) : integer
---foo (5, "HELLO")
+foo (5, "HELLO")
 function foo (i : integer, s : string) : integer
     local num1 : integer = i + 2
     num1 = num1 + 2

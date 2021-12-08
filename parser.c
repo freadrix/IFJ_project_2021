@@ -89,7 +89,7 @@ if (PARSER_RESPONSE != OK) return PARSER_RESPONSE
 #define ALLOC                                                                   \
 token = (token_struct *)malloc(sizeof(token_struct));                           \
 stack = (data_stack_t *)malloc(sizeof(data_stack_t));                           \
-expression_type = (tab_item_data_type)malloc(sizeof(tab_item_data_type));       \
+expression_type = malloc(sizeof(tab_item_data_type));                           \
 init_data_stack(stack);                                                         \
 if (!(string_init(&string))) return ERR_INTERNAL;                               \
 define_working_str(&string)
@@ -596,7 +596,7 @@ int def_var_parser(tab_item_t *function_item) {
         return ERR_SYNTAX;
     }
     printf("test1\n");
-    GET_TOKEN;
+    GET_TOKEN;   /// todo konrola typu num < int muze int < num nemuze
     if (token->type == TOKEN_ASSIGN) {  /// must be assi
         printf("test2\n");
         GET_TOKEN;
@@ -735,42 +735,34 @@ int call_check_parser() {
  * */
 int call_function_parser(tab_item_t *declaration_function) {
     GET_TOKEN;
-//    tab_item_t *argument_of_function;
-//    item_data_stack_t *stack_frame = stack->top;
+    tab_item_t *argument_of_function;
+    item_data_stack_t *stack_frame = stack->top;
     int i;      // counter
     for (i = 0; token->type != TOKEN_BRACKET_ROUND_R; i++) {
         if (i % 2 == 0) {
             if (IS_VALID) {
-                printf("%d- token type\n", token->type);
-                CALL(exp_processing(token, stack, &expression_type));
-                printf("%d - vysledek vyrazu\n",PARSER_RESPONSE);
-                printf("%d %d\n",declaration_function->data->item_parameters.type_parameters[(int) (i/2)], expression_type);
-                if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != expression_type)
-                    return ERR_SEMANTIC_PARRET;
-                continue;
-                //
-//                if (IS_ID) {      // todo mozna bude expr
-//                    while (stack_frame != NULL) {
-//                        argument_of_function = search_hashtable(stack_frame->table, token->attribute.string->string);
-//                        if (argument_of_function != NULL) break;
-//                        stack_frame = stack_frame->previous;
-//                    }
-//                    if (stack_frame == NULL) return ERR_SYNTAX;
-//                    if (argument_of_function->data->item_data_type
-//                        != declaration_function->data->item_parameters.type_parameters[(int) (i / 2)])
-//                        return ERR_SYNTAX;
-//                } else {
-//                    if (token->type == TOKEN_INT) {
-//                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_INTEGER)
-//                            return ERR_SEMANTIC_PARRET;
-//                    } else if (token->type == TOKEN_DOUBLE) {
-//                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_DOUBLE)
-//                            return ERR_SEMANTIC_PARRET;
-//                    } else if (token->type == TOKEN_STRING) {
-//                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_STRING)
-//                            return ERR_SEMANTIC_PARRET;
-//                    }
-//                }
+                if (IS_ID) {
+                    while (stack_frame != NULL) {
+                        argument_of_function = search_hashtable(stack_frame->table, token->attribute.string->string);
+                        if (argument_of_function != NULL) break;
+                        stack_frame = stack_frame->previous;
+                    }
+                    if (stack_frame == NULL) return ERR_SYNTAX;
+                    if (argument_of_function->data->item_data_type                                          \
+                        != declaration_function->data->item_parameters.type_parameters[(int) (i / 2)])
+                        return ERR_SYNTAX;
+                } else {
+                    if (token->type == TOKEN_INT) {
+                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_INTEGER)
+                            return ERR_SEMANTIC_PARRET;
+                    } else if (token->type == TOKEN_DOUBLE) {
+                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_DOUBLE)
+                            return ERR_SEMANTIC_PARRET;
+                    } else if (token->type == TOKEN_STRING) {
+                        if (declaration_function->data->item_parameters.type_parameters[(int) (i/2)] != TYPE_STRING)
+                            return ERR_SEMANTIC_PARRET;
+                    }
+                }
             } else {
                 return ERR_SYNTAX;
             }
