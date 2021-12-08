@@ -7,70 +7,13 @@ function foo (i : integer, s : string) : integer
     local num2 : integer = #s
     num1 = num1 + 2
     num1 = (num2 + 2) // 2
-    if (num1 + num2) > 3 then
-        local if_num : number = 3.14
-    else
-        while num1 ~= nil do
-            num1 = nil
-        end
+--    if (num1 + num2) > 3 then
+--        local if_num : number = 3.14
+--    else
+--        local if_num : number = 3.12
+--    end
+    while num1 == 2 do
+        local while_num : number = 3.14
     end
-    return num2 - num1
+    return num2 - num1, "strings"
 end
-
-/** Pravidlá
-✓    <header>        -> require "ifj21" <program>
-✓    <program>       -> global id : function ( <params_g> ) <rets> <program>
-✓~    <program>       -> function id ( <params> ) <rets> <state_l> end <program>
-✓~    <program>       -> <call> <program>
-✓    <program>       -> ε
-✓    <params_g>      -> <data_type> <param_g>
-✓    <params_g>      -> ε
-✓    <param_g>       -> , <data_type> <param_g>
-✓    <param_g>       -> ε
-✓    <params>        -> ε
-✓    <params>        -> id : <data_types> <param>
-✓    <param>         -> ε
-✓    <param>         -> , id : <data_type> <param>
-✓~    <def_var>       -> local id : <data_type> <assign>
-✓    <def_var>       -> ε
-✓~    <state_l>       -> <comm> <state_l>
-✓    <state_l>       -> ε
-✓    <comm>          -> <def_var>
-✓~    <comm>          -> <ids> <assign>
-✓~    <comm>          -> if <conditions> then <state_l> else <stale_l> end
-✓~    <comm>          -> while <conditions> do <state_l> end
-✓~    <comm>          -> <call>
-✓~    <comm>          -> return <expressions>
-✝     <comm>          -> write ( <expressions> )
-✓~    <ids>           -> id <id>
-✓~    <id>            -> , id <id>
-✓~    <id>            -> ε
-✓~    <call>          -> id ( <expressions> )
-✓    <call>          -> ε
-✓    <rets>          -> : <data_type> <ret>
-✓    <rets>          -> ε
-✓    <ret>           -> , <data_type> <ret>
-✓    <ret>           -> ε
-✓    <data_type>     -> integer
-✓    <data_type>     -> number
-✓    <data_type>     -> string
-✓    <data_type>     -> nil
-✝    <assign>        -> = <assigns>
-✝    <assign>        -> ε
-✝    <assigns>       -> <call> <expressions>
-✝    <expressions>   -> expression <expression>
-✝    <expression>    -> , expression <expression>
-✝    <expression>    -> ε
-✝    <expressions>   -> readi ()
-✝    <expressions>   -> readn ()
-✝    <expressions>   -> reads ()
-✝    <expressions>   -> substr ( expression, expression, expression ) /// string, number, number : string
-✝    <expressions>   -> tointeger ( expression )                      /// number : integer
-✝    <expressions>   -> ord ( expression, expression )                /// string, integer : integer
-✝    <expressions>   -> chr ( expression )                            /// integer : string
- */
-
-
-
-
-22 "sdada" 2.43
