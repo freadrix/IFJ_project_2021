@@ -540,6 +540,12 @@ int while_parser(tab_item_t *function_item) {
     if (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_DO) return ERR_SYNTAX;
     if (is_function()) return ERR_SYNTAX;
     CALL(exp_processing(token, stack, &expression_type));
+    if (!(code_generate_pop_stack_result())) {
+        return ERR_INTERNAL;
+    }
+    if (!(code_generate_while_start(while_counter))) {
+        return ERR_INTERNAL;
+    }
     //printf("%d - response from expression\n",  PARSER_RESPONSE);
     //printf("%d - typ tokenu na konci vyrazu\n", token->type);
     if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_DO)) return ERR_SYNTAX;
@@ -550,6 +556,9 @@ int while_parser(tab_item_t *function_item) {
     //printf("%d - typ tokenu na konci vyrazu\n", token->type);
     if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END)) return ERR_SYNTAX;
     if (!pop_data_item(stack)) return ERR_INTERNAL;
+    if (!(code_generate_while_end(while_counter))) {
+        return ERR_INTERNAL;
+    }
     while_counter++;
     return OK;
 }
@@ -569,9 +578,9 @@ int if_parser(tab_item_t *function_item) {
     if (!(code_generate_pop_stack_result())) {
         return ERR_INTERNAL;
     }
-    // if (!(code_generate_if_start(int if_index))) {
-    //     return ERR_INTERNAL;
-    // }
+    if (!(code_generate_if_start(if_counter))) {
+        return ERR_INTERNAL;
+    }
     printf("%d - response from expression\n",  PARSER_RESPONSE);
     printf("%d - typ tokenu na konci vyrazu\n", token->type);
     if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_THEN))
@@ -583,9 +592,9 @@ int if_parser(tab_item_t *function_item) {
     //printf("%d - typ tokenu na konci vyrazu\n", token->type);
     if (!pop_data_item(stack)) return ERR_INTERNAL;
     if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_ELSE)) return ERR_SYNTAX;
-    // if (!(code_generate_else(int if_index))) {
-    //     return ERR_INTERNAL;
-    // }
+    if (!(code_generate_else(if_counter))) {
+        return ERR_INTERNAL;
+    }
     printf("i'm inside else++++++++++++++\n");
     if (!push_data_item(stack)) return ERR_INTERNAL;
     GET_TOKEN;
@@ -594,9 +603,10 @@ int if_parser(tab_item_t *function_item) {
     //printf("%d - typ tokenu na konci vyrazu\n", token->type);
     if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END)) return ERR_SYNTAX;
     if (!pop_data_item(stack)) return ERR_INTERNAL;
-    // if (!(code_generate_if_end(int if_index))) {
-    //     return ERR_INTERNAL;
-    // }
+    if (!(code_generate_if_end(if_counter))) {
+        return ERR_INTERNAL;
+    }
+    if_counter++;
     return OK;
 }
 

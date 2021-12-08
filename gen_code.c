@@ -799,9 +799,9 @@ bool code_generate_while_start(int while_index) {
        !(add_string_to_string(&generated_code, ("LABEL $WHILE_TYPE_START_"))) ||
        !(add_string_to_string(&generated_code, (index_char))) ||
        !(add_string_to_string(&generated_code, ("\n"))) ||
-       !(add_string_to_string(&generated_code, ("LABEL $WHILESTART_"))) ||
+       !(add_string_to_string(&generated_code, ("JUMPIFNEQ $WHILEEND_"))) ||
        !(add_string_to_string(&generated_code, (index_char))) ||
-       !(add_string_to_string(&generated_code, ("\n")))) {
+       !(add_string_to_string(&generated_code, (" GF@%gl_res bool@true\n")))) {
         return false;
     }
     return true;
@@ -810,10 +810,7 @@ bool code_generate_while_start(int while_index) {
 bool code_generate_while_end(int while_index) {
     char index_char[10];
     sprintf(index_char, "%d", while_index);
-    if(!(add_string_to_string(&generated_code, ("JUMPIFEQ $WHILEEND_"))) ||
-       !(add_string_to_string(&generated_code, (index_char))) ||
-       !(add_string_to_string(&generated_code, (" GF@%gl_res bool@true\n"))) ||
-       !(add_string_to_string(&generated_code, ("JUMP $WHILESTART_"))) ||
+    if(!(add_string_to_string(&generated_code, ("JUMP $WHILE_TYPE_START_"))) ||
        !(add_string_to_string(&generated_code, (index_char))) ||
        !(add_string_to_string(&generated_code, ("\n"))) ||
        !(add_string_to_string(&generated_code, ("LABEL $WHILEEND_"))) ||

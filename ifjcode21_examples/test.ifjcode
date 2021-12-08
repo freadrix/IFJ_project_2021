@@ -243,5 +243,16 @@ EQS
 POPS GF@%gl_res
 write GF@%gl_res
 
+
+
+LABEL $start
+JUMPIFNEQ $end gl_res bool@true
+
+
+JUMP $start
+LABEL $end
+
+
+
 POPFRAME
 CLEARS
