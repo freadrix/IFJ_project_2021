@@ -15,5 +15,5 @@ function foo (i : integer, s : string) : integer
     while num1 == 2 do
         local while_num : number = 3.14
     end
-    return num2 - num1, "strings"
+    return num2 - num1
 end
