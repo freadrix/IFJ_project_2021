@@ -934,6 +934,9 @@ int call_function_parser(tab_item_t *declaration_function) {
     tab_item_t *argument_of_function;
     item_data_stack_t *stack_frame = stack->top;
     int i;      // counter
+    if (!(code_generate_empty_variables_frame())) {
+        return ERR_INTERNAL;
+    }
     for (i = 0; token->type != TOKEN_BRACKET_ROUND_R; i++) {
         if (i % 2 == 0) {
             if (IS_VALID) {
