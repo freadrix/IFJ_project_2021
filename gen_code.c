@@ -519,10 +519,10 @@ bool code_generate_function_end(char *f_name) {
 bool code_generate_retval_create(int retval_index) {
     char index_char[10];
     sprintf(index_char, "%d", retval_index);
-    if(!(add_string_to_string(&generated_code, ("DEFVAR LF@%retval_"))) ||
+    if(!(add_string_to_string(&generated_code, ("DEFVAR TF@%retval_"))) ||
        !(add_string_to_string(&generated_code, (index_char))) ||
        !(add_string_to_string(&generated_code, ("\n"))) ||
-       !(add_string_to_string(&generated_code, ("MOVE LF@%retval_"))) ||
+       !(add_string_to_string(&generated_code, ("MOVE TF@%retval_"))) ||
        !(add_string_to_string(&generated_code, (index_char))) ||
        !(add_string_to_string(&generated_code, (" nil@nil\n")))) {
         return false;
@@ -534,6 +534,19 @@ bool code_generate_retval_on_stack(int retval_index) {
     char index_char[10];
     sprintf(index_char, "%d", retval_index);
     if(!(add_string_to_string(&generated_code, ("PUSHS TF@%retval_"))) ||
+       !(add_string_to_string(&generated_code, (index_char))) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+        return false;
+    }
+    return true;
+}
+
+bool code_generate_retval_on_var(char *var_name, int retval_index) {
+    char index_char[10];
+    sprintf(index_char, "%d", retval_index);
+    if(!(add_string_to_string(&generated_code, ("MOVE TF@"))) ||
+       !(add_string_to_string(&generated_code, (var_name))) ||
+       !(add_string_to_string(&generated_code, (" TF@%retval_"))) ||
        !(add_string_to_string(&generated_code, (index_char))) ||
        !(add_string_to_string(&generated_code, ("\n")))) {
         return false;
