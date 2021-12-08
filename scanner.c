@@ -443,7 +443,7 @@ int get_token(token_struct *token) {
                 break;
             case (STATE_MINUS):
                 if (c == '-') {
-                    string_clear(str);
+                    string_clear(str); // MAYBE WE NEED STR_FREE
                     state = STATE_COMMENT_START;
                 } else {
                     ungetc(c, stdin);
@@ -453,22 +453,42 @@ int get_token(token_struct *token) {
                 }
                 break;
             case (STATE_COMMENT_START):
-                if (c == '\n' || c == EOF) {
+				if (c == EOF) { // comment must end with \n, not EOF
+					ungetc(c, stdin);
+                    string_free(str);
+                    return ERR_LEXER;
+				} else if (c == '\n') {
                     ungetc(c, stdin);
                     state = STATE_START;
                 } else if (c == '[') {
                     state = STATE_COMMENT_BLOCK_START;
-                }
+                } else {
+					state = STATE_COMMENT;
+				}
                 break;
+			case (STATE_COMMENT):
+				if (c == EOF) { // comment must end with \n, not EOF
+					ungetc(c, stdin);
+					string_free(str);
+					return ERR_LEXER;
+				} else if (c == '\n') {
+					ungetc(c, stdin);
+					state = STATE_START;
+				}
+				break;
             case (STATE_COMMENT_BLOCK_START):
-                if (c == '\n' || c == EOF) {
+				if (c == EOF) { // comment must end with \n, not EOF
+					ungetc(c, stdin);
+					string_free(str);
+					return ERR_LEXER;
+				} else if (c == '\n') {
                     ungetc(c, stdin);
                     state = STATE_START;
                 } else
                 if (c == '[') {
                     state = STATE_COMMENT_BLOCK;
                 } else {
-                    state = STATE_COMMENT_START;
+                    state = STATE_COMMENT;
                 }
                 break;
             case (STATE_COMMENT_BLOCK):
