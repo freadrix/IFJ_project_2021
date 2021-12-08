@@ -130,4 +130,11 @@ int call_check_parser();
  * */
 int call_function_parser();
 
+/**
+ * @brief work on build_in function
+ * @param assign_item item in table we assign to
+ * @return return code which is in error.h
+ * */
+int build_in_functions_parser(tab_item_t *assign_item);
+
 #endif

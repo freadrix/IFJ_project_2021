@@ -5,6 +5,7 @@ foo (5)
 function foo (i : integer) : integer
     local num1 : integer = i + 2 - 1
     local num2 : integer = 3
+    local num3 : integer
     num1 = num1 + 2
     num1 = (num2 + 2) // 2
     if (num1 + num2) > 3 then
@@ -16,9 +17,4 @@ function foo (i : integer) : integer
         local while_num : number = 3.14
     end
     return num2 - num1
-end
-
-function h()
-
-
 end
