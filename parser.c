@@ -89,7 +89,7 @@ if (PARSER_RESPONSE != OK) return PARSER_RESPONSE
 #define ALLOC                                                                   \
 token = (token_struct *)malloc(sizeof(token_struct));                           \
 stack = (data_stack_t *)malloc(sizeof(data_stack_t));                           \
-expression_type = malloc(sizeof(tab_item_data_type));                           \
+expression_type = (tab_item_data_type)malloc(sizeof(tab_item_data_type));       \
 init_data_stack(stack);                                                         \
 if (!(string_init(&string))) return ERR_INTERNAL;                               \
 define_working_str(&string)
@@ -444,8 +444,8 @@ int function_body_parser(tab_item_t *function_item) {
 //                code_generate_write_function(); ///TODO params write(params), [0] param == pocet parametrov, ostatne params stringy (aj int, num etc values na string!!!!)
                 return OK;
             }
-            PARSER_RESPONSE = id_in_body_parser(function_item);
-            if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
+            CALL(id_in_body_parser(function_item));
+            printf("%d\n", PARSER_RESPONSE);
         } else {
             return ERR_SYNTAX;
         }
@@ -572,6 +572,8 @@ int return_parser(tab_item_t *function_item) {
  * */
 int def_var_parser(tab_item_t *function_item) {
     printf("%s - string for use function_item in def var\n", function_item->key);
+    tab_item_t *parameter_item = search_hashtable(stack->top->table, "i");
+    printf("%d %d\n", parameter_item->data->item_id_type, parameter_item->data->item_data_type);
     GET_TOKEN;  ///should be ID
     if (!IS_ID) return ERR_SYNTAX;
     SEARCH_ITEM(searched_item, stack->top->table, token->attribute.string->string);
@@ -600,12 +602,27 @@ int def_var_parser(tab_item_t *function_item) {
     if (token->type == TOKEN_ASSIGN) {  /// must be assi
         printf("test2\n");
         GET_TOKEN;
-        if (is_function()) {
-            CALL(call_check_parser());
+        printf("test2\n");
+        if (IS_VALID) {
+            if (IS_ID) {
+                if (is_function()) {
+                    printf("test31\n");
+                    CALL(call_check_parser());
+                    if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
+                } else {
+                    printf("test3 id\n");
+                    CALL(exp_processing(token, stack, &expression_type));
+                    printf("%d\n",  PARSER_RESPONSE);
+                    if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
+                }
+            } else {
+                printf("test3 hodnota\n");
+                CALL(exp_processing(token, stack, &expression_type));
+                printf("%d\n",  PARSER_RESPONSE);
+                if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
+            }
         } else {
-            printf("test3\n");
-            CALL(exp_processing(token, stack, &expression_type));
-            printf("%d\n",  PARSER_RESPONSE);
+            return ERR_SYNTAX;
         }
         return OK; // todo
     } else if (IS_FUNCTION_BODY) {
