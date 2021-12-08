@@ -216,8 +216,8 @@ int parser() {
         GET_TOKEN;
     }
 
-//    code_generate_main_end();
-    //code_write_out(stdout);   //TODO where we wanna call this function? parser.c / main.c?
+    code_generate_main_end();
+    code_write_out(stdout);   //TODO where we wanna call this function? parser.c / main.c?
     CLEAN;
     return OK;
 }
@@ -444,7 +444,7 @@ int function_body_parser(tab_item_t *function_item) {
                 printf("%d - response from variable declaration\n", PARSER_RESPONSE);
                 continue;
             } else if (token->attribute.keyword == KEYWORD_IF) {
-//                PARSER_RESPONSE = if_parser(function_item);
+                //TODO IF
                 if (PARSER_RESPONSE != OK) return PARSER_RESPONSE;
             } else if (token->attribute.keyword == KEYWORD_WHILE) {
 //                PARSER_RESPONSE = while_parser(function_item);
@@ -462,7 +462,6 @@ int function_body_parser(tab_item_t *function_item) {
 //                code_generate_write_function(); ///TODO params write(params), [0] param == pocet parametrov, ostatne params stringy (aj int, num etc values na string!!!!)
                 return OK;
             } else {
-                printf("spracovam id\n");
                 CALL(id_in_body_parser(function_item));
                 printf("%d\n", PARSER_RESPONSE);
                 continue;
@@ -684,8 +683,7 @@ int def_var_parser(tab_item_t *function_item) {
 }
 
 int id_in_body_parser(tab_item_t *function_item) {
-    //TODO
-    printf("%s", function_item->key);
+    printf("%s\n", function_item->key);
     if (is_function()) {
         CALL(call_check_parser());
         printf("%d -  response from call func in id in func body\n", PARSER_RESPONSE);
@@ -700,6 +698,7 @@ int id_in_body_parser(tab_item_t *function_item) {
         }
         //if item dont exist, error undefined
         if (item == NULL) return ERR_SEMANTIC_DEF;
+        //item->key
         GET_TOKEN;
         if (token->type == TOKEN_ASSIGN) {  /// must be assi
             printf("dostal jsem assign\n");
@@ -714,18 +713,39 @@ int id_in_body_parser(tab_item_t *function_item) {
                     printf("test31\n");
                     CALL(call_check_parser());
                 } else {
-                    printf("test3 id\n");
                     CALL(exp_processing(token, stack, &expression_type));
-                    printf("%d\n",  PARSER_RESPONSE);
+
+                    if ((item->data->item_data_type == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
+                        if (!(code_generate_stack_convert_float_first())) {
+                            return ERR_INTERNAL;
+                        }
+                        expression_type = TYPE_DOUBLE;
+                    }
+                    if (!(code_generate_pop_stack_result())) {
+                        return ERR_INTERNAL;
+                    }
+                    if (!(code_generate_variable_save_expression(item->key))) {
+                        return ERR_INTERNAL;
+                    }
+
                     if (item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
-                    printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
                 }
             } else {
                 printf("test3 hodnota a symbol\n");
                 CALL(exp_processing(token, stack, &expression_type));
-                printf("%d\n",  PARSER_RESPONSE);
+                if ((item->data->item_data_type == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
+                        if (!(code_generate_stack_convert_float_first())) {
+                            return ERR_INTERNAL;
+                        }
+                        expression_type = TYPE_DOUBLE;
+                    }
+                    if (!(code_generate_pop_stack_result())) {
+                        return ERR_INTERNAL;
+                    }
+                    if (!(code_generate_variable_save_expression(item->key))) {
+                        return ERR_INTERNAL;
+                    }
                 if (item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
-                printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
             }
             item->data->defined = true;
             return OK; // todo

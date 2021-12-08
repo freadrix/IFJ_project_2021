@@ -711,13 +711,13 @@ bool code_generate_operations(rules_enum r) {
         if(!(add_string_to_string(&generated_code, ("IDIVS\n")))) {
             return false;
         }
-    } else if (r == E_CONCAT_E) {
+    } else if (r == E_LEN) {
         if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_1\n"
                                                     "STRLEN GF@%gl_1 GF@%gl_1\n"
                                                     "PUSHS GF@%gl_1\n")))) {
         return false;
         }
-    } else if (r == E_LEN) {
+    } else if (r == E_CONCAT_E) {
         if(!(add_string_to_string(&generated_code, ("POPS GF@%gl_2\n"
                                                     "POPS GF@%gl_1\n"
                                                     "CONCAT GF@%gl_1 GF@%gl_1 GF@%gl_2\n"
