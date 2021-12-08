@@ -136,7 +136,7 @@ int get_token(token_struct *token) {
                     token->type = TOKEN_EOF;
                     string_free(str);
                     return OK;
-                }else {
+                }else { // undefined symbol in input source code
                     string_free(str);
                     return ERR_LEXER;
                 }
@@ -342,7 +342,7 @@ int get_token(token_struct *token) {
                         string_free(str);
                         return ERR_INTERNAL;
                     }
-                } else if (tolower(c) == 'e') {
+                } else if (tolower(c) == 'e') { // e = tolower(E)
                     if (!(add_char_to_string(str, c))) {
                         string_free(str);
                         return ERR_INTERNAL;
@@ -426,7 +426,7 @@ int get_token(token_struct *token) {
                         string_free(str);
                         return ERR_INTERNAL;
                     }
-                } else if (tolower(c) == 'e') {
+                } else if (tolower(c) == 'e') { // e = tolower(E)
                     if (!(add_char_to_string(str, c))) {
                         string_free(str);
                         return ERR_INTERNAL;
@@ -453,26 +453,46 @@ int get_token(token_struct *token) {
                 }
                 break;
             case (STATE_COMMENT_START):
-                if (c == '\n' || c == EOF) {
+				if (c == EOF) { // comment must end with \n, not EOF
+					ungetc(c, stdin);
+                    string_free(str);
+                    return ERR_LEXER;
+				} else if (c == '\n') {
                     ungetc(c, stdin);
                     state = STATE_START;
                 } else if (c == '[') {
                     state = STATE_COMMENT_BLOCK_START;
-                }
+                } else {
+					state = STATE_COMMENT;
+				}
                 break;
+			case (STATE_COMMENT):
+				if (c == EOF) { // comment must end with \n, not EOF
+					ungetc(c, stdin);
+					string_free(str);
+					return ERR_LEXER;
+				} else if (c == '\n') {
+					ungetc(c, stdin);
+					state = STATE_START;
+				}
+				break;
             case (STATE_COMMENT_BLOCK_START):
-                if (c == '\n' || c == EOF) {
+				if (c == EOF) { // comment must end with \n, not EOF
+					ungetc(c, stdin);
+					string_free(str);
+					return ERR_LEXER;
+				} else if (c == '\n') {
                     ungetc(c, stdin);
                     state = STATE_START;
                 } else
                 if (c == '[') {
                     state = STATE_COMMENT_BLOCK;
                 } else {
-                    state = STATE_COMMENT_START;
+                    state = STATE_COMMENT;
                 }
                 break;
             case (STATE_COMMENT_BLOCK):
-                if (c == EOF) {
+                if (c == EOF) { // --[[something EOF == err
                     ungetc(c, stdin);
                     string_free(str);
                     return ERR_LEXER;
@@ -481,7 +501,7 @@ int get_token(token_struct *token) {
                 }
                 break;
             case (STATE_COMMENT_BLOCK_END):
-				if (c == EOF) {
+				if (c == EOF) { // --[[something]EOF == err
 					ungetc(c, stdin);
 					string_free(str);
 					return ERR_LEXER;
@@ -521,7 +541,7 @@ int get_token(token_struct *token) {
             case (STATE_TILDE):
                 if (c == '=') {
                     token->type = TOKEN_NOT_EQUAL;
-                } else {
+                } else { // symbol ~ is undefined
                     ungetc(c, stdin);
                     string_free(str);
                     return ERR_LEXER;
@@ -540,7 +560,7 @@ int get_token(token_struct *token) {
             case (STATE_DOT):
                 if (c == '.') {
                     token->type = TOKEN_CONCAT;
-                } else {
+                } else { // symbol . is undefined
                     ungetc(c, stdin);
                     string_free(str);
                     return ERR_LEXER;

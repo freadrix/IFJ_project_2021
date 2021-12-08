@@ -39,18 +39,19 @@
 #define STATE_SLASH 27        // /
 
 // Comments
-#define STATE_COMMENT_START 28        // ∑-EOL, EOF, [              (if [ go to 27)
-#define STATE_COMMENT_BLOCK_START 29  // go back to state 28 if ∑-[
-#define STATE_COMMENT_BLOCK 30        // ∑-]                        (if ] go to 31)
-#define STATE_COMMENT_BLOCK_END 31    // go back to state 28 if ∑-]
+#define STATE_COMMENT_START 28        // \n = start(10), EOF = err, [ = block start(29), else state_comment(30)
+#define STATE_COMMENT_BLOCK_START 29  // \n = start(10), EOF = err, [ = comm block(31), else state_comment(30)
+#define STATE_COMMENT 30              // \n = start(10), else state_comment(30)
+#define STATE_COMMENT_BLOCK 31        // ] = comm block end(32), EOF = err, else comm block(31)
+#define STATE_COMMENT_BLOCK_END 32    // ] = start(10), EOF = err,  else comm block(31)
 
 // Number
-#define STATE_NUMBER 32
-#define STATE_NUMBER_POINT 33
-#define STATE_NUMBER_DOUBLE 34
-#define STATE_NUMBER_EXPONENT 35
-#define STATE_NUMBER_EXPONENT_SIGN 36
-#define STATE_NUMBER_EXPONENT_END 37
+#define STATE_NUMBER 33
+#define STATE_NUMBER_POINT 34
+#define STATE_NUMBER_DOUBLE 35
+#define STATE_NUMBER_EXPONENT 36
+#define STATE_NUMBER_EXPONENT_SIGN 37
+#define STATE_NUMBER_EXPONENT_END 38
 
 #define STATE_EOF 39 // End of file
 /* STATES END */
