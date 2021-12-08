@@ -280,11 +280,11 @@ int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, r
         } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
             return ERR_SEMANTIC_DEF;
         } else {
-            if ((left->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE)) {
+            if ((left->type == TYPE_INTEGER) && (right->type == TYPE_DOUBLE)) {
                 if (!(code_generate_stack_convert_float_second())) {
                     return ERR_INTERNAL;
                 }
-            } else if ((left->type == TYPE_DOUBLE) || (right->type == TYPE_INTEGER)) {
+            } else if ((left->type == TYPE_DOUBLE) && (right->type == TYPE_INTEGER)) {
                 if (!(code_generate_stack_convert_float_first())) {
                     return ERR_INTERNAL;
                 }
@@ -301,11 +301,11 @@ int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, r
         } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
             return ERR_SEMANTIC_DEF;
         } else {
-            if ((left->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE)) {
+            if ((left->type == TYPE_INTEGER) && (right->type == TYPE_DOUBLE)) {
                 if (!(code_generate_stack_convert_float_second())) {
                     return ERR_INTERNAL;
                 }
-            } else if ((left->type == TYPE_DOUBLE) || (right->type == TYPE_INTEGER)) {
+            } else if ((left->type == TYPE_DOUBLE) && (right->type == TYPE_INTEGER)) {
                 if (!(code_generate_stack_convert_float_first())) {
                     return ERR_INTERNAL;
                 }
