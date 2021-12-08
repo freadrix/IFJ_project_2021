@@ -17,7 +17,8 @@ function foo (i : integer) : integer
     end
     return num2 - num1
 end
-function main()
-local a : integer
-a = foo(6)
+
+function h()
+
+
 end

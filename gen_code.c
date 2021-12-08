@@ -499,8 +499,10 @@ bool code_generate_save_param(char *var_name, int param_index) {
 }
 
 bool code_generate_function_start(char *f_name) {
-    printf("-----FUNC START-----");
-    if(!(add_string_to_string(&generated_code, ("\nLABLE $"))) ||
+    if(!(add_string_to_string(&generated_code, ("\nJUMP $"))) ||
+       !(add_string_to_string(&generated_code, (f_name))) ||
+       !(add_string_to_string(&generated_code, ("_ret_ret\n"))) ||
+       !(add_string_to_string(&generated_code, ("LABLE $"))) ||
        !(add_string_to_string(&generated_code, (f_name))) ||
        !(add_string_to_string(&generated_code, ("\n"
                                                 "PUSHFRAME\n")))) {
@@ -510,19 +512,20 @@ bool code_generate_function_start(char *f_name) {
 }
 
 bool code_generate_function_end(char *f_name) {
-    printf("------FUNC END------");
     if(!(add_string_to_string(&generated_code, ("LABLE $"))) ||
        !(add_string_to_string(&generated_code, (f_name))) ||
        !(add_string_to_string(&generated_code, ("_ret\n"
                                                 "POPFRAME\n"
-                                                "RETURN\n")))) {
+                                                "RETURN\n"
+                                                "LABEL $"))) ||
+        !(add_string_to_string(&generated_code, (f_name))) ||
+        !(add_string_to_string(&generated_code, ("_ret_ret\n")))) {
         return false;
     }
     return true;
 }
 
 bool code_generate_retval_create(int retval_index) {
-    printf("------RETVAL CREATE------");
     char index_char[10];
     sprintf(index_char, "%d", retval_index);
     if(!(add_string_to_string(&generated_code, ("DEFVAR LF@%retval_"))) ||
