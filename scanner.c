@@ -136,7 +136,7 @@ int get_token(token_struct *token) {
                     token->type = TOKEN_EOF;
                     string_free(str);
                     return OK;
-                }else {
+                }else { // undefined symbol in input source code
                     string_free(str);
                     return ERR_LEXER;
                 }
@@ -342,7 +342,7 @@ int get_token(token_struct *token) {
                         string_free(str);
                         return ERR_INTERNAL;
                     }
-                } else if (tolower(c) == 'e') {
+                } else if (tolower(c) == 'e') { // e = tolower(E)
                     if (!(add_char_to_string(str, c))) {
                         string_free(str);
                         return ERR_INTERNAL;
@@ -426,7 +426,7 @@ int get_token(token_struct *token) {
                         string_free(str);
                         return ERR_INTERNAL;
                     }
-                } else if (tolower(c) == 'e') {
+                } else if (tolower(c) == 'e') { // e = tolower(E)
                     if (!(add_char_to_string(str, c))) {
                         string_free(str);
                         return ERR_INTERNAL;
@@ -443,7 +443,7 @@ int get_token(token_struct *token) {
                 break;
             case (STATE_MINUS):
                 if (c == '-') {
-                    string_clear(str); // MAYBE WE NEED STR_FREE
+                    string_clear(str);
                     state = STATE_COMMENT_START;
                 } else {
                     ungetc(c, stdin);
@@ -492,7 +492,7 @@ int get_token(token_struct *token) {
                 }
                 break;
             case (STATE_COMMENT_BLOCK):
-                if (c == EOF) {
+                if (c == EOF) { // --[[something EOF == err
                     ungetc(c, stdin);
                     string_free(str);
                     return ERR_LEXER;
@@ -501,7 +501,7 @@ int get_token(token_struct *token) {
                 }
                 break;
             case (STATE_COMMENT_BLOCK_END):
-				if (c == EOF) {
+				if (c == EOF) { // --[[something]EOF == err
 					ungetc(c, stdin);
 					string_free(str);
 					return ERR_LEXER;
@@ -541,7 +541,7 @@ int get_token(token_struct *token) {
             case (STATE_TILDE):
                 if (c == '=') {
                     token->type = TOKEN_NOT_EQUAL;
-                } else {
+                } else { // symbol ~ is undefined
                     ungetc(c, stdin);
                     string_free(str);
                     return ERR_LEXER;
@@ -560,7 +560,7 @@ int get_token(token_struct *token) {
             case (STATE_DOT):
                 if (c == '.') {
                     token->type = TOKEN_CONCAT;
-                } else {
+                } else { // symbol . is undefined
                     ungetc(c, stdin);
                     string_free(str);
                     return ERR_LEXER;
