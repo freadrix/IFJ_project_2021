@@ -203,9 +203,10 @@ int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, r
     //check for types in the applying rules
     if ((rule == E_PLUS_E) || (rule == E_MINUS_E) || (rule == E_MUL_E)) {
         if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) ||
-            (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)  ||
-            (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+            (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
             return ERR_SEMANTIC_EXP;
+        if ((left->type == TYPE_NULL) || (right->type == TYPE_NULL)) {
+            return ERR_NIL;
         } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
             return ERR_SEMANTIC_DEF;
         } else if ((left->type == TYPE_INTEGER) && (right->type == TYPE_INTEGER)) {
@@ -226,9 +227,10 @@ int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, r
         }
     } else if (rule == E_DIV_E) {
         if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) ||
-            (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)  ||
-            (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+            (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
             return ERR_SEMANTIC_EXP;
+        if ((left->type == TYPE_NULL) || (right->type == TYPE_NULL)) {
+            return ERR_NIL;
         } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
             return ERR_SEMANTIC_DEF;
         } else if (right->is_zero) {
@@ -249,9 +251,10 @@ int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, r
         }
     } else if (rule == E_IDIV_E) {
         if ((left->type == TYPE_STRING) || (right->type == TYPE_STRING) ||
-            (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)  ||
-            (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+            (right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
             return ERR_SEMANTIC_EXP;
+        if ((left->type == TYPE_NULL) || (right->type == TYPE_NULL)) {
+            return ERR_NIL;
         } else if ((right->type == TYPE_UNDEFINED) || (left->type == TYPE_UNDEFINED)) {
             return ERR_SEMANTIC_DEF;
         } else if (right->is_zero) {
@@ -271,9 +274,10 @@ int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, r
             return OK;
         }
     } else if ((rule == E_LT_E) || (rule == E_GT_E) || (rule == E_LEQ_E) || (rule == E_GEQ_E)) {
-        if ((right->type == TYPE_BOOL) || (left->type == TYPE_BOOL) ||
-            (right->type == TYPE_NULL) || (left->type == TYPE_NULL)) {
+        if ((right->type == TYPE_BOOL) || (left->type == TYPE_BOOL)) {
             return ERR_SEMANTIC_EXP;
+        if ((left->type == TYPE_NULL) || (right->type == TYPE_NULL)) {
+            return ERR_NIL;
         } else if (((left->type == TYPE_STRING) && ((right->type == TYPE_INTEGER) || (right->type == TYPE_DOUBLE))) ||
                   (((left->type == TYPE_INTEGER) || (left->type == TYPE_DOUBLE)) && (right->type == TYPE_STRING))) {
             return ERR_SEMANTIC_EXP;
@@ -316,6 +320,8 @@ int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, r
     } else if (rule == E_LEN) {
         if (middle->type == TYPE_UNDEFINED) {
             return ERR_SEMANTIC_DEF;
+        if ((middle->type == TYPE_NULL)) {
+            return ERR_NIL;
         } else if (middle->type != TYPE_STRING) {
             return ERR_SEMANTIC_EXP;
         } else {
@@ -324,6 +330,8 @@ int rules_check(item_stack_t *left, item_stack_t *middle, item_stack_t *right, r
     } else if (rule == E_CONCAT_E) {
         if (left->type == TYPE_UNDEFINED || right->type == TYPE_UNDEFINED) {
             return ERR_SEMANTIC_DEF;
+        if ((left->type == TYPE_NULL) || (right->type == TYPE_NULL)) {
+            return ERR_NIL;
         } else if ((left->type != TYPE_STRING) || (right->type != TYPE_STRING)) {
             return ERR_SEMANTIC_EXP;
         } else {
