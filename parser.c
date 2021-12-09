@@ -471,7 +471,8 @@ int function_body_parser(tab_item_t *function_item) {
         if (IS_ID) {
             if (!(strcmp(token->attribute.string->string, "write"))) {
                 write_func_parser();
-                return OK;
+                GET_TOKEN;
+                continue;
             } else {
                 CALL(id_in_body_parser(function_item));
                 continue;
@@ -1153,6 +1154,7 @@ int write_func_parser() {
         } else {
             if (token->type != TOKEN_COMMA) return ERR_SYNTAX;
         }
+        GET_TOKEN;
     }
     if ((i > 0) && (i % 2 == 0)) return ERR_SYNTAX;
     return OK;
