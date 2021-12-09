@@ -254,7 +254,7 @@ int function_parser() {
         if (IS_BUILT_IN_FUNCTION) return ERR_SEMANTIC_DEF;
         SEARCH_ITEM(function_item, stack->top->table, token->attribute.string->string);
         if (is_there) { /// checking if there is already defined function with same ad
-            if (function_item->data->defined) //TODO
+            if (function_item->data->defined)
                 return ERR_SEMANTIC_DEF;
             else
                 function_item->data->defined = true;
@@ -344,7 +344,7 @@ int function_params_parser(tab_item_t *function_item) {
                                 return ERR_SEMANTIC_PARRET;
                         }
                         inserted_item->data->item_data_type = TYPE_STRING;
-                    } else if (token->attribute.keyword == KEYWORD_NIL) {  // TODO need to read pdf, maybe we'll need
+                    } else if (token->attribute.keyword == KEYWORD_NIL) {
                         if (count_declare_parameters == 0) {
                             if (!insert_parameter_item(function_item, TYPE_NULL)) return ERR_SYNTAX;
                         } else {
@@ -713,7 +713,6 @@ int id_in_body_parser(tab_item_t *function_item) {
     if (is_function()) {
         CALL(call_check_parser());
         GET_TOKEN;
-        //// printf("%d -  response from call func in id in func body\n", PARSER_RESPONSE);
     } else if ((token->type == TOKEN_ID) && (!strcmp(token->attribute.string->string, "write"))) {
         write_func_parser();
     } else {
@@ -724,7 +723,7 @@ int id_in_body_parser(tab_item_t *function_item) {
         if (token->type == TOKEN_ASSIGN) {  /// must be assi
             GET_TOKEN;
             if (IS_ID) {
-                if (is_function()) { // TODO MOZNE PRIRADIT NEKOLIK HODNOT
+                if (is_function()) {
                     tab_item_t *function = search_hashtable(global_frame->table, token->attribute.string->string);
                     if (function->data->item_returns.count_returns == 0) return ERR_SEMANTIC_PARRET;
                     if (item->data->item_data_type != function->data->item_returns.type_returns[0])
@@ -734,10 +733,10 @@ int id_in_body_parser(tab_item_t *function_item) {
                         return ERR_INTERNAL;
                     }
                     GET_TOKEN;
-                } else {    // TODO musi byt kontrola na vestavene funkce
+                } else {
                     if ((IS_BUILT_IN_FUNCTION) && (strcmp(token->attribute.string->string, "write") != 0)) {
                         CALL(build_in_functions_parser(item));
-                        GET_TOKEN; /// TODO MUSI TADY BYT NEXT TOKEN?
+                        GET_TOKEN;
                     } else {
                         CALL(exp_processing(token, stack, &expression_type));
                         if ((item->data->item_data_type == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
@@ -1012,7 +1011,6 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
-        //TODO code_gen
     } else if (!strcmp(token->attribute.string->string, "substr")) { //• function substr(s : string, i : number, j : number) : string
         if (assign_item->data->item_data_type != TYPE_STRING) return ERR_SEMANTIC_ASSIGNMENT;
         GET_TOKEN;
@@ -1064,7 +1062,6 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
-        //TODO code_gen asi bude treba dať parametre spolocne
     } else if (!strcmp(token->attribute.string->string, "ord")) {   //• function ord(s : string, i : integer) : integer
         if (assign_item->data->item_data_type != TYPE_INTEGER ) return ERR_SEMANTIC_ASSIGNMENT;
         GET_TOKEN;
@@ -1103,7 +1100,6 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
-        //TODO code_gen asi bude treba dať parametre spolocne
     } else if (!strcmp(token->attribute.string->string, "chr")) {   //• function chr(i : integer) : string
         if (assign_item->data->item_data_type != TYPE_STRING) return ERR_SEMANTIC_ASSIGNMENT;
         GET_TOKEN;
