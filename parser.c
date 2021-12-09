@@ -663,7 +663,6 @@ int def_var_parser(tab_item_t *function_item) {
                 if(!(code_generate_retval_on_var(inserted_item->key, 1))) {
                     return ERR_INTERNAL;
                 }
-//                if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
             } else if ((IS_BUILT_IN_FUNCTION) && (strcmp(token->attribute.string->string, "write") != 0)) {
                 CALL(build_in_functions_parser(inserted_item));
                 GET_TOKEN;
