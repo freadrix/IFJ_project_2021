@@ -237,20 +237,9 @@ DEFVAR TF@%0
 MOVE TF@%0 string@ge
 
 
-PUSHS nil@nil
-PUSHS TF@%0
-EQS
-POPS GF@%gl_res
-write GF@%gl_res
+WRITE float@13.2
 
 
-
-LABEL $start
-JUMPIFNEQ $end gl_res bool@true
-
-
-JUMP $start
-LABEL $end
 
 
 

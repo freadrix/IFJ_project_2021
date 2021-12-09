@@ -10,11 +10,6 @@
 
 #include "parser.h"
 
-/*
- * if(IS_ID || (token->type == TOKEN_STRING))
-    // printf("%s\n", token->attribute.string->string);
- * */
-// macro that we use for get new token and check return value
 #define GET_TOKEN                                                               \
 SCANNER_RESPONSE = get_token(token);                                            \
 if(SCANNER_RESPONSE != OK) return SCANNER_RESPONSE;                             \
@@ -190,21 +185,15 @@ int parser() {
 
     /// require "ifj21"
     PARSER_RESPONSE = start_program_parser();
-    //// printf("%d\n", PARSER_RESPONSE);
     if (PARSER_RESPONSE != OK){
         CLEAN;
         return PARSER_RESPONSE;
     }
-    // GET_TOKEN;                   // testing expr
-    // // printf("%d\n", exp_processing(token, stack, &expression_type));
-    // return 0;
-    /// <program>
     GET_TOKEN;
     while (token->type != TOKEN_EOF) {
         if (IS_GLOBAL) {  /// <program>       -> global id : function ( <params_g> ) <rets>
             while (IS_GLOBAL) {
                 PARSER_RESPONSE = global_parser();
-                //// printf("%d\n", PARSER_RESPONSE);
                 if(PARSER_RESPONSE != OK) {
                     CLEAN;
                     return PARSER_RESPONSE;
@@ -213,7 +202,6 @@ int parser() {
         }
         if (IS_FUNCTION) { /// <program>       -> function id ( <params> ) <rets> <state_l> end
             PARSER_RESPONSE = function_parser();
-            //// printf("%d\n", PARSER_RESPONSE);
             if(PARSER_RESPONSE != OK) {
                 CLEAN;
                 return PARSER_RESPONSE;
@@ -226,7 +214,6 @@ int parser() {
                 continue;
             }
             PARSER_RESPONSE = call_check_parser();
-            //// printf("%d\n", PARSER_RESPONSE);
             if(PARSER_RESPONSE != OK) {
                 CLEAN;
                 return PARSER_RESPONSE;
@@ -285,13 +272,10 @@ int function_parser() {
     }
     // check params fully work
     CALL(function_params_parser(function_item));            /// ( <params> )
-    //// printf("%d\n", PARSER_RESPONSE);
 
     GET_TOKEN;
-    if (token->type == TOKEN_DDOT) {    /// if there is ':' than we expect getting ret. values
-//        if (function_item->data->item_returns.count_returns == 0) return ERR_SEMANTIC_PARRET;
+    if (token->type == TOKEN_DDOT) { ;
         CALL(function_rets_parser(function_item)); /// <data_type> <ret>
-        //// printf("%d\n", PARSER_RESPONSE);
     } else if (function_item->data->item_returns.count_returns != 0) return ERR_SEMANTIC_PARRET;
 
     if ((token->type == TOKEN_KEYWORD) && (token->attribute.keyword == KEYWORD_END)) {
@@ -468,25 +452,19 @@ int function_body_parser(tab_item_t *function_item) {
         if (token->type == TOKEN_KEYWORD) {
             if (token->attribute.keyword == KEYWORD_LOCAL) {
                 CALL(def_var_parser(function_item));
-                //// printf("%d - response from variable declaration\n", PARSER_RESPONSE);
                 continue;
             } else if (token->attribute.keyword == KEYWORD_IF) {
-                //// printf("i'm near if\n");
                 CALL(if_parser(function_item));
-                //// printf("%d - response from if func\n", PARSER_RESPONSE);
                 GET_TOKEN;  // PROTOZE IF KONCI NA END A PAK NASTANE CHYBA POTREBUJEME NACIST DALSI TOKEN
                 continue;
             } else if (token->attribute.keyword == KEYWORD_WHILE) {
                 CALL(while_parser(function_item));
-                //// printf("%d - response from while\n", PARSER_RESPONSE);
                 GET_TOKEN;  // PROTOZE IF KONCI NA END A PAK NASTANE CHYBA POTREBUJEME NACIST DALSI TOKEN
                 continue;
             } else if (token->attribute.keyword == KEYWORD_RETURN) {
                 CALL(return_parser(function_item));
-                //// printf("%d - response from return\n", PARSER_RESPONSE);
                 continue;
             } else {
-                //// printf("i will be dead soon\n");
                 return ERR_SYNTAX;
             }
         }
@@ -497,7 +475,6 @@ int function_body_parser(tab_item_t *function_item) {
                 return OK;
             } else {
                 CALL(id_in_body_parser(function_item));
-                //// printf("%d - vysledek prirazeni\n", PARSER_RESPONSE);
                 continue;
             }
         } else {
@@ -536,10 +513,8 @@ int return_parser(tab_item_t *function_item) {
                     }
                     if (function_item->data->item_returns.type_returns[(int) (i / 2)] != expression_type)
                         return ERR_SEMANTIC_PARRET;
-                    //// printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
                 }
             } else {
-                //// printf("test3 hodnota a symbol\n");
                 CALL(exp_processing(token, stack, &expression_type));
                 if ((function_item->data->item_returns.type_returns[(int) (i / 2)] == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
                     if (!(code_generate_stack_convert_float_first())) {
@@ -555,7 +530,6 @@ int return_parser(tab_item_t *function_item) {
                 }
                 if (function_item->data->item_returns.type_returns[(int) (i / 2)] != expression_type)
                     return ERR_SEMANTIC_PARRET;
-                //// printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
             }
             continue;
         } else {
@@ -584,7 +558,6 @@ int return_parser(tab_item_t *function_item) {
  * while <conditions> do <state_l> end
  */
 int while_parser(tab_item_t *function_item) {
-    //// printf("i'm inside while !!!!!!!!!!!!!\n");
     GET_TOKEN;
     if (token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_DO) return ERR_SYNTAX;
     if (is_function()) return ERR_SYNTAX;
@@ -595,14 +568,10 @@ int while_parser(tab_item_t *function_item) {
     if (!(code_generate_while_start(while_counter))) {
         return ERR_INTERNAL;
     }
-    //// printf("%d - response from expression\n",  PARSER_RESPONSE);
-    //// printf("%d - typ tokenu na konci vyrazu\n", token->type);
     if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_DO)) return ERR_SYNTAX;
     if (!push_data_item(stack)) return ERR_INTERNAL;
     GET_TOKEN;
     CALL(function_body_parser(function_item));
-    //// printf("%d - response from body\n",  PARSER_RESPONSE);
-    //// printf("%d - typ tokenu na konci vyrazu\n", token->type);
     if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END)) return ERR_SYNTAX;
     if (!pop_data_item(stack)) return ERR_INTERNAL;
     if (!(code_generate_while_end(while_counter))) {
@@ -616,10 +585,7 @@ int while_parser(tab_item_t *function_item) {
  * if <conditions> then <state_l> else <stale_l> end
  */
 int if_parser(tab_item_t *function_item) {
-    //// printf("i'm inside if!!!!!!!!!!!!!\n");
-    //actual token == KEYWORD_IF
-    //TODO call Expression_handler  //<conditions>
-    GET_TOKEN;    //want token from IS_FUNCTION_BODY or keyword THEN
+    GET_TOKEN;
     if ((token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_THEN))    // then
         return ERR_SYNTAX;
     if (is_function()) return ERR_SYNTAX;
@@ -630,26 +596,19 @@ int if_parser(tab_item_t *function_item) {
     if (!(code_generate_if_start(if_counter))) {
         return ERR_INTERNAL;
     }
-    // printf("%d - response from expression\n",  PARSER_RESPONSE);
-    // printf("%d - typ tokenu na konci vyrazu\n", token->type);
     if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_THEN))
         return ERR_SYNTAX;
     if (!push_data_item(stack)) return ERR_INTERNAL;
     GET_TOKEN;
     CALL(function_body_parser(function_item));
-    //// printf("%d - response from body\n",  PARSER_RESPONSE);
-    //// printf("%d - typ tokenu na konci vyrazu\n", token->type);
     if (!pop_data_item(stack)) return ERR_INTERNAL;
     if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_ELSE)) return ERR_SYNTAX;
     if (!(code_generate_else(if_counter))) {
         return ERR_INTERNAL;
     }
-    // printf("i'm inside else++++++++++++++\n");
     if (!push_data_item(stack)) return ERR_INTERNAL;
     GET_TOKEN;
     CALL(function_body_parser(function_item));
-    //// printf("%d - response from body\n",  PARSER_RESPONSE);
-    //// printf("%d - typ tokenu na konci vyrazu\n", token->type);
     if (!(token->type == TOKEN_KEYWORD && token->attribute.keyword == KEYWORD_END)) return ERR_SYNTAX;
     if (!pop_data_item(stack)) return ERR_INTERNAL;
     if (!(code_generate_if_end(if_counter))) {
@@ -692,9 +651,7 @@ int def_var_parser(tab_item_t *function_item) {
     }
     GET_TOKEN;   /// todo konrola typu num < int muze int < num nemuze
     if (token->type == TOKEN_ASSIGN) {  /// must be assi
-        //// printf("test2\n");
         GET_TOKEN;
-        //// printf("%d typ tokenu na zacatku vyrazu\n", token->type);
         if (IS_ID) {
             if (is_function()) {
                 item_data_stack_t *global_frame = get_global_frame_stack(stack);
@@ -711,7 +668,6 @@ int def_var_parser(tab_item_t *function_item) {
                 CALL(build_in_functions_parser(inserted_item));
                 GET_TOKEN;
             } else {
-                // TODO convert final type int->double
                 CALL(exp_processing(token, stack, &expression_type));
                 if ((inserted_item->data->item_data_type == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
                     if (!(code_generate_stack_convert_float_first())) {
@@ -726,10 +682,8 @@ int def_var_parser(tab_item_t *function_item) {
                     return ERR_INTERNAL;
                 }
                 if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
-                //// printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
             }
         } else {
-            // TODO convert final type int->double
             CALL(exp_processing(token, stack, &expression_type));
             if ((inserted_item->data->item_data_type == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
                 if (!(code_generate_stack_convert_float_first())) {
@@ -743,9 +697,7 @@ int def_var_parser(tab_item_t *function_item) {
             if (!(code_generate_variable_save_expression(inserted_item->key))) {
                 return ERR_INTERNAL;
             }
-            //// printf("%d\n",  PARSER_RESPONSE);
             if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
-            //// printf("%d typ tokenu na konci spracovani vyrazu\n", token->type);
         }
         inserted_item->data->defined = true;
         return OK; // todo
@@ -770,9 +722,7 @@ int id_in_body_parser(tab_item_t *function_item) {
         SEARCH_VARIABLE_IN_ALL_TABLES(item);
         GET_TOKEN;
         if (token->type == TOKEN_ASSIGN) {  /// must be assi
-            //// printf("dostal jsem assign\n");
             GET_TOKEN;
-            //// printf("%d typ tokenu na zacatku vyrazu\n", token->type);
             if (IS_ID) {
                 if (is_function()) { // TODO MOZNE PRIRADIT NEKOLIK HODNOT
                     tab_item_t *function = search_hashtable(global_frame->table, token->attribute.string->string);
@@ -804,7 +754,6 @@ int id_in_body_parser(tab_item_t *function_item) {
                     }
                 }
             } else {
-            //    // printf("test3 hodnota a symbol\n");
                 CALL(exp_processing(token, stack, &expression_type));
                 if ((item->data->item_data_type == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
                         if (!(code_generate_stack_convert_float_first())) {
@@ -1003,30 +952,38 @@ int build_in_functions_parser(tab_item_t *assign_item) {
     if (!strcmp(token->attribute.string->string, "readi")) {
         if (assign_item->data->item_data_type != TYPE_INTEGER && assign_item->data->item_data_type != TYPE_DOUBLE)
             return ERR_SEMANTIC_ASSIGNMENT;
+        if (!(code_generate_function_call("readi")) || !(code_generate_retval_on_var(assign_item->key, 1))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_L) return ERR_SYNTAX;
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
-        //TODO code_gen
     } else if (!strcmp(token->attribute.string->string, "readn")) {
         if (assign_item->data->item_data_type != TYPE_DOUBLE)
             return ERR_SEMANTIC_ASSIGNMENT;
+        if (!(code_generate_function_call("readn")) ||
+            !(code_generate_retval_on_var(assign_item->key, 1))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_L) return ERR_SYNTAX;
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
-        //TODO code_gen
     } else if (!strcmp(token->attribute.string->string, "reads")) {
         if (assign_item->data->item_data_type != TYPE_STRING)
             return ERR_SEMANTIC_ASSIGNMENT;
+        if (!(code_generate_function_call("reads")) ||
+            !(code_generate_retval_on_var(assign_item->key, 1))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_L) return ERR_SYNTAX;
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
-        //TODO code_gen
     } else if (!strcmp(token->attribute.string->string, "tointeger")) {
         if (assign_item->data->item_data_type != TYPE_INTEGER)
             return ERR_SEMANTIC_ASSIGNMENT;
@@ -1043,6 +1000,12 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         } else {
             return ERR_SEMANTIC_PARRET;
         }
+        if (!(code_generate_empty_variables_frame()) ||
+            !(code_generate_function_parameter(*token, 0)) ||
+            !(code_generate_function_call("tointeger")) ||
+            !(code_generate_retval_on_var(assign_item->key, 1))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
@@ -1062,16 +1025,8 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         } else {
             return ERR_SEMANTIC_PARRET;
         }
-        GET_TOKEN;
-        if (IS_ID) {
-            SEARCH_VARIABLE_IN_ALL_TABLES(id_in_buildin_functions);
-            if (id_in_buildin_functions->data->item_data_type != TYPE_DOUBLE){
-                return ERR_SEMANTIC_PARRET;
-            }
-        } else if (token->type == TOKEN_DOUBLE) {
-
-        } else {
-            return ERR_SEMANTIC_PARRET;
+        if (!(code_generate_empty_variables_frame()) || !(code_generate_function_parameter(*token, 0))) {
+            return ERR_INTERNAL;
         }
         GET_TOKEN;
         if (IS_ID) {
@@ -1084,6 +1039,25 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         } else {
             return ERR_SEMANTIC_PARRET;
         }
+        if (!(code_generate_empty_variables_frame()) || !(code_generate_function_parameter(*token, 1))) {
+            return ERR_INTERNAL;
+        }
+        GET_TOKEN;
+        if (IS_ID) {
+            SEARCH_VARIABLE_IN_ALL_TABLES(id_in_buildin_functions);
+            if (id_in_buildin_functions->data->item_data_type != TYPE_DOUBLE){
+                return ERR_SEMANTIC_PARRET;
+            }
+        } else if (token->type == TOKEN_DOUBLE) {
+
+        } else {
+            return ERR_SEMANTIC_PARRET;
+        }
+        if (!(code_generate_function_parameter(*token, 2)) ||
+            !(code_generate_function_call("substr")) ||
+            !(code_generate_retval_on_var(assign_item->key, 1))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
@@ -1103,6 +1077,10 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         } else {
             return ERR_SEMANTIC_PARRET;
         }
+        if (!(code_generate_empty_variables_frame()) ||
+            !(code_generate_function_parameter(*token, 0))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (IS_ID) {
             SEARCH_VARIABLE_IN_ALL_TABLES(id_in_buildin_functions);
@@ -1114,6 +1092,11 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         } else {
             return ERR_SEMANTIC_PARRET;
         }
+        if (!(code_generate_function_parameter(*token, 1)) ||
+            !(code_generate_function_call("ord")) ||
+            !(code_generate_retval_on_var(assign_item->key, 1))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
@@ -1133,10 +1116,15 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         } else {
             return ERR_SEMANTIC_PARRET;
         }
+        if (!(code_generate_empty_variables_frame()) ||
+            !(code_generate_function_parameter(*token, 0)) ||
+            !(code_generate_function_call("chr")) ||
+            !(code_generate_retval_on_var(assign_item->key, 1))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
-        //TODO code_gen
     }
     return OK;
 }

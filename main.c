@@ -16,11 +16,7 @@
 
 int main() {
     int global_response = parser();
-    if (global_response != 0) //TODO delete it
+    if (global_response != 0)
         fprintf(stderr, "%d\n", global_response);
-//    else {
-//        printf("%d\n", global_response);
-//    }
-//    printf("uspech!!\n");
-    return global_response;   //TODO return global_response
+    return global_response;
 }

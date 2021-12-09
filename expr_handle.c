@@ -446,7 +446,7 @@ int exp_processing(token_struct *token, data_stack_t *data_stack, tab_item_data_
         if (next_expr_detect) {
             given_symbol = SIGN;
         }
-        // printf("GIVEN ELEMENT == %d\n", given_symbol);
+
         char prec_symbol = precedence_tab[get_precedence(stack_term->elem)][get_precedence(given_symbol)];
         //reduce prec
         if (prec_symbol == '>') {
