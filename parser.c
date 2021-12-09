@@ -1142,7 +1142,12 @@ int write_func_parser() {
     for (i = 0; token->type != TOKEN_BRACKET_ROUND_R; ++i) {
         if (i % 2 == 0) {
             if (IS_VALID) {
-                SEARCH_VARIABLE_IN_ALL_TABLES(id_in_buildin_functions);
+                if (IS_ID) {
+                    SEARCH_VARIABLE_IN_ALL_TABLES(id_in_buildin_functions);
+                }
+                if (!(code_generate_simple_write(*token))) {
+                    return ERR_INTERNAL;
+                }
             } else {
                 return ERR_SEMANTIC_PARRET;
             }
