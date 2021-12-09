@@ -995,30 +995,38 @@ int build_in_functions_parser(tab_item_t *assign_item) {
     if (!strcmp(token->attribute.string->string, "readi")) {
         if (assign_item->data->item_data_type != TYPE_INTEGER && assign_item->data->item_data_type != TYPE_DOUBLE)
             return ERR_SEMANTIC_ASSIGNMENT;
+        if (!(code_generate_function_call("readi")) || !(code_generate_retval_on_var(assign_item->key, 1))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_L) return ERR_SYNTAX;
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
-        //TODO code_gen
     } else if (!strcmp(token->attribute.string->string, "readn")) {
         if (assign_item->data->item_data_type != TYPE_DOUBLE)
             return ERR_SEMANTIC_ASSIGNMENT;
+        if (!(code_generate_function_call("readn")) ||
+            !(code_generate_retval_on_var(assign_item->key, 1))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_L) return ERR_SYNTAX;
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
-        //TODO code_gen
     } else if (!strcmp(token->attribute.string->string, "reads")) {
         if (assign_item->data->item_data_type != TYPE_STRING)
             return ERR_SEMANTIC_ASSIGNMENT;
+        if (!(code_generate_function_call("reads")) ||
+            !(code_generate_retval_on_var(assign_item->key, 1))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_L) return ERR_SYNTAX;
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
-        //TODO code_gen
     } else if (!strcmp(token->attribute.string->string, "tointeger")) {
         if (assign_item->data->item_data_type != TYPE_INTEGER)
             return ERR_SEMANTIC_ASSIGNMENT;
@@ -1035,6 +1043,12 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         } else {
             return ERR_SEMANTIC_PARRET;
         }
+        if (!(code_generate_empty_variables_frame()) ||
+            !(code_generate_function_parameter(*token, 0)) ||
+            !(code_generate_function_call("tointeger")) ||
+            !(code_generate_retval_on_var(assign_item->key, 1))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
@@ -1054,16 +1068,8 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         } else {
             return ERR_SEMANTIC_PARRET;
         }
-        GET_TOKEN;
-        if (IS_ID) {
-            SEARCH_VARIABLE_IN_ALL_TABLES(id_in_buildin_functions);
-            if (id_in_buildin_functions->data->item_data_type != TYPE_DOUBLE){
-                return ERR_SEMANTIC_PARRET;
-            }
-        } else if (token->type == TOKEN_DOUBLE) {
-
-        } else {
-            return ERR_SEMANTIC_PARRET;
+        if (!(code_generate_empty_variables_frame()) || !(code_generate_function_parameter(*token, 0))) {
+            return ERR_INTERNAL;
         }
         GET_TOKEN;
         if (IS_ID) {
@@ -1076,6 +1082,25 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         } else {
             return ERR_SEMANTIC_PARRET;
         }
+        if (!(code_generate_empty_variables_frame()) || !(code_generate_function_parameter(*token, 1))) {
+            return ERR_INTERNAL;
+        }
+        GET_TOKEN;
+        if (IS_ID) {
+            SEARCH_VARIABLE_IN_ALL_TABLES(id_in_buildin_functions);
+            if (id_in_buildin_functions->data->item_data_type != TYPE_DOUBLE){
+                return ERR_SEMANTIC_PARRET;
+            }
+        } else if (token->type == TOKEN_DOUBLE) {
+
+        } else {
+            return ERR_SEMANTIC_PARRET;
+        }
+        if (!(code_generate_function_parameter(*token, 2)) ||
+            !(code_generate_function_call("substr")) ||
+            !(code_generate_retval_on_var(assign_item->key, 1))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
@@ -1095,6 +1120,10 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         } else {
             return ERR_SEMANTIC_PARRET;
         }
+        if (!(code_generate_empty_variables_frame()) ||
+            !(code_generate_function_parameter(*token, 0))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (IS_ID) {
             SEARCH_VARIABLE_IN_ALL_TABLES(id_in_buildin_functions);
@@ -1106,6 +1135,11 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         } else {
             return ERR_SEMANTIC_PARRET;
         }
+        if (!(code_generate_function_parameter(*token, 1)) ||
+            !(code_generate_function_call("ord")) ||
+            !(code_generate_retval_on_var(assign_item->key, 1))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
@@ -1125,10 +1159,15 @@ int build_in_functions_parser(tab_item_t *assign_item) {
         } else {
             return ERR_SEMANTIC_PARRET;
         }
+        if (!(code_generate_empty_variables_frame()) ||
+            !(code_generate_function_parameter(*token, 0)) ||
+            !(code_generate_function_call("chr")) ||
+            !(code_generate_retval_on_var(assign_item->key, 1))) {
+                return ERR_INTERNAL;
+            }
         GET_TOKEN;
         if (token->type != TOKEN_BRACKET_ROUND_R) return ERR_SYNTAX;
         return OK;
-        //TODO code_gen
     }
     return OK;
 }
