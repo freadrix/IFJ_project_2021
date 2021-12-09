@@ -220,6 +220,11 @@ int parser() {
             }
         }
         if (IS_ID) {      /// <program>       -> <call>
+            if (!strcmp(token->attribute.string->string, "write")) {
+                write_func_parser();
+                GET_TOKEN;
+                continue;
+            }
             PARSER_RESPONSE = call_check_parser();
             //// printf("%d\n", PARSER_RESPONSE);
             if(PARSER_RESPONSE != OK) {
@@ -697,12 +702,14 @@ int def_var_parser(tab_item_t *function_item) {
                 if (function->data->item_returns.count_returns == 0) return ERR_SEMANTIC_PARRET;
                 if (inserted_item->data->item_data_type != function->data->item_returns.type_returns[0])
                     return ERR_SEMANTIC_ASSIGNMENT;
-                //// printf("test31\n");
                 CALL(call_check_parser());
                 if(!(code_generate_retval_on_var(inserted_item->key, 1))) { //TODO if return multiple, change 1
                     return ERR_INTERNAL;
                 }
 //                if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
+            } else if ((IS_BUILT_IN_FUNCTION) && (strcmp(token->attribute.string->string, "write") != 0)) {
+                CALL(build_in_functions_parser(inserted_item));
+                GET_TOKEN;
             } else {
                 // TODO convert final type int->double
                 CALL(exp_processing(token, stack, &expression_type));
@@ -755,6 +762,8 @@ int id_in_body_parser(tab_item_t *function_item) {
         CALL(call_check_parser());
         GET_TOKEN;
         //// printf("%d -  response from call func in id in func body\n", PARSER_RESPONSE);
+    } else if ((token->type == TOKEN_ID) && (!strcmp(token->attribute.string->string, "write"))) {
+        write_func_parser();
     } else {
         item_data_stack_t *global_frame = get_global_frame_stack(stack);
         item_data_stack_t *frame;
@@ -775,7 +784,6 @@ int id_in_body_parser(tab_item_t *function_item) {
                 } else {    // TODO musi byt kontrola na vestavene funkce
                     if ((IS_BUILT_IN_FUNCTION) && (strcmp(token->attribute.string->string, "write") != 0)) {
                         CALL(build_in_functions_parser(item));
-                        // printf("%d - response from build in funcs\n", PARSER_RESPONSE);
                         GET_TOKEN; /// TODO MUSI TADY BYT NEXT TOKEN?
                     } else {
                         CALL(exp_processing(token, stack, &expression_type));
@@ -1152,6 +1160,6 @@ int write_func_parser() {
         }
     }
     if ((i > 0) && (i % 2 == 0)) return ERR_SYNTAX;
-    if(!code_generate_write_function((int) (i/2))) return ERR_INTERNAL;
+//    if(!code_generate_write_function((int) (i/2)), "ssss") return ERR_INTERNAL;
     return OK;
 }

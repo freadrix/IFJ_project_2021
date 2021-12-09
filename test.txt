@@ -2,10 +2,11 @@
 require "ifj21"
 global foo : function (integer) : integer
 foo (5)
+write("sddsa")
 function foo (i : integer) : integer
     local num1 : integer = i + 2 - 1
     local num2 : integer = 3
-    local num3 : integer
+    local num3 : integer = readi()
     num1 = num1 + 2
     num1 = (num2 + 2) // 2
     if (num1 + num2) > 3 then

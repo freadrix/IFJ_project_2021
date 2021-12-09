@@ -22,5 +22,5 @@ int main() {
 //        printf("%d\n", global_response);
 //    }
 //    printf("uspech!!\n");
-    return 0;   //TODO return global_response
+    return global_response;   //TODO return global_response
 }
