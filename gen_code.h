@@ -185,6 +185,13 @@ bool code_generate_stack_push(token_struct *token);
 bool code_generate_stack_convert_float_first();
 
 /**
+ * @brief Generation of write command
+ * @param token token to be writed
+ * @return true in case of success, false otherwise
+ */
+bool code_generate_simple_write(token_struct token);
+
+/**
  * @brief Generation of convertion of second stack variable from integer to float
  * @return true in case of success, false otherwise
  */
