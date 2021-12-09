@@ -471,7 +471,8 @@ int function_body_parser(tab_item_t *function_item) {
         if (IS_ID) {
             if (!(strcmp(token->attribute.string->string, "write"))) {
                 write_func_parser();
-
+                GET_TOKEN;
+                continue;
             } else {
                 CALL(id_in_body_parser(function_item));
                 continue;
