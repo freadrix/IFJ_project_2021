@@ -1155,6 +1155,5 @@ int write_func_parser() {
         }
     }
     if ((i > 0) && (i % 2 == 0)) return ERR_SYNTAX;
-//    if(!code_generate_write_function((int) (i/2)), "ssss") return ERR_INTERNAL;
     return OK;
 }
