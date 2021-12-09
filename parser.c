@@ -663,7 +663,6 @@ int def_var_parser(tab_item_t *function_item) {
                 if(!(code_generate_retval_on_var(inserted_item->key, 1))) {
                     return ERR_INTERNAL;
                 }
-//                if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
             } else if ((IS_BUILT_IN_FUNCTION) && (strcmp(token->attribute.string->string, "write") != 0)) {
                 CALL(build_in_functions_parser(inserted_item));
                 GET_TOKEN;
@@ -724,7 +723,7 @@ int id_in_body_parser(tab_item_t *function_item) {
         if (token->type == TOKEN_ASSIGN) {  /// must be assi
             GET_TOKEN;
             if (IS_ID) {
-                if (is_function()) { // TODO MOZNE PRIRADIT NEKOLIK HODNOT
+                if (is_function()) {
                     tab_item_t *function = search_hashtable(global_frame->table, token->attribute.string->string);
                     if (function->data->item_returns.count_returns == 0) return ERR_SEMANTIC_PARRET;
                     if (item->data->item_data_type != function->data->item_returns.type_returns[0])
@@ -734,10 +733,10 @@ int id_in_body_parser(tab_item_t *function_item) {
                         return ERR_INTERNAL;
                     }
                     GET_TOKEN;
-                } else {    // TODO musi byt kontrola na vestavene funkce
+                } else {
                     if ((IS_BUILT_IN_FUNCTION) && (strcmp(token->attribute.string->string, "write") != 0)) {
                         CALL(build_in_functions_parser(item));
-                        GET_TOKEN; /// TODO MUSI TADY BYT NEXT TOKEN?
+                        GET_TOKEN;
                     } else {
                         CALL(exp_processing(token, stack, &expression_type));
                         if ((item->data->item_data_type == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
