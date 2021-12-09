@@ -470,8 +470,7 @@ int function_body_parser(tab_item_t *function_item) {
         }
         if (IS_ID) {
             if (!(strcmp(token->attribute.string->string, "write"))) {
-                /*TODO expression*/
-//                code_generate_write_function(); ///TODO params write(params), [0] param == pocet parametrov, ostatne params stringy (aj int, num etc values na string!!!!)
+                write_func_parser();
                 return OK;
             } else {
                 CALL(id_in_body_parser(function_item));
