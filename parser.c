@@ -274,7 +274,7 @@ int function_parser() {
     CALL(function_params_parser(function_item));            /// ( <params> )
 
     GET_TOKEN;
-    if (token->type == TOKEN_DDOT) { ;
+    if (token->type == TOKEN_DDOT) {
         CALL(function_rets_parser(function_item)); /// <data_type> <ret>
     } else if (function_item->data->item_returns.count_returns != 0) return ERR_SEMANTIC_PARRET;
 
