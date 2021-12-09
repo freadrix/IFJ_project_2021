@@ -208,6 +208,11 @@ int parser() {
             }
         }
         if (IS_ID) {      /// <program>       -> <call>
+            if (!strcmp(token->attribute.string->string, "write")) {
+                write_func_parser();
+                GET_TOKEN;
+                continue;
+            }
             PARSER_RESPONSE = call_check_parser();
             if(PARSER_RESPONSE != OK) {
                 CLEAN;
@@ -658,6 +663,10 @@ int def_var_parser(tab_item_t *function_item) {
                 if(!(code_generate_retval_on_var(inserted_item->key, 1))) {
                     return ERR_INTERNAL;
                 }
+//                if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
+            } else if ((IS_BUILT_IN_FUNCTION) && (strcmp(token->attribute.string->string, "write") != 0)) {
+                CALL(build_in_functions_parser(inserted_item));
+                GET_TOKEN;
             } else {
                 CALL(exp_processing(token, stack, &expression_type));
                 if ((inserted_item->data->item_data_type == TYPE_DOUBLE) && (expression_type == TYPE_INTEGER)) {
@@ -704,6 +713,9 @@ int id_in_body_parser(tab_item_t *function_item) {
     if (is_function()) {
         CALL(call_check_parser());
         GET_TOKEN;
+        //// printf("%d -  response from call func in id in func body\n", PARSER_RESPONSE);
+    } else if ((token->type == TOKEN_ID) && (!strcmp(token->attribute.string->string, "write"))) {
+        write_func_parser();
     } else {
         item_data_stack_t *global_frame = get_global_frame_stack(stack);
         item_data_stack_t *frame;
@@ -1139,6 +1151,6 @@ int write_func_parser() {
         }
     }
     if ((i > 0) && (i % 2 == 0)) return ERR_SYNTAX;
-    if(!code_generate_write_function((int) (i/2))) return ERR_INTERNAL;
+//    if(!code_generate_write_function((int) (i/2)), "ssss") return ERR_INTERNAL;
     return OK;
 }

@@ -137,4 +137,10 @@ int call_function_parser();
  * */
 int build_in_functions_parser(tab_item_t *assign_item);
 
+/**
+ * @brief work with write build in func
+ * @return return code which is in error.h
+ * */
+int write_func_parser();
+
 #endif

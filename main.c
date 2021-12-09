@@ -17,6 +17,6 @@
 int main() {
     int global_response = parser();
     if (global_response != 0)
-        return global_response;
-    return 0;
+        fprintf(stderr, "%d\n", global_response);
+    return global_response;
 }
