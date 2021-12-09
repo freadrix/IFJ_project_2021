@@ -660,7 +660,7 @@ int def_var_parser(tab_item_t *function_item) {
                 if (inserted_item->data->item_data_type != function->data->item_returns.type_returns[0])
                     return ERR_SEMANTIC_ASSIGNMENT;
                 CALL(call_check_parser());
-                if(!(code_generate_retval_on_var(inserted_item->key, 1))) { //TODO if return multiple, change 1
+                if(!(code_generate_retval_on_var(inserted_item->key, 1))) {
                     return ERR_INTERNAL;
                 }
 //                if (inserted_item->data->item_data_type != expression_type) return ERR_SEMANTIC_ASSIGNMENT;
@@ -730,6 +730,9 @@ int id_in_body_parser(tab_item_t *function_item) {
                     if (item->data->item_data_type != function->data->item_returns.type_returns[0])
                         return ERR_SEMANTIC_ASSIGNMENT;
                     CALL(call_check_parser());
+                    if (!(code_generate_retval_on_var(item->key, 1))) {
+                        return ERR_INTERNAL;
+                    }
                     GET_TOKEN;
                 } else {    // TODO musi byt kontrola na vestavene funkce
                     if ((IS_BUILT_IN_FUNCTION) && (strcmp(token->attribute.string->string, "write") != 0)) {
@@ -1139,7 +1142,12 @@ int write_func_parser() {
     for (i = 0; token->type != TOKEN_BRACKET_ROUND_R; ++i) {
         if (i % 2 == 0) {
             if (IS_VALID) {
-                SEARCH_VARIABLE_IN_ALL_TABLES(id_in_buildin_functions);
+                if (IS_ID) {
+                    SEARCH_VARIABLE_IN_ALL_TABLES(id_in_buildin_functions);
+                }
+                if (!(code_generate_simple_write(*token))) {
+                    return ERR_INTERNAL;
+                }
             } else {
                 return ERR_SEMANTIC_PARRET;
             }

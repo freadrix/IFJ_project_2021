@@ -594,6 +594,15 @@ bool code_generate_write_function(int terms_count, ...) {
     return true;
 }
 
+bool code_generate_simple_write(token_struct token) {
+    if(!(add_string_to_string(&generated_code, ("WRITE "))) ||
+       !(code_generate_token_value(token)) ||
+       !(add_string_to_string(&generated_code, ("\n")))) {
+           return false;
+       }
+    return true;
+}
+
 bool code_generate_variable_create(char *var_name) {
     if(!(add_string_to_string(&generated_code, ("DEFVAR LF@"))) ||
        !(add_string_to_string(&generated_code, (var_name))) ||
